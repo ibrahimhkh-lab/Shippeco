@@ -1181,6 +1181,7 @@ select option { background:var(--surface); }
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
         <button onclick="triggerManualSync()" style="background:#10b981;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">🔄 مزامنة الآن</button>
         <button onclick="runFullDaftraImport()" style="background:transparent;color:#10b981;border:1px solid #10b981;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">📥 استيراد كل الفواتير</button>
+        <button onclick="clearAndReimport()" style="background:transparent;color:#ef4444;border:1px solid #ef4444;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🗑️ مسح وإعادة استيراد</button>
         <span id="daftra-status" style="font-size:13px"></span>
       </div>
     </div>
@@ -3324,10 +3325,9 @@ const DAFTRA_WORKER_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
 async function syncDaftraBackground() {
   setSyncStatus('⏳ جارٍ المزامنة مع دفترة...', 'var(--accent)');
   try {
-    const [invResult, clientResult] = await Promise.all([
-      fetchAllDaftraPages('invoices'),
-      fetchAllDaftraPages('clients')
-    ]);
+    // Fetch clients first so phone lookup is ready when processing invoices
+    const clientResult = await fetchAllDaftraPages('clients');
+    const invResult = await fetchAllDaftraPages('invoices', { payment_status: 0 });
     const cache = {
       invoices: invResult,
       clients: clientResult,
@@ -3350,18 +3350,24 @@ async function triggerManualSync() {
 }
 
 // Fetch from Worker — single request, normalise any response shape
-async function fetchAllDaftraPages(endpoint) {
-  const res = await fetch(`${DAFTRA_WORKER_URL}/${endpoint}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status} on /${endpoint}`);
-  const raw = await res.json();
-  // Response shape: {result, code, data: [{Invoice:{...}}, ...]}
-  const rows = raw.data || raw.invoices || raw.clients || (Array.isArray(raw) ? raw : []);
-  // Unwrap nested keys: {Invoice:{...}} → {...} or {Client:{...}} → {...}
-  return rows.map(row => {
-    if (row.Invoice) return row.Invoice;
-    if (row.Client) return row.Client;
-    return row;
-  });
+async function fetchAllDaftraPages(endpoint, params = {}) {
+  let page = 1, all = [];
+  while (true) {
+    const qp = new URLSearchParams({ ...params, page, limit: 50 });
+    const res = await fetch(`${DAFTRA_WORKER_URL}/${endpoint}?${qp}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status} on /${endpoint}`);
+    const raw = await res.json();
+    const rows = raw.data || (Array.isArray(raw) ? raw : []);
+    // Unwrap nested keys: {Invoice:{...}} → {...} or {Client:{...}} → {...}
+    const items = rows.map(row => row.Invoice || row.Client || row);
+    if (!items.length) break;
+    all = all.concat(items);
+    // Check pagination
+    const pagination = raw.pagination;
+    if (!pagination || !pagination.next || page >= pagination.page_count) break;
+    page++;
+  }
+  return all;
 }
 
 function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
@@ -3397,7 +3403,7 @@ function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
     let clientName = dInv.client_business_name || dInv.client_name || dInv.name || '';
     if (!clientName && clientId && clientMap['id_' + clientId]) clientName = clientMap['id_' + clientId];
     if (!clientName) clientName = 'عميل دفترة';
-    const phone = normalizePhone(dInv.client_phone || dInv.phone || dInv.mobile || (clientId && clientMap['phone_' + clientId]) || '');
+    const phone = normalizePhone(dInv.client_phone || dInv.phone || dInv.mobile || '') || (clientId ? (clientMap['phone_' + clientId] || '') : '');
     const price = parseFloat(dInv.summary_total || dInv.total || dInv.grand_total || 0);
     const date = (dInv.date || dInv.issue_date || '').substring(0,10) || new Date().toISOString().split('T')[0];
     const awb = dInv.order_number || dInv.po_number || '';
@@ -3447,6 +3453,17 @@ function normalizePhone(p) {
   return String(p).replace(/[^0-9+]/g,'');
 }
 
+async function clearAndReimport() {
+  if (!confirm('سيتم مسح جميع فواتير دفترة المستوردة وإعادة الاستيراد. هل أنت متأكد؟')) return;
+  // Remove only daftra-imported invoices (those with daftra_id)
+  invoices = invoices.filter(inv => !inv.daftra_id);
+  saveData();
+  updateStats();
+  renderTable && renderTable();
+  showToast('🗑️ تم مسح فواتير دفترة — جارٍ الاستيراد...');
+  await runFullDaftraImport();
+}
+
 async function runFullDaftraImport() {
   const btn = document.getElementById('full-import-btn');
   const statusEl = document.getElementById('full-import-status');
@@ -3458,7 +3475,7 @@ async function runFullDaftraImport() {
     const clients = await fetchAllDaftraPages('clients');
 
     if (statusEl) statusEl.textContent = `جاري جلب الفواتير... (${clients.length} عميل جُلب)`;
-    const invs = await fetchAllDaftraPages('invoices');
+    const invs = await fetchAllDaftraPages('invoices', { payment_status: 0 });
 
     if (statusEl) statusEl.textContent = `جاري الدمج... (${invs.length} فاتورة)`;
     const { added, updated } = mergeFromDaftra(invs, clients);
@@ -3508,7 +3525,7 @@ async function fetchDaftraInvoices() {
   document.getElementById('daftra-error').style.display = 'none';
   document.getElementById('daftra-results').style.display = 'none';
   try {
-    const invs = await fetchAllDaftraPages('invoices');
+    const invs = await fetchAllDaftraPages('invoices', { payment_status: 0 });
     daftraAllInvoices = invs;
     const cache = loadDaftraCache();
     cache.invoices = invs;
