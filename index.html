@@ -3372,10 +3372,13 @@ function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
   const clientMap = {};
   (daftraClients || []).forEach(c => {
     // Daftra client fields
-    const phone = normalizePhone(c.phone || c.mobile || c.Phone || c.Mobile || '');
+    const phone = normalizePhone(c.phone2 || c.phone1 || c.phone || c.mobile || '');
     const name = c.business_name || c.name || c.client_name || c.Name || '';
     if (phone) clientMap[phone] = name;
-    if (c.id) clientMap['id_' + c.id] = name;
+    if (c.id) {
+      clientMap['id_' + c.id] = name;
+      if (phone) clientMap['phone_' + c.id] = phone;
+    }
   });
 
   // Build lookup of existing invoices by daftra_id
@@ -3394,8 +3397,8 @@ function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
     let clientName = dInv.client_business_name || dInv.client_name || dInv.name || '';
     if (!clientName && clientId && clientMap['id_' + clientId]) clientName = clientMap['id_' + clientId];
     if (!clientName) clientName = 'عميل دفترة';
-    const phone = normalizePhone(dInv.client_phone || dInv.phone || dInv.mobile || '');
-    const price = parseFloat(dInv.total || dInv.grand_total || dInv.subtotal || 0);
+    const phone = normalizePhone(dInv.client_phone || dInv.phone || dInv.mobile || (clientId && clientMap['phone_' + clientId]) || '');
+    const price = parseFloat(dInv.summary_total || dInv.total || dInv.grand_total || 0);
     const date = (dInv.date || dInv.issue_date || '').substring(0,10) || new Date().toISOString().split('T')[0];
     const awb = dInv.order_number || dInv.po_number || '';
     const details = `#${dInv.no || dId} — مستورد من دفترة`;
