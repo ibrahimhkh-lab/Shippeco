@@ -954,7 +954,7 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
     <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
       <div class="stat-card" style="--card-color:var(--red-p)"><div class="stat-icon">🔴</div><div class="stat-label">غير مدفوعة</div><div class="stat-value" id="dash-unpaid-count" style="color:var(--red-p)">0</div><div class="stat-detail" id="dash-unpaid-amount">0 ر.س</div></div>
       <div class="stat-card" style="--card-color:var(--gold)"><div class="stat-icon">🟡</div><div class="stat-label">مدفوعة جزئياً</div><div class="stat-value" id="dash-partial-count" style="color:var(--gold)">0</div><div class="stat-detail" id="dash-partial-amount">0 ر.س</div></div>
-      <div class="stat-card" style="--card-color:var(--accent)"><div class="stat-icon">💳</div><div class="stat-label">إجمالي المتبقي</div><div class="stat-value" id="dash-remaining" style="color:var(--accent)">0</div><div class="stat-detail">ريال لم يُحصَّل</div></div>
+      <div class="stat-card" style="--card-color:var(--red-p);border-color:rgba(239,68,68,0.3)"><div class="stat-icon">💳</div><div class="stat-label">إجمالي غير المحصّل</div><div class="stat-value" id="dash-remaining" style="color:var(--red-p)">0</div><div class="stat-detail">غير مدفوعة + جزئية</div></div>
     </div>
 
     <!-- Charts row -->
@@ -2791,7 +2791,7 @@ function renderStatusChart(filtered) {
   if (leg) leg.innerHTML = [
     ['#10b981','مدفوع', paid],
     ['#ef4444','غير مدفوع', unpaid],
-    ['#f59e0b','جزئي', partial],
+    ['#f59e0b','جزئي (غير محصّل)', partial],
   ].map(([c,l,v]) => `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:${c};display:inline-block"></span>${l}: <b>${v.toFixed(0)} ر.س</b></span>`).join('');
 }
 
@@ -4253,7 +4253,7 @@ function renderClients() {
   grid.innerHTML = clients.map(c => {
     const total  = c.invoices.reduce((s,i) => s + Number(i.price||0), 0);
     const paid   = c.invoices.filter(i => i.status === 'paid').length;
-    const unpaid = c.invoices.filter(i => i.status === 'unpaid').length;
+    const unpaid = c.invoices.filter(i => i.status === 'unpaid' || i.status === 'partial').length;
     const initials = c.name.trim().split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('') || '?';
     // badge: مزيج دفترة + يدوي
     const srcBadge = c.hasDaftra && c.hasManual
@@ -4329,7 +4329,7 @@ function showClientDetail(phone, name, idsStr) {
   // stats
   const total  = clientInvs.reduce((s,i) => s + Number(i.price||0), 0);
   const paid   = clientInvs.filter(i=>i.status==='paid').reduce((s,i)=>s+Number(i.price||0),0);
-  const unpaid = clientInvs.filter(i=>i.status==='unpaid').reduce((s,i)=>s+Number(i.price||0),0);
+  const unpaid = clientInvs.filter(i=>i.status==='unpaid' || i.status==='partial').reduce((s,i)=>s+Number(i.price||0),0);
   document.getElementById('client-stats-row').innerHTML = `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
       <div style="font-size:22px;font-weight:700;color:var(--accent)">${clientInvs.length}</div>
@@ -5957,7 +5957,7 @@ async function fetchAllDaftraPages(endpoint, params = {}) {
 function openCollections() {
   // جمع كل العملاء الذين عندهم فواتير غير مدفوعة
   const unpaidByPhone = {};
-  invoices.filter(i => i.status === 'unpaid' && i.phone).forEach(inv => {
+  invoices.filter(i => (i.status === 'unpaid' || i.status === 'partial') && i.phone).forEach(inv => {
     const p = normalizePhone(inv.phone);
     if (!p) return;
     if (!unpaidByPhone[p]) unpaidByPhone[p] = { client: inv.client, phone: p, invoices: [], total: 0 };
@@ -5997,7 +5997,7 @@ function openCollections() {
 
 async function sendCollectionWAForPhone(phone) {
   const p = normalizePhone(phone);
-  const unpaid = invoices.filter(i => i.status === 'unpaid' && normalizePhone(i.phone) === p);
+  const unpaid = invoices.filter(i => (i.status === 'unpaid' || i.status === 'partial') && normalizePhone(i.phone) === p);
   if (!unpaid.length) return;
   const total = unpaid.reduce((s, i) => s + Number(i.price || 0), 0);
   const lines = unpaid.map(i => `• #${i.no||i.id} — ${Number(i.price||0).toFixed(0)} ر.س (${formatDate(i.date)})`).join('\n');
