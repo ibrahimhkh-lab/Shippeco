@@ -855,6 +855,9 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
     <button class="nav-item" onclick="showSection('invoices')">
       <span>📄</span> الفواتير
     </button>
+    <button class="nav-item" onclick="showSection('reports')">
+      <span>📈</span> التقارير
+    </button>
     <button class="nav-item" onclick="showSection('clients')">
       <span>👥</span> العملاء
     </button>
@@ -914,11 +917,11 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
 
     <!-- Period filter -->
     <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
-      <button class="dash-period-btn active" data-p="today" onclick="dashSetPeriod('today')">اليوم</button>
+      <button class="dash-period-btn" data-p="today" onclick="dashSetPeriod('today')">اليوم</button>
       <button class="dash-period-btn" data-p="week" onclick="dashSetPeriod('week')">هذا الأسبوع</button>
       <button class="dash-period-btn" data-p="month" onclick="dashSetPeriod('month')">هذا الشهر</button>
       <button class="dash-period-btn" data-p="year" onclick="dashSetPeriod('year')">هذه السنة</button>
-      <button class="dash-period-btn" data-p="all" onclick="dashSetPeriod('all')">الكل</button>
+      <button class="dash-period-btn active" data-p="all" onclick="dashSetPeriod('all')">الكل</button>
     </div>
 
     <!-- Stat cards row 1 -->
@@ -1096,8 +1099,59 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
 </div>
 
 <!-- ── CLIENTS ── -->
-<div id="sec-clients" class="section">
-  <div class="topbar">
+<!-- ═══════════════════════════════════════ REPORTS SECTION ═══ -->
+<div id="sec-reports" class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-title">📈 التقارير</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px" id="rep-subtitle">اختر الفترة الزمنية لعرض التقرير</div>
+    </div>
+    <button onclick="exportReportPDF()" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);color:#8b5cf6;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px">📥 تصدير PDF</button>
+  </div>
+
+  <!-- فلاتر زمنية -->
+  <div class="table-card" style="padding:18px 20px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;gap:6px;background:var(--bg);border-radius:10px;padding:4px">
+        <button class="rep-period-btn active" data-p="daily"   onclick="setRepPeriod('daily',this)"   style="padding:7px 14px;border:none;border-radius:8px;font-family:var(--font);font-size:13px;cursor:pointer;font-weight:600;background:var(--accent);color:#fff">يومي</button>
+        <button class="rep-period-btn"        data-p="weekly"  onclick="setRepPeriod('weekly',this)"  style="padding:7px 14px;border:none;border-radius:8px;font-family:var(--font);font-size:13px;cursor:pointer;background:transparent;color:var(--muted)">أسبوعي</button>
+        <button class="rep-period-btn"        data-p="monthly" onclick="setRepPeriod('monthly',this)" style="padding:7px 14px;border:none;border-radius:8px;font-family:var(--font);font-size:13px;cursor:pointer;background:transparent;color:var(--muted)">شهري</button>
+        <button class="rep-period-btn"        data-p="yearly"  onclick="setRepPeriod('yearly',this)"  style="padding:7px 14px;border:none;border-radius:8px;font-family:var(--font);font-size:13px;cursor:pointer;background:transparent;color:var(--muted)">سنوي</button>
+        <button class="rep-period-btn"        data-p="custom"  onclick="setRepPeriod('custom',this)"  style="padding:7px 14px;border:none;border-radius:8px;font-family:var(--font);font-size:13px;cursor:pointer;background:transparent;color:var(--muted)">مخصص</button>
+      </div>
+      <div id="rep-nav" style="display:flex;align-items:center;gap:8px">
+        <button onclick="repNavigate(-1)" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:var(--font);color:var(--text)">&#x2039;</button>
+        <span id="rep-nav-label" style="font-size:13px;font-weight:600;color:var(--text);min-width:130px;text-align:center">—</span>
+        <button onclick="repNavigate(1)" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:var(--font);color:var(--text)">&#x203a;</button>
+      </div>
+      <div id="rep-custom-range" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="date" id="rep-from" onchange="renderReport()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:13px">
+        <span style="color:var(--muted)">—</span>
+        <input type="date" id="rep-to" onchange="renderReport()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:13px">
+      </div>
+    </div>
+  </div>
+
+  <!-- بطاقات الإجمالي -->
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px" id="rep-stats"></div>
+
+  <!-- مخطط المبيعات -->
+  <div class="table-card" style="padding:20px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:14px;font-weight:700;color:var(--text)">📊 مخطط المبيعات</div>
+      <div style="display:flex;gap:6px">
+        <button class="rep-chart-btn active" onclick="setRepChart('bar',this)" style="padding:5px 12px;border:none;border-radius:6px;font-family:var(--font);font-size:12px;cursor:pointer;background:var(--accent);color:#fff">أعمدة</button>
+        <button class="rep-chart-btn"        onclick="setRepChart('line',this)" style="padding:5px 12px;border:none;border-radius:6px;font-family:var(--font);font-size:12px;cursor:pointer;background:var(--bg);color:var(--muted)">خطي</button>
+      </div>
+    </div>
+    <canvas id="rep-chart" height="120"></canvas>
+  </div>
+
+  <!-- جدول التفاصيل -->
+  <div class="table-card" id="rep-table-wrap"></div>
+</div>
+
+<div id="sec-clients" class="section">  <div class="topbar">
     <div style="display:flex;align-items:center;gap:10px">
       <button class="hamburger" onclick="openSidebar()">☰</button>
       <div><div class="page-title">العملاء</div><div class="page-sub">ملفات العملاء وسجل فواتيرهم</div></div>
@@ -1106,11 +1160,14 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
   <div class="content">
     <!-- Client list view -->
     <div id="clients-list-view">
-      <div style="display:flex;gap:10px;margin-bottom:16px">
-        <div class="search-box" style="flex:1">
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="search-box" style="flex:1;min-width:200px">
           <span style="color:var(--muted);font-size:14px">🔍</span>
           <input type="text" id="client-search" placeholder="بحث باسم العميل أو الجوال..." oninput="renderClients()">
         </div>
+        <button onclick="openCollections()" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--red-p);padding:8px 18px;border-radius:10px;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700;white-space:nowrap">
+          💸 مطالبات التحصيل
+        </button>
       </div>
       <div id="clients-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
     </div>
@@ -1123,7 +1180,8 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
           <div style="font-size:13px;color:var(--muted)" id="client-detail-phone">—</div>
         </div>
         <button id="client-wa-btn" style="margin-right:auto;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);color:#25d366;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px">📲 واتساب</button>
-        <button data-action="exportClientPDF" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);color:#8b5cf6;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px">📥 تصدير كل الفواتير PDF</button>
+        <button onclick="sendCollectionWA()" id="client-collect-btn" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px;display:none">💰 مطالبة بالكل</button>
+        <button data-action="exportClientPDF" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);color:#8b5cf6;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px">📥 تصدير PDF</button>
       </div>
       <!-- Client stats -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="client-stats-row"></div>
@@ -2280,12 +2338,13 @@ function showSection(id) {
     if (!sec) { console.error('Section not found: sec-' + id); return; }
     sec.classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    const map = {dashboard:0, invoices:1, clients:2, calculator:4, reconcile:5, 'invoice-template':6, settings:7};
+    const map = {dashboard:0, invoices:1, reports:2, clients:3, calculator:6, reconcile:7, 'invoice-template':8, settings:9};
     const items = document.querySelectorAll('.nav-item');
     if (map[id] !== undefined) items[map[id]].classList.add('active');
     if (id === 'clients') { try { backToClients(); } catch(e) { console.warn('backToClients:', e); } }
     if (id === 'settings') { try { loadSettings(); } catch(e) { console.warn('loadSettings:', e); } try { renderUsersList(); } catch(e) {} }
     if (id === 'invoice-template') { try { loadInvoiceTemplate(); } catch(e) { console.warn('loadInvoiceTemplate:', e); } }
+    if (id === 'reports') { try { initReports(); } catch(e) { console.warn('initReports:', e); } }
     closeSidebar();
   } catch(e) {
     console.error('showSection error:', e);
@@ -2385,7 +2444,7 @@ async function bulkSaveToDB(invs) {
 
 // ─── STATS ───
 // ─── DASHBOARD ───
-let dashPeriod = 'today';
+let dashPeriod = 'all';
 
 function dashSetPeriod(p) {
   dashPeriod = p;
@@ -2752,6 +2811,7 @@ function renderTable() {
         <button class="btn btn-ghost btn-sm" onclick="viewInvoice(${inv.id})">👁</button>
         <button class="btn btn-ghost btn-sm" title="إضافة بند" onclick="openAddItemModal(${inv.id})" style="color:#a78bfa">＋</button>
         <button class="btn btn-ghost btn-sm" onclick="editInvoice(${inv.id})" ${inv.isDraft ? 'style="color:var(--gold)"' : ''} title="${inv.isDraft ? 'إكمال المسودة' : 'تعديل'}">✏️${inv.isDraft ? ' إكمال' : ''}</button>
+        ${!inv.isDraft && inv.status !== 'paid' && inv.phone ? `<button class="btn btn-ghost btn-sm" title="مطالبة بالدفع" onclick="sendSingleCollectionWA(${inv.id})" style="color:#ef4444">💰</button>` : ''}
         <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${inv.id})">🗑</button>
       </div></td>
     </tr>`).join('') + `</tbody></table>`;
@@ -3838,6 +3898,54 @@ function sendWAPaid() {
   openWA(inv.phone,msg); logWA(inv,'paid',msg); showToast('📲 تم فتح واتساب — رسالة البوليصة');
 }
 
+// ─── مطالبة بالدفع — فاتورة واحدة (من الجدول أو ملف العميل) ───
+function sendSingleCollectionWA(invId) {
+  const inv = invoices.find(i => String(i.id) === String(invId));
+  if (!inv) return showToast('❌ الفاتورة غير موجودة');
+  const phone = normalizePhone(inv.phone || '');
+  if (!phone) return showToast('❌ لا يوجد رقم جوال لهذا العميل');
+  const payUrl = inv.paymentUrl || '';
+  const awbLine = inv.awb ? `📦 رقم الشحنة: \`${inv.awb}\`\n` : '';
+  let msg = `مرحباً ${inv.client} 👋\n\n`;
+  msg += `نود تذكيرك بفاتورة مستحقة لدى شيب بيك 🧾\n\n`;
+  msg += `🔖 *رقم الفاتورة:* #${inv.no || inv.id}\n`;
+  msg += awbLine;
+  msg += `💰 *المبلغ المستحق:* *${Number(inv.price||0).toFixed(2)} ر.س*\n`;
+  msg += `📅 *التاريخ:* ${formatDate(inv.date)}\n`;
+  msg += `⏳ *الحالة:* بانتظار الدفع\n`;
+  if (payUrl) msg += `\n💳 *رابط الدفع:*\n${payUrl}\n`;
+  msg += `\nنأمل منكم سرعة التسوية. شكراً لثقتكم 🌟\nشيب بيك`;
+  openWA(phone, msg);
+  addTimelineEvent && addTimelineEvent(inv, 'wa_send', 'مطالبة دفع — فاتورة واحدة');
+  showToast('📲 تم فتح واتساب — مطالبة الفاتورة #' + (inv.no || inv.id));
+}
+
+// ─── مطالبة بالكل — من ملف العميل ───
+function sendCollectionWA() {
+  const phone = normalizePhone(document.getElementById('client-detail-phone')?.textContent || '');
+  const name  = document.getElementById('client-detail-name')?.textContent || 'العميل';
+  if (!phone || phone === '—') return showToast('❌ لا يوجد رقم جوال للعميل');
+  const unpaid = invoices.filter(i =>
+    normalizePhone(i.phone||'') === phone && i.status !== 'paid' && !i.isDraft
+  ).sort((a,b) => new Date(a.date||0) - new Date(b.date||0));
+  if (!unpaid.length) return showToast('✅ لا توجد فواتير مستحقة لهذا العميل');
+  const total = unpaid.reduce((s,i) => s + Number(i.price||0), 0);
+  let msg = `مرحباً ${name} 👋\n\n`;
+  msg += `نود تذكيرك بالفواتير المستحقة لدى شيب بيك 🧾\n\n`;
+  msg += `━━━━━━━━━━━━━━━━\n`;
+  unpaid.forEach((inv, idx) => {
+    const awbPart = inv.awb ? ` — ${inv.awb}` : '';
+    msg += `${idx+1}. #${inv.no||inv.id}${awbPart}\n`;
+    msg += `   💵 ${Number(inv.price||0).toFixed(2)} ر.س | 📅 ${formatDate(inv.date)}\n`;
+  });
+  msg += `━━━━━━━━━━━━━━━━\n`;
+  msg += `📊 *إجمالي المستحق: ${total.toFixed(2)} ر.س*\n`;
+  msg += `\nنأمل منكم سرعة تسوية المبالغ المستحقة.\nشكراً لثقتكم 🌟\nشيب بيك`;
+  openWA(phone, msg);
+  unpaid.forEach(inv => addTimelineEvent && addTimelineEvent(inv, 'wa_send', 'مطالبة دفع شاملة'));
+  showToast(`📲 تم فتح واتساب — مطالبة ${unpaid.length} فاتورة بإجمالي ${total.toFixed(2)} ر.س`);
+}
+
 // Legacy aliases
 async function sendWhatsAppWithPDF() {
   const inv=currentViewInvoice; if(!inv) return;
@@ -3999,6 +4107,11 @@ function showClientDetail(phone, name, idsStr) {
 
   // invoices table — الأحدث أولاً
   const sorted = [...clientInvs].sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
+  const unpaidInvs = clientInvs.filter(i => i.status !== 'paid' && !i.isDraft);
+  // إظهار/إخفاء زر مطالبة الكل
+  const collectBtn = document.getElementById('client-collect-btn');
+  if (collectBtn) collectBtn.style.display = unpaidInvs.length ? '' : 'none';
+
   document.getElementById('client-invoices-wrap').innerHTML = `<table><thead><tr>
     <th>رقم الفاتورة</th><th>رقم الشحنة</th><th>الشركة</th><th>السعر</th><th>الحالة</th><th>المصدر</th><th>التاريخ</th><th>إجراءات</th>
   </tr></thead><tbody>` +
@@ -4013,6 +4126,7 @@ function showClientDetail(phone, name, idsStr) {
       <td><div class="actions">
         <button class="btn btn-ghost btn-sm" onclick="viewInvoice(${inv.id})">👁</button>
         <button class="btn btn-ghost btn-sm" onclick="editInvoice(${inv.id})">✏️</button>
+        ${inv.status !== 'paid' && !inv.isDraft ? `<button class="btn btn-ghost btn-sm" title="مطالبة بالدفع" onclick="sendSingleCollectionWA(${inv.id})" style="color:#ef4444">💰</button>` : ''}
       </div></td>
     </tr>`).join('') + `</tbody></table>`;
 
@@ -6288,6 +6402,283 @@ function recExportExcel() {
   showToast('✅ تم تصدير البيانات');
 }
 
+
+// ═══════════════════════════════════════════════════════════
+// REPORTS ENGINE — محرك التقارير
+// ═══════════════════════════════════════════════════════════
+
+let _repPeriod  = 'daily';   // daily | weekly | monthly | yearly | custom
+let _repOffset  = 0;         // تنقل للأمام/الخلف
+let _repChartType = 'bar';
+let _repChartInst = null;
+
+function initReports() {
+  _repOffset = 0;
+  renderReport();
+}
+
+function setRepPeriod(p, btn) {
+  _repPeriod = p;
+  _repOffset = 0;
+  document.querySelectorAll('.rep-period-btn').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = 'var(--muted)';
+    b.style.fontWeight = '400';
+  });
+  btn.style.background = 'var(--accent)';
+  btn.style.color = '#fff';
+  btn.style.fontWeight = '600';
+  const customDiv = document.getElementById('rep-custom-range');
+  const navDiv    = document.getElementById('rep-nav');
+  if (p === 'custom') {
+    customDiv.style.display = 'flex';
+    navDiv.style.display    = 'none';
+    // ضبط تاريخ افتراضي
+    const today = new Date();
+    document.getElementById('rep-from').value = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+    document.getElementById('rep-to').value   = today.toISOString().split('T')[0];
+  } else {
+    customDiv.style.display = 'none';
+    navDiv.style.display    = 'flex';
+  }
+  renderReport();
+}
+
+function setRepChart(type, btn) {
+  _repChartType = type;
+  document.querySelectorAll('.rep-chart-btn').forEach(b => {
+    b.style.background = 'var(--bg)';
+    b.style.color = 'var(--muted)';
+  });
+  btn.style.background = 'var(--accent)';
+  btn.style.color = '#fff';
+  renderReport();
+}
+
+function repNavigate(dir) {
+  _repOffset += dir;
+  renderReport();
+}
+
+// ── حساب نطاق الفترة ──
+function getRepRange() {
+  const now = new Date();
+  let from, to, label, groupBy;
+
+  if (_repPeriod === 'daily') {
+    const d = new Date(now); d.setDate(d.getDate() + _repOffset);
+    from = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    to   = new Date(from); to.setDate(to.getDate() + 1);
+    label = from.toLocaleDateString('ar-SA', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    groupBy = 'hour';
+  } else if (_repPeriod === 'weekly') {
+    const d = new Date(now); d.setDate(d.getDate() + _repOffset * 7);
+    const day = d.getDay();
+    from = new Date(d); from.setDate(d.getDate() - day);
+    from = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+    to   = new Date(from); to.setDate(to.getDate() + 7);
+    label = `${from.toLocaleDateString('ar-SA',{month:'short',day:'numeric'})} — ${new Date(to-1).toLocaleDateString('ar-SA',{month:'short',day:'numeric',year:'numeric'})}`;
+    groupBy = 'day';
+  } else if (_repPeriod === 'monthly') {
+    const d = new Date(now.getFullYear(), now.getMonth() + _repOffset, 1);
+    from = d;
+    to   = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    label = d.toLocaleDateString('ar-SA', { year:'numeric', month:'long' });
+    groupBy = 'day';
+  } else if (_repPeriod === 'yearly') {
+    const y = now.getFullYear() + _repOffset;
+    from = new Date(y, 0, 1);
+    to   = new Date(y + 1, 0, 1);
+    label = `سنة ${y}`;
+    groupBy = 'month';
+  } else { // custom
+    const f = document.getElementById('rep-from')?.value;
+    const t = document.getElementById('rep-to')?.value;
+    if (!f || !t) return null;
+    from = new Date(f);
+    to   = new Date(t); to.setDate(to.getDate() + 1);
+    const diffDays = (to - from) / 86400000;
+    groupBy = diffDays <= 2 ? 'hour' : diffDays <= 60 ? 'day' : 'month';
+    label = `${f} — ${t}`;
+  }
+  return { from, to, label, groupBy };
+}
+
+// ── توليد التسميات والفترات ──
+function buildRepGroups(from, to, groupBy) {
+  const groups = [];
+  let cur = new Date(from);
+  while (cur < to) {
+    let key, label, next;
+    if (groupBy === 'hour') {
+      key   = cur.toISOString().slice(0,13);
+      label = cur.getHours() + ':00';
+      next  = new Date(cur); next.setHours(next.getHours() + 1);
+    } else if (groupBy === 'day') {
+      key   = cur.toISOString().slice(0,10);
+      label = cur.getDate() + '/' + (cur.getMonth()+1);
+      next  = new Date(cur); next.setDate(next.getDate() + 1);
+    } else { // month
+      key   = cur.toISOString().slice(0,7);
+      label = cur.toLocaleDateString('ar-SA', { month:'short', year:'numeric' });
+      next  = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
+    }
+    groups.push({ key, label, from: new Date(cur), to: next, paid: 0, unpaid: 0, count: 0 });
+    cur = next;
+  }
+  return groups;
+}
+
+function renderReport() {
+  const range = getRepRange();
+  if (!range) return;
+
+  // تحديث label التنقل
+  const navLabel = document.getElementById('rep-nav-label');
+  if (navLabel) navLabel.textContent = range.label;
+  const subtitle = document.getElementById('rep-subtitle');
+  if (subtitle) subtitle.textContent = range.label;
+
+  // فلترة الفواتير بالفترة
+  const filtered = invoices.filter(inv => {
+    if (inv.isDraft) return false;
+    const d = new Date(inv.date || 0);
+    return d >= range.from && d < range.to;
+  });
+
+  const totalPaid   = filtered.filter(i=>i.status==='paid').reduce((s,i)=>s+Number(i.price||0),0);
+  const totalUnpaid = filtered.filter(i=>i.status!=='paid').reduce((s,i)=>s+Number(i.price||0),0);
+  const totalAll    = totalPaid + totalUnpaid;
+  const countAll    = filtered.length;
+  const countPaid   = filtered.filter(i=>i.status==='paid').length;
+
+  // بطاقات الإجمالي
+  const stats = document.getElementById('rep-stats');
+  if (stats) stats.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">إجمالي الفترة</div>
+      <div class="stat-value">${totalAll.toFixed(0)} <span style="font-size:14px;color:var(--muted)">ر.س</span></div>
+      <div class="stat-sub">${countAll} فاتورة</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">مدفوعة</div>
+      <div class="stat-value" style="color:var(--green)">${totalPaid.toFixed(0)} <span style="font-size:14px;color:var(--muted)">ر.س</span></div>
+      <div class="stat-sub">${countPaid} فاتورة</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">غير مدفوعة</div>
+      <div class="stat-value" style="color:var(--red-p)">${totalUnpaid.toFixed(0)} <span style="font-size:14px;color:var(--muted)">ر.س</span></div>
+      <div class="stat-sub">${filtered.length - countPaid} فاتورة</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">نسبة التحصيل</div>
+      <div class="stat-value" style="color:var(--accent)">${totalAll > 0 ? ((totalPaid/totalAll)*100).toFixed(1) : 0}<span style="font-size:14px;color:var(--muted)">%</span></div>
+      <div class="stat-sub">من الإجمالي</div>
+    </div>`;
+
+  // بناء مجموعات الرسم البياني
+  const groups = buildRepGroups(range.from, range.to, range.groupBy);
+  filtered.forEach(inv => {
+    const d = new Date(inv.date || 0);
+    const g = groups.find(g => d >= g.from && d < g.to);
+    if (!g) return;
+    g.count++;
+    if (inv.status === 'paid') g.paid += Number(inv.price||0);
+    else g.unpaid += Number(inv.price||0);
+  });
+
+  // رسم المخطط
+  const ctx = document.getElementById('rep-chart');
+  if (ctx && window.Chart) {
+    if (_repChartInst) { _repChartInst.destroy(); _repChartInst = null; }
+    _repChartInst = new Chart(ctx, {
+      type: _repChartType,
+      data: {
+        labels: groups.map(g => g.label),
+        datasets: [
+          { label: 'مدفوعة', data: groups.map(g => g.paid),
+            backgroundColor: _repChartType==='bar' ? 'rgba(16,185,129,0.7)' : 'rgba(16,185,129,0.1)',
+            borderColor: '#10b981', borderWidth: 2, fill: _repChartType==='line', tension: 0.3 },
+          { label: 'غير مدفوعة', data: groups.map(g => g.unpaid),
+            backgroundColor: _repChartType==='bar' ? 'rgba(239,68,68,0.7)' : 'rgba(239,68,68,0.1)',
+            borderColor: '#ef4444', borderWidth: 2, fill: _repChartType==='line', tension: 0.3 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Tajawal' } } } },
+        scales: {
+          x: { ticks: { color: '#64748b', font: { family: 'Tajawal', size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { ticks: { color: '#64748b', font: { family: 'Tajawal', size: 11 }, callback: v => v.toLocaleString('ar') + ' ر.س' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+        }
+      }
+    });
+  }
+
+  // جدول التفاصيل
+  const wrap = document.getElementById('rep-table-wrap');
+  if (!wrap) return;
+  if (!filtered.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">لا توجد فواتير في هذه الفترة</div></div>`;
+    return;
+  }
+  const sorted = [...filtered].sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
+  wrap.innerHTML = `
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:14px;font-weight:700;color:var(--text)">تفاصيل الفواتير (${sorted.length})</div>
+    </div>
+    <div style="overflow-x:auto">
+    <table><thead><tr>
+      <th>رقم</th><th>العميل</th><th>الشركة</th><th>AWB</th>
+      <th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th>موظف</th>
+    </tr></thead><tbody>` +
+    sorted.map(inv => `<tr>
+      <td class="mono" style="cursor:pointer;color:var(--accent)" onclick="viewInvoice(${inv.id})">#${inv.no||inv.id}</td>
+      <td>${inv.client||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${inv.carrier||'—'}</td>
+      <td class="mono" style="font-size:12px">${inv.awb||'—'}</td>
+      <td style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)}</td>
+      <td>${statusBadge(inv.status)}</td>
+      <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
+      <td style="font-size:12px;color:var(--muted)">${inv.created_by||'—'}</td>
+    </tr>`).join('') +
+    `</tbody>
+    <tfoot><tr>
+      <td colspan="4" style="text-align:right;font-weight:700;padding:10px 16px;color:var(--text)">الإجمالي</td>
+      <td style="font-weight:700;color:var(--gold);padding:10px 16px">${totalAll.toFixed(2)}</td>
+      <td colspan="3"></td>
+    </tr></tfoot>
+    </table></div>`;
+}
+
+function exportReportPDF() {
+  showToast('⏳ جاري تجهيز التقرير...');
+  const range = getRepRange();
+  if (!range) return;
+  const el = document.getElementById('sec-reports');
+  if (!el || !window.html2canvas || !window.jspdf?.jsPDF) {
+    showToast('❌ مكتبة PDF غير متوفرة');
+    return;
+  }
+  html2canvas(el, { scale: 1.5, useCORS: true, backgroundColor: '#0d1117' }).then(canvas => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    const w = pdf.internal.pageSize.getWidth();
+    const h = canvas.height * w / canvas.width;
+    pdf.addImage(canvas.toDataURL('image/jpeg',0.85), 'JPEG', 0, 0, w, h);
+    pdf.save(`تقرير-${range.label.replace(/[^\w\u0600-\u06FF]/g,'-')}.pdf`);
+    showToast('✅ تم تصدير التقرير');
+  });
+}
+
+window.initReports      = initReports;
+window.setRepPeriod     = setRepPeriod;
+window.setRepChart      = setRepChart;
+window.repNavigate      = repNavigate;
+window.renderReport     = renderReport;
+window.exportReportPDF  = exportReportPDF;
+
+
 // Expose functions on window for iOS Safari data-action wiring
 window.toggleMultiSelect = toggleMultiSelect;
 window.exportSelectedPDF = exportSelectedPDF;
@@ -6303,6 +6694,8 @@ window.syncAllStatusFromDaftra = syncAllStatusFromDaftra;
 window.runDeepDebug = runDeepDebug;
 window.fixMissingDaftraIds = fixMissingDaftraIds;
 window.nukeDaftraAndReimport = nukeDaftraAndReimport;
+window.sendCollectionWA = sendCollectionWA;
+window.sendSingleCollectionWA = sendSingleCollectionWA;
 window.toggleZatcaTemplate = toggleZatcaTemplate;
 window.filterDaftraResults = filterDaftraResults;
 window.settingsDirty = settingsDirty;
