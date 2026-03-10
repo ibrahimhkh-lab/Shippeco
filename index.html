@@ -2348,7 +2348,7 @@ function closeSidebar() {
   document.getElementById('sidebar-overlay').classList.remove('show');
 }
 
-function showSection(id) {
+function showSection(id, pushState = true) {
   try {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     const sec = document.getElementById('sec-' + id);
@@ -2362,11 +2362,22 @@ function showSection(id) {
     if (id === 'settings') { try { loadSettings(); } catch(e) { console.warn('loadSettings:', e); } try { renderUsersList(); } catch(e) {} }
     if (id === 'invoice-template') { try { loadInvoiceTemplate(); } catch(e) { console.warn('loadInvoiceTemplate:', e); } }
     if (id === 'reports') { try { initReports(); } catch(e) { console.warn('initReports:', e); } }
+    // Browser history — زر الرجوع يعمل
+    if (pushState && history.state?.section !== id) {
+      history.pushState({ section: id }, '', '#' + id);
+    }
     closeSidebar();
   } catch(e) {
     console.error('showSection error:', e);
   }
 }
+
+// زر الرجوع في المتصفح
+window.addEventListener('popstate', (e) => {
+  const id = e.state?.section || 'dashboard';
+  showSection(id, false);
+});
+
 
 // ─── INIT ───
 document.addEventListener('DOMContentLoaded', () => {
@@ -2378,6 +2389,14 @@ document.addEventListener('DOMContentLoaded', () => {
   try { calcInit(); } catch(e){ console.error('calcInit:', e); }
   try { recInit(); } catch(e){ console.error('recInit:', e); }
   try { wireDataHandlers(); } catch(e){ console.error('wireDataHandlers:', e); }
+  // hash routing — إذا فُتحت الصفحة بـ #section ابدأ فيها
+  const validSections = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','settings'];
+  const hashSection = location.hash.replace('#','');
+  if (hashSection && validSections.includes(hashSection)) {
+    setTimeout(() => showSection(hashSection, false), 100);
+  } else {
+    history.replaceState({ section: 'dashboard' }, '', '#dashboard');
+  }
   setTimeout(() => { try { loadFromDB(); } catch(e){ console.warn('loadFromDB:', e); } }, 500);
   setTimeout(() => { try { syncUsersFromDB(); } catch(e){ console.warn('syncUsers:', e); } }, 800);
   setTimeout(() => { try { syncDaftraBackground(); } catch(e){ console.warn('syncDaftra:', e); } }, 2000);
@@ -5659,29 +5678,61 @@ async function triggerManualSync() {
 }
 
 // Fetch from Worker — single request, normalise any response shape
-async function fetchAllDaftraPages(endpoint, params = {}) {
+// جلب صفحة واحدة من Worker
+async function _fetchOnePage(endpoint, params) {
+  const qp = new URLSearchParams({ ...params, limit: 50 });
+  const res = await fetch(`${DAFTRA_WORKER_URL}/${endpoint}?${qp}`, {
+    headers: { 'Accept': 'application/json; charset=utf-8' }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} on /${endpoint}`);
+  const text = await res.text();
+  let raw;
+  try { raw = JSON.parse(text); } catch(e) { throw new Error('JSON parse error'); }
+  const rows = raw.data || (Array.isArray(raw) ? raw : []);
+  const items = rows.map(row => {
+    const inv = row.Invoice || row.Client || row;
+    if (row.Invoice?.Client) inv._client = row.Invoice.Client;
+    return inv;
+  });
+  return { items, pagination: raw.pagination || {} };
+}
+
+// جلب كل صفحات endpoint معين بـ params معينة
+async function _fetchAllPages(endpoint, params = {}) {
   let page = 1, all = [];
   while (true) {
-    const qp = new URLSearchParams({ ...params, page, limit: 50 });
-    const res = await fetch(`${DAFTRA_WORKER_URL}/${endpoint}?${qp}`, {
-      headers: { 'Accept': 'application/json; charset=utf-8' }
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status} on /${endpoint}`);
-    // القراءة كـ UTF-8 صريح
-    const text = await res.text();
-    let raw;
-    try { raw = JSON.parse(text); } catch(e) { throw new Error('JSON parse error: ' + e.message); }
-    const rows = raw.data || (Array.isArray(raw) ? raw : []);
-    const items = rows.map(row => {
-      const inv = row.Invoice || row.Client || row;
-      if (row.Invoice && row.Invoice.Client) inv._client = row.Invoice.Client;
-      return inv;
-    });
+    const { items, pagination } = await _fetchOnePage(endpoint, { ...params, page });
     if (!items.length) break;
     all = all.concat(items);
-    const pagination = raw.pagination;
-    if (!pagination || !pagination.next || page >= pagination.page_count) break;
+    if (!pagination.next || page >= (pagination.page_count || 1)) break;
     page++;
+  }
+  return all;
+}
+
+// الدالة الرئيسية — للـ clients تجلب مرة واحدة
+// للـ invoices تجلب 3 مرات (unpaid + partial + paid) لأن Worker يفلتر
+async function fetchAllDaftraPages(endpoint, params = {}) {
+  if (endpoint !== 'invoices') {
+    return await _fetchAllPages(endpoint, params);
+  }
+
+  // invoices: جلب الثلاث حالات منفصلة لضمان الحصول على الكل
+  // لأن الـ Worker قد يفرض فلتر payment_status داخلياً
+  const [unpaid, partial, paid] = await Promise.all([
+    _fetchAllPages('invoices', { ...params, payment_status: 0 }),
+    _fetchAllPages('invoices', { ...params, payment_status: 1 }),
+    _fetchAllPages('invoices', { ...params, payment_status: 2 }),
+  ]);
+
+  // دمج مع إزالة المكررات بـ id
+  const seen = new Set();
+  const all = [];
+  for (const inv of [...unpaid, ...partial, ...paid]) {
+    const id = String(inv.id || inv.invoice_id || '');
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    all.push(inv);
   }
   return all;
 }
