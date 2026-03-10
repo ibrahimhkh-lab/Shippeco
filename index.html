@@ -248,6 +248,12 @@ tbody tr:hover { background:rgba(255,255,255,0.02); }
 .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 .form-group { display:flex; flex-direction:column; gap:7px; }
 .form-group.full { grid-column:1/-1; }
+.item-row { display:grid; grid-template-columns:1fr 1fr 80px 32px; gap:8px; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+.item-row select, .item-row input { background:var(--card); border:1px solid var(--border); border-radius:7px; padding:6px 10px; color:var(--text); font-family:var(--font); font-size:13px; }
+.item-row input:focus, .item-row select:focus { outline:none; border-color:var(--accent); }
+.item-row-label { font-size:10px; color:var(--muted); margin-bottom:2px; font-weight:600; }
+.item-remove-btn { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:var(--red-p); border-radius:7px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; transition:all 0.2s; }
+.item-remove-btn:hover { background:rgba(239,68,68,0.2); }
 label { font-size:12px; font-weight:600; color:var(--muted); }
 input[type=text], input[type=number], input[type=date], select, textarea {
   background:var(--bg); border:1px solid var(--border); border-radius:9px;
@@ -1513,11 +1519,22 @@ select option { background:var(--surface); }
         <div class="form-grid">
           <div class="form-group"><label>اسم العميل *</label><input type="text" id="f-client" placeholder="محمد عبدالله"></div>
           <div class="form-group"><label>رقم جوال العميل *</label><input type="text" id="f-phone" placeholder="05xxxxxxxx"></div>
+          <div class="form-group"><label>بند الفاتورة *</label>
+            <select id="f-item-type">
+              <option value="شحن دولي">شحن دولي</option>
+              <option value="شحن داخلي">شحن داخلي</option>
+              <option value="تغيير عنوان">تغيير عنوان</option>
+              <option value="فرق وزن">فرق وزن</option>
+              <option value="توصيل">توصيل</option>
+              <option value="أخرى">أخرى</option>
+            </select>
+          </div>
           <div class="form-group"><label>شركة الشحن *</label>
             <select id="f-carrier"><option value="">اختر شركة الشحن</option><option selected>DHL Express</option><option>Aramex</option><option>FedEx</option><option>SMSA</option><option>Naqel</option><option>J&T Express</option><option>أخرى</option></select>
           </div>
           <div class="form-group"><label>رقم الشحنة / AWB *</label><input type="text" id="f-awb" placeholder="1234567890" oninput="generateCode()"></div>
           <div class="form-group"><label>السعر النهائي (ريال) *</label><input type="number" id="f-price" placeholder="0.00" min="0" step="0.01"></div>
+          <div class="form-group"><label>الوزن (كجم)</label><input type="number" id="f-weight" placeholder="اختياري" min="0" step="0.1"></div>
           <div class="form-group"><label>تاريخ الفاتورة</label><input type="date" id="f-date"></div>
           <div class="form-group"><label>حالة الدفع</label>
             <select id="f-status"><option value="unpaid">غير مدفوعة</option><option value="partial">مدفوعة جزئياً</option><option value="paid">مدفوعة بالكامل</option></select>
@@ -1578,10 +1595,34 @@ select option { background:var(--surface); }
 const USERS_KEY = 'shippec_users';
 const SESSION_KEY = 'shippec_session';
 
-// Default admin account (first run)
+// Default admin account (fallback only)
 const DEFAULT_USERS = [
   { username: 'admin', name: 'المدير', password: 'admin123', role: 'admin' }
 ];
+
+// ── Load users: D1 first, localStorage fallback ──
+async function fetchUsersFromDB() {
+  try {
+    const res = await fetch(`${DB_URL}/db/settings`);
+    if (!res.ok) return null;
+    const rows = await res.json();
+    const row = (rows || []).find(r => r.key === 'users_list');
+    if (row && row.value) return JSON.parse(row.value);
+  } catch(e) {}
+  return null;
+}
+
+async function saveUsersToDB(users) {
+  try {
+    await fetch(`${DB_URL}/db/settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'users_list', value: JSON.stringify(users) })
+    });
+  } catch(e) { console.warn('saveUsersToDB:', e); }
+  // Also save locally as cache
+  try { localStorage.setItem(USERS_KEY, JSON.stringify(users)); } catch(e) {}
+}
 
 function getUsers() {
   try {
@@ -1592,6 +1633,15 @@ function getUsers() {
 
 function saveUsers(users) {
   try { localStorage.setItem(USERS_KEY, JSON.stringify(users)); } catch(e) {}
+  saveUsersToDB(users); // async — fire and forget
+}
+
+// Load users from D1 on startup and update local cache
+async function syncUsersFromDB() {
+  const dbUsers = await fetchUsersFromDB();
+  if (dbUsers && dbUsers.length) {
+    try { localStorage.setItem(USERS_KEY, JSON.stringify(dbUsers)); } catch(e) {}
+  }
 }
 
 function getCurrentUser() {
@@ -1770,6 +1820,7 @@ document.addEventListener('DOMContentLoaded', () => {
   try { recInit(); } catch(e){ console.error('recInit:', e); }
   try { wireDataHandlers(); } catch(e){ console.error('wireDataHandlers:', e); }
   setTimeout(() => { try { loadFromDB(); } catch(e){ console.warn('loadFromDB:', e); } }, 500);
+  setTimeout(() => { try { syncUsersFromDB(); } catch(e){ console.warn('syncUsers:', e); } }, 800);
   setTimeout(() => { try { syncDaftraBackground(); } catch(e){ console.warn('syncDaftra:', e); } }, 2000);
 });
 
@@ -2018,7 +2069,7 @@ function renderTable() {
   wrap.innerHTML = `<table><thead><tr>
     ${msMode?'<th><input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this)" style="cursor:pointer;width:15px;height:15px"></th>':''}
     <th>رقم الفاتورة</th><th>العميل</th><th>الجوال</th><th>رقم الشحنة</th>
-    <th>الشركة</th><th>السعر</th><th>الحالة</th><th>طريقة الدفع</th><th>أنشأها</th><th>التاريخ</th><th>إجراءات</th>
+    <th>البند</th><th>الشركة</th><th>الوزن</th><th>السعر</th><th>الحالة</th><th>طريقة الدفع</th><th>أنشأها</th><th>التاريخ</th><th>إجراءات</th>
   </tr></thead><tbody>` +
     filtered.map(inv => `<tr>
       ${msMode?`<td><input type="checkbox" class="inv-checkbox" data-id="${inv.id}" onchange="updateExportBtn()" style="cursor:pointer;width:15px;height:15px"></td>`:''}
@@ -2026,7 +2077,9 @@ function renderTable() {
       <td style="font-weight:600">${inv.client}</td>
       <td class="mono" style="font-size:12px;direction:ltr">${inv.phone}</td>
       <td class="mono">${inv.awb}</td>
+      <td><span style="background:rgba(139,92,246,0.12);color:#a78bfa;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${inv.itemType||'شحن دولي'}</span></td>
       <td style="color:var(--muted);font-size:12px">${inv.carrier}</td>
+      <td style="color:var(--muted);font-size:12px">${inv.weight ? `<span style="background:rgba(14,165,233,0.1);color:var(--accent);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">${inv.weight} كجم</span>` : '<span style="color:var(--border)">—</span>'}</td>
       <td style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)} ر.س</td>
       <td>${statusBadge(inv.status)}</td>
       <td style="color:var(--muted);font-size:12px">${inv.payment||'—'}</td>
@@ -2034,6 +2087,7 @@ function renderTable() {
       <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
       <td><div class="actions">
         <button class="btn btn-ghost btn-sm" onclick="viewInvoice(${inv.id})">👁</button>
+        <button class="btn btn-ghost btn-sm" title="إضافة بند" onclick="openAddItemModal(${inv.id})" style="color:#a78bfa">＋</button>
         <button class="btn btn-ghost btn-sm" onclick="editInvoice(${inv.id})">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${inv.id})">🗑</button>
       </div></td>
@@ -2078,9 +2132,11 @@ function openNewInvoice(prefill) {
   // Reset step 2 fields
   document.getElementById('f-client').value = '';
   document.getElementById('f-phone').value = '';
+  document.getElementById('f-item-type').value = 'شحن دولي';
   document.getElementById('f-carrier').value = 'DHL Express';
   document.getElementById('f-awb').value = '';
   document.getElementById('f-price').value = prefill ? prefill.price : '';
+  document.getElementById('f-weight').value = prefill ? (prefill.weight || '') : '';
   document.getElementById('f-date').valueAsDate = new Date();
   document.getElementById('f-status').value = 'unpaid';
   document.getElementById('f-payment').value = '';
@@ -2109,7 +2165,7 @@ function sendToInvoice() {
   const to = document.getElementById('input-to').value;
   const zone = document.getElementById('zone-badge-text').textContent;
   const weight = document.getElementById('val-charge').textContent;
-  const details = `من: ${from}\nإلى: ${to}\n${zone}\nوزن المحاسبة: ${weight}\n---\nسعر أساسي: ${document.getElementById('res-base').textContent}  وقود: ${document.getElementById('res-fuel').textContent}  GoGreen: ${document.getElementById('res-gogreen').textContent}`;
+  const details = `من: ${from}\nإلى: ${to}\n${zone}\nوزن المحاسبة: ${weight}`;
   showSection('invoices');
   openNewInvoice({ price: total, details });
   showToast('✅ تم نقل السعر لنموذج الفاتورة');
@@ -2175,9 +2231,11 @@ function generateCode() {
 function saveInvoice() {
   const client = document.getElementById('f-client').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
+  const itemType = document.getElementById('f-item-type').value;
   const carrier = document.getElementById('f-carrier').value;
   const awb = document.getElementById('f-awb').value.trim();
   const price = document.getElementById('f-price').value;
+  const weight = document.getElementById('f-weight').value;
   const date = document.getElementById('f-date').value;
   const status = document.getElementById('f-status').value;
   const payment = document.getElementById('f-payment').value;
@@ -2186,12 +2244,12 @@ function saveInvoice() {
   if (!client||!phone||!carrier||!awb||!price) { showToast('⚠️ يرجى ملء جميع الحقول المطلوبة'); return; }
   if (editingId) {
     const idx = invoices.findIndex(i => i.id === editingId);
-    invoices[idx] = {...invoices[idx],client,phone,carrier,awb,price,date,status,payment,details,codeType};
+    invoices[idx] = {...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType};
     showToast('✅ تم تعديل الفاتورة بنجاح');
   } else {
     const newId = invoices.length ? Math.max(...invoices.map(i=>i.id))+1 : 1001;
     const curUser = getCurrentUser();
-    invoices.push({id:newId,client,phone,carrier,awb,price,date,status,payment,details,codeType,created_by:curUser?.name||curUser?.username||'—'});
+    invoices.push({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,created_by:curUser?.name||curUser?.username||'—'});
     showToast('✅ تم إنشاء الفاتورة بنجاح');
   }
   saveData();
@@ -2206,9 +2264,11 @@ function editInvoice(id) {
   document.getElementById('form-modal-title').textContent = 'تعديل الفاتورة #'+id;
   document.getElementById('f-client').value = inv.client||'';
   document.getElementById('f-phone').value = inv.phone||'';
+  document.getElementById('f-item-type').value = inv.itemType||'شحن دولي';
   document.getElementById('f-carrier').value = inv.carrier||'';
   document.getElementById('f-awb').value = inv.awb||'';
   document.getElementById('f-price').value = inv.price||'';
+  document.getElementById('f-weight').value = inv.weight||'';
   document.getElementById('f-date').value = inv.date||'';
   document.getElementById('f-status').value = inv.status||'unpaid';
   document.getElementById('f-payment').value = inv.payment||'';
@@ -2317,20 +2377,19 @@ function sendWhatsApp() {
   const inv = currentViewInvoice;
   const phone = inv.phone.replace(/\D/g,'');
   const intlPhone = phone.startsWith('0') ? '966' + phone.slice(1) : phone;
-  const statusText = inv.status === 'paid' ? 'مدفوعة ✅' : inv.status === 'partial' ? 'مدفوعة جزئياً 🟡' : 'غير مدفوعة 🔴';
-  const msg = `مرحباً ${inv.client} 👋
+  const trackingUrl = `https://www.dhl.com/sa-en/home/tracking.html?tracking-id=${inv.awb}&submit=1`;
+  const msg = `عزيزي العميل،
+نحن سعداء بإبلاغكم أنه قد تم إصدار بوليصة الشحن الخاصة بكم بنجاح! 🎉
 
-نرسل لك تفاصيل فاتورتك:
+تفاصيل الشحن
+رقم البوليصة: *${inv.awb}*
+يمكنكم تتبع شحنتكم عبر الرابط التالي: ${trackingUrl}
 
-🧾 رقم الفاتورة: #${inv.id}
-📦 رقم الشحنة: ${inv.awb}
-🏢 شركة الشحن: ${inv.carrier}
-📅 التاريخ: ${inv.date}
-💰 المبلغ: ${Number(inv.price).toFixed(2)} ريال
-📋 الحالة: ${statusText}
-${inv.payment ? `💳 طريقة الدفع: ${inv.payment}` : ''}
+نحن هنا لمساعدتكم في أي استفسارات أو احتياجات أخرى قد تكون لديكم. لا تترددوا في التواصل معنا!
 
-شكراً لتعاملكم مع شيب بيك 🚀`;
+• ملاحظة: تم تسجيل الوزن والأبعاد بناءً على المعلومات المقدمة، في حال وجود فرق بعد مراجعة DHL يتحمل العميل دفع الفرق حسب الشروط والأحكام المذكورة على في الفاتورة.
+
+فريق SHIPPEC تتمنى لكم يومًا سعيدًا! 🌟`;
 
   window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 }
@@ -2929,21 +2988,210 @@ async function recStartAnalysis() {
   recAnimateSteps();
 
   try {
-    const formData = new FormData();
-    formData.append('file', recFile);
-    const resp = await fetch('/api/reconcile', { method: 'POST', body: formData });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.detail || 'خطأ غير متوقع');
+    // ── Step 1: Read Excel file with SheetJS ──
+    const arrayBuffer = await recFile.arrayBuffer();
+    const wb = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
+
+    // Try to find the main sheet (first sheet or one named with DHL keywords)
+    let sheetName = wb.SheetNames[0];
+    for (const n of wb.SheetNames) {
+      if (/dhl|ship|invoice|شحن|فاتور/i.test(n)) { sheetName = n; break; }
+    }
+    const ws = wb.Sheets[sheetName];
+    const rawRows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    if (!rawRows.length) throw new Error('الملف فارغ أو لا يحتوي على بيانات');
+
+    // ── Step 2: Detect column names flexibly ──
+    // AWB / Waybill number
+    const AWB_KEYS = ['Waybill No','Waybill','AWB','AWB No','AWB Number','Airway Bill','Shipment No',
+      'رقم البوليصة','رقم الشحنة','رقم بوليصة الشحن','Shipment Number','Hawb','HAWB'];
+    // Charge / Total
+    const TOTAL_KEYS = ['Total Charge','Total','Grand Total','Net Charge','Amount','Charge',
+      'الإجمالي','إجمالي الرسوم','Total Amount','Invoice Amount','Billed Amount'];
+    // Weight
+    const WEIGHT_KEYS = ['Weight','Actual Weight','Chargeable Weight','Billed Weight',
+      'الوزن','وزن الشحنة','Weight (KG)','Weight KG'];
+    // Date
+    const DATE_KEYS = ['Shipment Date','Date','Invoice Date','Ship Date','تاريخ الشحن','التاريخ'];
+    // Destination
+    const DEST_KEYS = ['Destination','Destination Country','Dest','To','وجهة','الوجهة','Destination Code'];
+    // Origin
+    const ORIGIN_KEYS = ['Origin','From','Origin Country','منشأ','المنشأ'];
+    // Service type
+    const SERVICE_KEYS = ['Service','Service Type','Product','نوع الخدمة','Product Name'];
+    // Fuel surcharge
+    const FUEL_KEYS = ['Fuel Surcharge','Fuel','رسوم الوقود'];
+    // VAT
+    const VAT_KEYS = ['VAT','Tax','Value Added Tax','ضريبة','ضريبة القيمة المضافة'];
+
+    function findKey(row, candidates) {
+      const keys = Object.keys(row);
+      for (const c of candidates) {
+        const found = keys.find(k => k.trim().toLowerCase() === c.toLowerCase());
+        if (found) return found;
+      }
+      // Fuzzy: partial match
+      for (const c of candidates) {
+        const found = keys.find(k => k.trim().toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(k.trim().toLowerCase()));
+        if (found) return found;
+      }
+      return null;
+    }
+
+    const sampleRow = rawRows[0];
+    const kAwb     = findKey(sampleRow, AWB_KEYS);
+    const kTotal   = findKey(sampleRow, TOTAL_KEYS);
+    const kWeight  = findKey(sampleRow, WEIGHT_KEYS);
+    const kDate    = findKey(sampleRow, DATE_KEYS);
+    const kDest    = findKey(sampleRow, DEST_KEYS);
+    const kOrigin  = findKey(sampleRow, ORIGIN_KEYS);
+    const kService = findKey(sampleRow, SERVICE_KEYS);
+    const kFuel    = findKey(sampleRow, FUEL_KEYS);
+    const kVat     = findKey(sampleRow, VAT_KEYS);
+
+    if (!kAwb) throw new Error('تعذّر إيجاد عمود رقم الشحنة/البوليصة في الملف. تأكد أن الملف من DHL');
+
+    // ── Step 3: Parse DHL rows ──
+    const dhlShipments = rawRows
+      .map(row => {
+        const awb = String(row[kAwb] || '').trim().replace(/\s+/g,'');
+        if (!awb || awb === '' || awb === '0') return null;
+        return {
+          awb,
+          total_charge : parseFloat(row[kTotal]  || 0) || 0,
+          weight_kg    : parseFloat(row[kWeight] || 0) || 0,
+          shipment_date: kDate   ? String(row[kDate]   || '').substring(0,10) : '—',
+          destination  : kDest   ? String(row[kDest]   || '') : '—',
+          origin       : kOrigin ? String(row[kOrigin] || '') : '—',
+          service_type : kService? String(row[kService]|| '') : '—',
+          fuel_surcharge: kFuel  ? parseFloat(row[kFuel] || 0) || 0 : 0,
+          vat_amount   : kVat   ? parseFloat(row[kVat]  || 0) || 0 : 0,
+        };
+      })
+      .filter(Boolean);
+
+    if (!dhlShipments.length) throw new Error('لم يتم العثور على أي شحنات في الملف');
+
+    // ── Step 4: Match against platform invoices ──
+    // Build lookup: AWB → invoice (normalize AWB: remove spaces/dashes)
+    const normalize = s => String(s || '').replace(/[\s\-]/g,'').toUpperCase();
+    const invMap = {};
+    for (const inv of invoices) {
+      const key = normalize(inv.awb);
+      if (key) invMap[key] = inv;
+    }
+
+    let totalDHL = 0, totalPlatform = 0;
+    let matched = 0, withDisc = 0, notFound = 0;
+
+    const results = dhlShipments.map(dhl => {
+      const key = normalize(dhl.awb);
+      const inv = invMap[key] || null;
+      totalDHL += dhl.total_charge;
+
+      // DHL data object (mirrors old API shape)
+      const dhl_data = {
+        airwaybill_number: dhl.awb,
+        shipment_date    : dhl.shipment_date,
+        origin_airport   : dhl.origin,
+        destination_code : dhl.destination,
+        service_type     : dhl.service_type,
+        weight_kg        : dhl.weight_kg,
+        standard_charge  : dhl.total_charge - dhl.fuel_surcharge - dhl.vat_amount,
+        fuel_surcharge   : dhl.fuel_surcharge,
+        gogreen_charge   : 0,
+        vat_amount       : dhl.vat_amount,
+        total_charge     : dhl.total_charge,
+      };
+
+      if (!inv) {
+        notFound++;
+        return {
+          airwaybill_number     : dhl.awb,
+          status                : 'not_found_in_platform',
+          dhl_data,
+          platform_data         : null,
+          total_financial_difference: null,
+          profit_margin_pct     : null,
+          discrepancies         : [],
+        };
+      }
+
+      // Platform invoice data (mirrors old daftra_data shape)
+      const platPrice = parseFloat(inv.price || 0);
+      totalPlatform += platPrice;
+
+      const diff = platPrice - dhl.total_charge; // positive = we charged more (profit)
+      const pm   = dhl.total_charge > 0 ? ((platPrice - dhl.total_charge) / dhl.total_charge * 100) : null;
+
+      const platform_data = {
+        invoice_no     : String(inv.id),
+        client_name    : inv.client,
+        phone          : inv.phone,
+        date           : inv.date,
+        summary_subtotal: platPrice / 1.15,
+        summary_total  : platPrice,
+        summary_paid   : inv.status === 'paid' ? platPrice : inv.status === 'partial' ? platPrice / 2 : 0,
+        summary_unpaid : inv.status === 'paid' ? 0 : platPrice,
+        payment_status : inv.status === 'paid' ? 'مدفوع' : inv.status === 'partial' ? 'مدفوع جزئياً' : 'غير مدفوع',
+        created_by     : inv.created_by || '—',
+        weight_kg      : null, // not stored in platform
+      };
+
+      // Detect discrepancies
+      const discrepancies = [];
+      const priceDiff = Math.round((platPrice - dhl.total_charge) * 100) / 100;
+      if (Math.abs(priceDiff) > 0.5) {
+        discrepancies.push({
+          field_name_ar: 'إجمالي المبلغ',
+          dhl_value    : dhl.total_charge.toFixed(2) + ' ﷼',
+          daftra_value : platPrice.toFixed(2) + ' ﷼',
+          difference   : priceDiff,
+        });
+      }
+
+      const status = discrepancies.length ? 'discrepancy' : 'matched';
+      if (status === 'matched') matched++;
+      else withDisc++;
+
+      return {
+        airwaybill_number          : dhl.awb,
+        status,
+        dhl_data,
+        platform_data,
+        total_dhl_amount           : dhl.total_charge,
+        total_platform_amount      : platPrice,
+        total_financial_difference : diff,
+        profit_margin_pct          : pm,
+        discrepancies,
+      };
+    });
+
+    const report = {
+      filename          : recFile.name,
+      total_shipments   : dhlShipments.length,
+      matched,
+      with_discrepancies: withDisc,
+      not_found         : notFound,
+      total_dhl_amount  : totalDHL,
+      total_daftra_amount: totalPlatform,
+      total_difference  : totalPlatform - totalDHL,
+      results,
+      _col_map: { awb: kAwb, total: kTotal, weight: kWeight }, // debug info
+    };
+
     clearInterval(recStepTimer);
     ['rstep1','rstep2','rstep3','rstep4'].forEach(s => {
       const el = document.getElementById(s);
       el.classList.remove('active'); el.classList.add('done');
     });
     document.getElementById('rec-progress').style.width = '100%';
-    setTimeout(() => { recReport = data; recRenderResults(data); recShowState('results'); }, 500);
+    setTimeout(() => { recReport = report; recRenderResults(report); recShowState('results'); }, 500);
+
   } catch (err) {
     clearInterval(recStepTimer);
-    showToast(err.message || 'حدث خطأ أثناء المعالجة');
+    showToast('❌ ' + (err.message || 'حدث خطأ أثناء المعالجة'));
     recShowState('upload');
   }
 }
@@ -3581,9 +3829,12 @@ async function exportInvoicesPDF(invList) {
 function buildInvoiceHTML(inv) {
   const sClass = inv.status==='paid'?'paid':inv.status==='partial'?'partial':'unpaid';
   const sLabel = inv.status==='paid'?'مدفوعة':inv.status==='partial'?'جزئية':'غير مدفوعة';
-  const vat = (Number(inv.price||0)*0.15).toFixed(2);
-  const total = Number(inv.price||0).toFixed(2);
-  const base = (Number(inv.price||0)/1.15).toFixed(2);
+  // Build items array — support both legacy (single) and new (multi)
+  const items = (inv.items && inv.items.length)
+    ? inv.items
+    : [{ type: inv.itemType||'شحن دولي', details: inv.details||'', price: parseFloat(inv.price||0) }];
+  const totalNum = items.reduce((s, it) => s + (parseFloat(it.price)||0), 0);
+  const total = totalNum.toFixed(2);
   const t = invoiceTemplate || {};
   const note = t.note || ptSettings.invoiceNote || '';
   const companyAr = t.companyAr || 'التكامل التقني الدولي';
@@ -3619,14 +3870,26 @@ function buildInvoiceHTML(inv) {
         </div>
       </div>
       <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-        <thead><tr style="background:#f1f5f9"><th style="padding:10px 14px;text-align:right;font-size:12px;color:#64748b;font-weight:700">البيان</th><th style="padding:10px 14px;text-align:left;font-size:12px;color:#64748b;font-weight:700">المبلغ</th></tr></thead>
+        <thead>
+          <tr style="background:#f1f5f9">
+            <th style="padding:10px 14px;text-align:right;font-size:12px;color:#64748b;font-weight:700">البند</th>
+            <th style="padding:10px 14px;text-align:right;font-size:12px;color:#64748b;font-weight:700">التفاصيل</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:#64748b;font-weight:700;white-space:nowrap">المبلغ</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px 14px;font-size:13px">رسوم الشحن (قبل الضريبة)</td><td style="padding:10px 14px;font-size:13px;text-align:left;direction:ltr">${base} ر.س</td></tr>
-          <tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px 14px;font-size:13px">ضريبة القيمة المضافة (15%)</td><td style="padding:10px 14px;font-size:13px;text-align:left;direction:ltr">${vat} ر.س</td></tr>
-          <tr style="background:#0f172a"><td style="padding:12px 14px;color:#fff;font-size:14px;font-weight:700">الإجمالي شامل ضريبة القيمة المضافة</td><td style="padding:12px 14px;color:#0ea5e9;font-size:18px;font-weight:800;text-align:left;direction:ltr">${total} ر.س</td></tr>
+          ${items.map(it => `
+          <tr style="border-bottom:1px solid #f1f5f9">
+            <td style="padding:10px 14px;font-size:13px;font-weight:600;white-space:nowrap">${it.type}</td>
+            <td style="padding:10px 14px;font-size:12px;color:#64748b">${it.details||'—'}</td>
+            <td style="padding:10px 14px;font-size:13px;text-align:left;direction:ltr;font-weight:600">${parseFloat(it.price||0).toFixed(2)} ر.س</td>
+          </tr>`).join('')}
+          <tr style="background:#0f172a">
+            <td colspan="2" style="padding:12px 14px;color:#fff;font-size:14px;font-weight:700">الإجمالي</td>
+            <td style="padding:12px 14px;color:#0ea5e9;font-size:18px;font-weight:800;text-align:left;direction:ltr">${total} ر.س</td>
+          </tr>
         </tbody>
       </table>
-      ${inv.details?`<div style="background:#f8fafc;border-radius:8px;padding:12px 16px;margin-bottom:16px"><div style="font-size:11px;color:#64748b;font-weight:700;margin-bottom:6px">ملاحظات الشحنة</div><div style="font-size:13px">${inv.details}</div></div>`:''}
       ${note?`<div style="border-top:1px solid #e2e8f0;padding-top:12px;margin-bottom:12px;text-align:center;font-size:12px;color:#475569">${note}</div>`:''}
       <div style="border-top:1px solid #e2e8f0;padding-top:14px;display:flex;justify-content:space-between;align-items:center">
         <div style="font-size:11px;color:#94a3b8">شكراً لاستخدامكم خدمات شيب بيك • جميع الأسعار شاملة ضريبة القيمة المضافة</div>
@@ -4086,5 +4349,155 @@ window.saveData = saveData;
     <div id="rec-modal-body"></div>
   </div>
 </div>
+
+<!-- ═══ ADD ITEM MODAL ═══ -->
+<div class="overlay" id="add-item-modal" onclick="if(event.target===this)closeModal('add-item-modal')" style="display:none;align-items:center;justify-content:center">
+  <div class="modal" style="max-width:480px;width:95%">
+    <div class="modal-header">
+      <h3 id="add-item-title" style="margin:0;font-size:16px">إضافة بند للفاتورة</h3>
+      <button class="close-btn" onclick="closeModal('add-item-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px;display:flex;flex-direction:column;gap:14px">
+      <div class="form-group">
+        <label>نوع البند *</label>
+        <select id="ai-type" onchange="onAiTypeChange()" style="width:100%">
+          <option value="شحن دولي">شحن دولي</option>
+          <option value="شحن داخلي">شحن داخلي</option>
+          <option value="تغيير عنوان">تغيير عنوان — ثابت ٥٦ ر.س</option>
+          <option value="فرق وزن">فرق وزن</option>
+          <option value="توصيل">توصيل</option>
+          <option value="أخرى">أخرى</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>التفاصيل (اختياري)</label>
+        <input type="text" id="ai-details" placeholder="مثال: من 5 كجم إلى 8 كجم">
+      </div>
+      <div class="form-group">
+        <label>السعر (ريال) *</label>
+        <input type="number" id="ai-price" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div id="ai-items-preview" style="background:var(--bg);border-radius:10px;padding:12px 14px;display:none">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px">بنود الفاتورة بعد الإضافة:</div>
+        <div id="ai-items-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between">
+          <span style="font-size:13px;color:var(--muted)">الإجمالي الجديد</span>
+          <span id="ai-new-total" style="font-weight:800;color:var(--gold)">0.00 ر.س</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('add-item-modal')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveAddedItem()">💾 إضافة البند</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// ADD ITEM TO EXISTING INVOICE
+// ═══════════════════════════════════════════
+const ITEM_FIXED_PRICES = { 'تغيير عنوان': 56 };
+let addItemTargetId = null;
+
+function openAddItemModal(invId) {
+  const inv = invoices.find(i => i.id === invId);
+  if (!inv) return;
+  addItemTargetId = invId;
+  document.getElementById('add-item-title').textContent = `إضافة بند — فاتورة #${invId} | ${inv.client}`;
+  document.getElementById('ai-type').value = 'تغيير عنوان';
+  document.getElementById('ai-details').value = '';
+  document.getElementById('ai-price').value = '56';
+  document.getElementById('ai-price').readOnly = true;
+  onAiTypeChange();
+  updateAiPreview(inv);
+  openModal('add-item-modal');
+}
+
+function onAiTypeChange() {
+  const type = document.getElementById('ai-type').value;
+  // Strip the arabic description from option value
+  const cleanType = type.replace(/ —.*/, '').trim();
+  document.getElementById('ai-type').dataset.cleanType = cleanType;
+  const priceInput = document.getElementById('ai-price');
+  if (ITEM_FIXED_PRICES[cleanType] !== undefined) {
+    priceInput.value = ITEM_FIXED_PRICES[cleanType];
+    priceInput.readOnly = true;
+    priceInput.style.opacity = '0.6';
+  } else {
+    priceInput.readOnly = false;
+    priceInput.style.opacity = '1';
+    if (parseFloat(priceInput.value) === 56) priceInput.value = '';
+  }
+  const inv = invoices.find(i => i.id === addItemTargetId);
+  if (inv) updateAiPreview(inv);
+}
+
+function updateAiPreview(inv) {
+  const preview = document.getElementById('ai-items-preview');
+  const listEl = document.getElementById('ai-items-list');
+  const totalEl = document.getElementById('ai-new-total');
+  // Build current items array
+  const existingItems = getInvItems(inv);
+  const newPrice = parseFloat(document.getElementById('ai-price').value) || 0;
+  const newType = (document.getElementById('ai-type').dataset.cleanType) ||
+    document.getElementById('ai-type').value.replace(/ —.*/, '').trim();
+  const newDetails = document.getElementById('ai-details').value;
+  const allItems = [...existingItems, { type: newType, details: newDetails, price: newPrice }];
+  let total = 0;
+  listEl.innerHTML = allItems.map(item => {
+    total += parseFloat(item.price) || 0;
+    return `<div style="display:flex;justify-content:space-between;font-size:12px">
+      <span><span style="background:rgba(139,92,246,0.15);color:#a78bfa;padding:1px 7px;border-radius:5px;font-size:11px">${item.type}</span>${item.details ? ' — ' + item.details : ''}</span>
+      <span style="font-weight:600;color:var(--gold)">${parseFloat(item.price||0).toFixed(2)} ر.س</span>
+    </div>`;
+  }).join('');
+  totalEl.textContent = total.toFixed(2) + ' ر.س';
+  preview.style.display = 'block';
+}
+
+function getInvItems(inv) {
+  if (inv.items && inv.items.length) return inv.items;
+  // Legacy: single item
+  return [{ type: inv.itemType || 'شحن دولي', details: inv.details || '', price: parseFloat(inv.price || 0) }];
+}
+
+function getInvTotal(inv) {
+  return getInvItems(inv).reduce((s, it) => s + (parseFloat(it.price) || 0), 0);
+}
+
+async function saveAddedItem() {
+  const inv = invoices.find(i => i.id === addItemTargetId);
+  if (!inv) return;
+  const type = (document.getElementById('ai-type').dataset.cleanType) ||
+    document.getElementById('ai-type').value.replace(/ —.*/, '').trim();
+  const details = document.getElementById('ai-details').value.trim();
+  const price = parseFloat(document.getElementById('ai-price').value) || 0;
+  if (!price) { showToast('⚠️ أدخل السعر'); return; }
+  const existingItems = getInvItems(inv);
+  const newItems = [...existingItems, { type, details, price }];
+  const newTotal = newItems.reduce((s, it) => s + (parseFloat(it.price) || 0), 0);
+  const idx = invoices.findIndex(i => i.id === addItemTargetId);
+  invoices[idx] = { ...inv, items: newItems, price: newTotal.toFixed(2) };
+  await saveInvoiceToDB(invoices[idx]);
+  renderTable();
+  closeModal('add-item-modal');
+  showToast('✅ تم إضافة البند بنجاح');
+}
+
+// Bind price input to update preview live
+document.addEventListener('DOMContentLoaded', () => {
+  const aiPrice = document.getElementById('ai-price');
+  const aiDetails = document.getElementById('ai-details');
+  if (aiPrice) aiPrice.addEventListener('input', () => {
+    const inv = invoices.find(i => i.id === addItemTargetId);
+    if (inv) updateAiPreview(inv);
+  });
+  if (aiDetails) aiDetails.addEventListener('input', () => {
+    const inv = invoices.find(i => i.id === addItemTargetId);
+    if (inv) updateAiPreview(inv);
+  });
+});
+</script>
 </body>
 </html>
