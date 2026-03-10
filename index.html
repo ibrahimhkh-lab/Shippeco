@@ -1542,6 +1542,7 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
         <button onclick="clearAndReimport()" style="background:transparent;color:#ef4444;border:1px solid #ef4444;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🗑️ مسح وإعادة استيراد</button>
         <button onclick="deleteNoPhone()" style="background:transparent;color:#f59e0b;border:1px solid #f59e0b;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🗑️ حذف فواتير بدون رقم</button>
         <button onclick="runDiagnostics()" style="background:transparent;color:#a78bfa;border:1px solid #a78bfa;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🔍 تشخيص المكررات</button>
+        <button onclick="runDeepDebug()" style="background:transparent;color:#f97316;border:1px solid #f97316;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🐛 فحص عميق</button>
         <span id="daftra-status" style="font-size:13px"></span>
         <span id="full-import-status" style="font-size:13px;display:none"></span>
       </div>
@@ -3938,10 +3939,11 @@ function renderClients() {
 }
 
 function showClientDetail(phone, name, idsStr) {
-  // جمع فواتير العميل — بالجوال إذا وُجد، وإلا بالـ ids المرسلة
+  // جمع فواتير العميل — بالجوال المُطبَّع إذا وُجد، وإلا بالـ ids
   let clientInvs;
-  if (phone) {
-    clientInvs = invoices.filter(i => (i.phone||'').trim() === phone.trim());
+  const normPhone = normalizePhone(phone);
+  if (normPhone) {
+    clientInvs = invoices.filter(i => normalizePhone(i.phone||'') === normPhone);
   } else if (idsStr) {
     const ids = new Set(idsStr.split(','));
     clientInvs = invoices.filter(i => ids.has(String(i.id)));
@@ -4026,7 +4028,8 @@ function goToClient(phone) {
     if (search) { search.value = phone; renderClients(); }
     // افتح ملف العميل مباشرة إذا وُجد
     if (phone) {
-      const clientInvs = invoices.filter(i => (i.phone||'').trim() === phone.trim());
+      const normPhone = normalizePhone(phone);
+      const clientInvs = invoices.filter(i => normalizePhone(i.phone||'') === normPhone);
       if (clientInvs.length) showClientDetail(phone, '', '');
     }
   }, 150);
@@ -5329,9 +5332,10 @@ async function exportSelectedPDF() {
 async function exportClientPDF() {
   const phone = document.getElementById('client-detail-phone').textContent;
   const name  = document.getElementById('client-detail-name').textContent;
+  const normPhone = normalizePhone(phone !== '—' ? phone : '');
   let clientInvs;
-  if (phone && phone !== '—') {
-    clientInvs = invoices.filter(i => (i.phone||'').trim() === phone.trim());
+  if (normPhone) {
+    clientInvs = invoices.filter(i => normalizePhone(i.phone||'') === normPhone);
   } else {
     clientInvs = invoices.filter(i => (i.client||'').trim().toLowerCase() === name.trim().toLowerCase());
   }
@@ -5508,22 +5512,22 @@ async function fetchAllDaftraPages(endpoint, params = {}) {
   let page = 1, all = [];
   while (true) {
     const qp = new URLSearchParams({ ...params, page, limit: 50 });
-    const res = await fetch(`${DAFTRA_WORKER_URL}/${endpoint}?${qp}`);
+    const res = await fetch(`${DAFTRA_WORKER_URL}/${endpoint}?${qp}`, {
+      headers: { 'Accept': 'application/json; charset=utf-8' }
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status} on /${endpoint}`);
-    const raw = await res.json();
+    // القراءة كـ UTF-8 صريح
+    const text = await res.text();
+    let raw;
+    try { raw = JSON.parse(text); } catch(e) { throw new Error('JSON parse error: ' + e.message); }
     const rows = raw.data || (Array.isArray(raw) ? raw : []);
-    // Unwrap nested keys: {Invoice:{...}} → {...} or {Client:{...}} → {...}
     const items = rows.map(row => {
       const inv = row.Invoice || row.Client || row;
-      // Merge nested Client data into invoice for phone lookup
-      if (row.Invoice && row.Invoice.Client) {
-        inv._client = row.Invoice.Client;
-      }
+      if (row.Invoice && row.Invoice.Client) inv._client = row.Invoice.Client;
       return inv;
     });
     if (!items.length) break;
     all = all.concat(items);
-    // Check pagination
     const pagination = raw.pagination;
     if (!pagination || !pagination.next || page >= pagination.page_count) break;
     page++;
@@ -5539,14 +5543,15 @@ function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
   // status في بعض الـ endpoints: 0=unpaid، 1=partial، 2=paid (مختلف!)
   const statusMap = { '2':'paid', '1':'partial', '0':'unpaid' };
 
-  // Build client lookup
+  // Build client lookup — clients endpoint يُرجع بيانات نظيفة عادةً
   const clientMap = {};
   (daftraClients || []).forEach(c => {
     const phone = normalizePhone(c.phone2 || c.phone1 || c.phone || c.mobile || '');
-    const name = c.business_name || c.name || c.client_name || c.Name || '';
-    if (phone) clientMap[phone] = name;
+    const rawName = c.business_name || c.name || c.client_name || c.Name || '';
+    const name = /Ø|Ù|Ú|Û/.test(rawName) ? '' : rawName; // تجاهل garbled
+    if (phone) clientMap[phone] = name || phone;
     if (c.id) {
-      clientMap['id_' + c.id] = name;
+      if (name) clientMap['id_' + c.id] = name;
       if (phone) clientMap['phone_' + c.id] = phone;
     }
   });
@@ -5566,15 +5571,21 @@ function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
     const newStatus = statusMap[pst] || 'unpaid';
 
     const clientId = String(dInv.client_id || '');
-    let clientName = dInv.client_business_name || dInv.client_name || dInv.name || '';
+    // الاسم: من Client nested أولاً (أنظف)، ثم الحقول المسطّحة
+    const embeddedClient = dInv._client || {};
+    const rawName = embeddedClient.business_name || embeddedClient.first_name ||
+                    dInv.client_business_name || dInv.client_name || dInv.name || '';
+    // فحص encoding: إذا كان الاسم يحتوي على Ø أو Ù (garbled UTF-8) استخدم clientMap
+    const isGarbled = /Ø|Ù|Ú|Û/.test(rawName);
+    let clientName = isGarbled ? '' : rawName;
     if (!clientName && clientId) clientName = clientMap['id_' + clientId] || '';
     if (!clientName) clientName = 'عميل دفترة';
 
-    const embeddedClient = dInv._client || {};
-    const phone = normalizePhone(
-      dInv.client_phone || dInv.phone || dInv.mobile ||
-      embeddedClient.phone2 || embeddedClient.phone1 || ''
-    ) || (clientId ? (clientMap['phone_' + clientId] || '') : '');
+    // الجوال: phone2 أولاً (دفترة يخزن الجوال في phone2 عادةً)
+    const rawPhone = embeddedClient.phone2 || embeddedClient.phone1 ||
+                     dInv.client_phone || dInv.phone || dInv.mobile || '';
+    const phone = normalizePhone(rawPhone) ||
+                  (clientId ? (clientMap['phone_' + clientId] || '') : '');
 
     const price = parseFloat(dInv.summary_total || dInv.total || dInv.grand_total || 0);
     const date = (dInv.date || dInv.issue_date || '').substring(0,10) || new Date().toISOString().split('T')[0];
@@ -5683,9 +5694,18 @@ async function linkInvoiceToDaftraByPhone(inv) {
   }
 }
 
+// تطبيع رقم الجوال → صيغة موحّدة 05xxxxxxxx دائماً
 function normalizePhone(p) {
   if (!p) return '';
-  return String(p).replace(/[^0-9+]/g,'');
+  let s = String(p).replace(/[^0-9]/g, ''); // أزل كل شيء عدا الأرقام
+  if (!s) return '';
+  // 966xxxxxxxxx → 0xxxxxxxxx
+  if (s.startsWith('966') && s.length === 12) s = '0' + s.slice(3);
+  // 9665xxxxxxxx (11 رقم) → 05xxxxxxxx
+  if (s.startsWith('966') && s.length === 11) s = '0' + s.slice(3);
+  // 5xxxxxxxx (9 أرقام بدون صفر) → 05xxxxxxxx
+  if (s.length === 9 && s.startsWith('5')) s = '0' + s;
+  return s;
 }
 
 // ═══════════════════════════════════════════
@@ -5850,6 +5870,174 @@ async function syncAllStatusFromDaftra() {
   } catch(e) {
     showToast('❌ فشل التحديث: ' + e.message);
   }
+}
+
+// ═══════════════════════════════════════════
+// DEEP DEBUG — فحص عميق لمصدر التكرار
+// ═══════════════════════════════════════════
+async function runDeepDebug() {
+  const panel = document.getElementById('diag-panel');
+  const body  = document.getElementById('diag-body');
+  if (!panel || !body) return;
+  panel.style.display = 'block';
+  body.innerHTML = `<div style="color:var(--muted);font-size:12px">⏳ جاري الفحص...</div>`;
+
+  const results = {};
+
+  // ── 1. ما في localStorage ──
+  const local = (() => { try { return JSON.parse(localStorage.getItem('shipco_invoices')||'[]'); } catch(e){ return []; } })();
+  const localWithDaftra = local.filter(i => i.daftra_id);
+  const localWithoutDaftra = local.filter(i => !i.daftra_id);
+  const localDupDaftraId = (() => {
+    const cnt = {}; local.forEach(i => { if(i.daftra_id) cnt[i.daftra_id] = (cnt[i.daftra_id]||0)+1; });
+    return Object.entries(cnt).filter(([,c])=>c>1);
+  })();
+
+  results.local = { total: local.length, withDaftraId: localWithDaftra.length, withoutDaftraId: localWithoutDaftra.length, dups: localDupDaftraId };
+
+  // ── 2. ما في D1 (DB) ──
+  let dbData = [], dbError = null;
+  try {
+    const r = await fetch(`${DB_URL}/db/invoices`);
+    if (r.ok) {
+      dbData = await r.json();
+      if (!Array.isArray(dbData)) dbData = [];
+    } else { dbError = `HTTP ${r.status}`; }
+  } catch(e) { dbError = e.message; }
+
+  const dbWithDaftra = dbData.filter(i => i.daftra_id);
+  const dbWithoutDaftra = dbData.filter(i => !i.daftra_id);
+  const dbDupDaftraId = (() => {
+    const cnt = {}; dbData.forEach(i => { if(i.daftra_id) cnt[String(i.daftra_id)] = (cnt[String(i.daftra_id)]||0)+1; });
+    return Object.entries(cnt).filter(([,c])=>c>1);
+  })();
+
+  results.db = { total: dbData.length, withDaftraId: dbWithDaftra.length, withoutDaftraId: dbWithoutDaftra.length, dups: dbDupDaftraId, error: dbError };
+
+  // ── 3. جلب صفحة واحدة من Daftra مباشرةً ──
+  let daftraPage1 = [], daftraError = null, daftraRaw = null;
+  try {
+    const r = await fetch(`${DAFTRA_WORKER_URL}/invoices?payment_status=0&page=1&limit=10`);
+    if (r.ok) {
+      daftraRaw = await r.json();
+      const rows = daftraRaw.data || (Array.isArray(daftraRaw) ? daftraRaw : []);
+      daftraPage1 = rows.slice(0,5).map(row => {
+        const inv = row.Invoice || row.Client || row;
+        return { id: inv.id, invoice_id: inv.invoice_id, payment_status: inv.payment_status, status: inv.status, client: inv.client_name||inv.name||'—', no: inv.no };
+      });
+    } else { daftraError = `HTTP ${r.status}`; }
+  } catch(e) { daftraError = e.message; }
+
+  // ── 4. فحص: هل DB تحفظ daftra_id؟ ──
+  // ابحث عن فاتورة في DB لها daftra_id وتحقق من شكلها
+  const sampleDaftraInDB = dbWithDaftra.slice(0,3).map(i => ({ id: i.id, daftra_id: i.daftra_id, status: i.status, client: i.client }));
+
+  // ── 5. مقارنة: كم فاتورة في DB بدون daftra_id (هذه هي التي ستُضاف مجدداً) ──
+  const dbNoDaftraIds = dbWithoutDaftra
+    .filter(i => i.payment === 'دفترة' || (i.details||'').includes('مستورد من دفترة'))
+    .slice(0,5)
+    .map(i => ({ id: i.id, client: i.client, details: (i.details||'').slice(0,30) }));
+
+  // ── عرض النتائج ──
+  body.innerHTML = `
+    <div style="font-weight:700;color:var(--text);margin-bottom:14px;font-size:14px">🐛 الفحص العميق — مصدر التكرار</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.2);border-radius:8px;padding:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;text-transform:uppercase">💾 LocalStorage</div>
+        <div style="font-size:12px;line-height:1.8">
+          إجمالي: <b>${results.local.total}</b><br>
+          لها daftra_id: <b style="color:${results.local.withDaftraId>0?'var(--green)':'var(--red-p)'}">${results.local.withDaftraId}</b><br>
+          بدون daftra_id: <b style="color:${results.local.withoutDaftraId>0?'var(--red-p)':'var(--green)'}">${results.local.withoutDaftraId}</b><br>
+          daftra_id مكرر: <b style="color:${results.local.dups.length>0?'var(--red-p)':'var(--green)'}">${results.local.dups.length}</b>
+        </div>
+      </div>
+      <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px;text-transform:uppercase">☁️ D1 Database</div>
+        ${results.db.error ? `<div style="color:var(--red-p);font-size:12px">❌ ${results.db.error}</div>` : `
+        <div style="font-size:12px;line-height:1.8">
+          إجمالي: <b>${results.db.total}</b><br>
+          لها daftra_id: <b style="color:${results.db.withDaftraId>0?'var(--green)':'var(--red-p)'}">${results.db.withDaftraId}</b><br>
+          بدون daftra_id: <b style="color:${results.db.withoutDaftraId>0?'var(--red-p)':'var(--green)'}">${results.db.withoutDaftraId}</b><br>
+          daftra_id مكرر في DB: <b style="color:${results.db.dups.length>0?'var(--red-p)':'var(--green)'}">${results.db.dups.length}</b>
+        </div>`}
+      </div>
+    </div>
+
+    ${dbNoDaftraIds.length ? `
+    <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--red-p);margin-bottom:6px">⚠️ فواتير في DB مصدرها دفترة لكن بدون daftra_id (هذه تُضاف مجدداً في كل sync)</div>
+      ${dbNoDaftraIds.map(i=>`<div style="font-size:11px;color:var(--muted);padding:2px 0">id=${i.id} · ${i.client} · ${i.details}</div>`).join('')}
+      <div style="margin-top:8px;font-size:11px;color:var(--gold)">الحل: هذه الفواتير فقدت daftra_id عند الحفظ في DB — احتمال أن Worker لا يحفظ الحقول الإضافية.</div>
+    </div>` : ''}
+
+    <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">📒 Daftra API — أول 5 فواتير</div>
+      ${daftraError ? `<div style="color:var(--red-p);font-size:12px">❌ ${daftraError}</div>` : daftraPage1.map(d=>`
+        <div style="font-size:11px;color:var(--muted);padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+          id=<b style="color:var(--accent)">${d.id||'—'}</b> invoice_id=<b>${d.invoice_id||'—'}</b>
+          payment_status=<b style="color:${d.payment_status==0?'var(--red-p)':'var(--green)'}">${d.payment_status??'—'}</b>
+          status=<b>${d.status??'—'}</b> · ${d.client} · no=${d.no}
+        </div>`).join('')}
+      ${daftraRaw?.pagination ? `<div style="margin-top:6px;font-size:11px;color:var(--muted)">pagination: total=${daftraRaw.pagination.total||'—'} · pages=${daftraRaw.pagination.page_count||'—'} · next=${daftraRaw.pagination.next||'لا'}</div>` : ''}
+    </div>
+
+    ${sampleDaftraInDB.length ? `
+    <div style="background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:6px">🔍 عينة فواتير في DB لها daftra_id</div>
+      ${sampleDaftraInDB.map(i=>`<div style="font-size:11px;color:var(--muted);padding:2px 0">id=<b>${i.id}</b> daftra_id=<b style="color:var(--accent)">${i.daftra_id}</b> status=${i.status} · ${i.client}</div>`).join('')}
+    </div>` : `<div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--red-p)">⚠️ DB لا تحتوي على أي فاتورة بـ daftra_id — هذا سبب التكرار المستمر!</div>`}
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--border)">
+      <button onclick="fixMissingDaftraIds()" style="background:rgba(239,68,68,0.1);color:var(--red-p);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+        🔧 إصلاح: إعادة ربط الفواتير بـ daftra_id
+      </button>
+      <button onclick="nukeDaftraAndReimport()" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.4);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+        💣 مسح كل دفترة + إعادة استيراد نظيفة
+      </button>
+      <button onclick="document.getElementById('diag-panel').style.display='none'" style="background:none;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit">إغلاق</button>
+    </div>`;
+}
+
+// إصلاح: محاولة استرداد daftra_id من الـ details field للفواتير القديمة
+async function fixMissingDaftraIds() {
+  // الفواتير القديمة كان details = "#12345 — مستورد من دفترة"
+  let fixed = 0;
+  invoices.forEach((inv, idx) => {
+    if (inv.daftra_id) return; // لها بالفعل
+    const m = (inv.details||'').match(/#(\d+)\s*[—-]/);
+    if (m) {
+      const recoveredId = m[1];
+      // تحقق: هل يوجد فاتورة أخرى بهذا daftra_id؟
+      const exists = invoices.some((other, oi) => oi !== idx && String(other.daftra_id) === recoveredId);
+      if (!exists) {
+        invoices[idx] = { ...inv, daftra_id: recoveredId };
+        fixed++;
+      }
+    }
+  });
+  if (fixed) {
+    saveData();
+    await bulkSaveToDB(invoices.filter(i=>i.daftra_id));
+    showToast(`✅ تم استرداد daftra_id لـ ${fixed} فاتورة`);
+  } else {
+    showToast('لم يُعثر على فواتير قابلة للإصلاح التلقائي');
+  }
+  runDeepDebug();
+}
+
+// مسح كامل نظيف: أمثل إذا كانت الفواتير اليدوية منعدمة أو قليلة
+async function nukeDaftraAndReimport() {
+  const manualCount = invoices.filter(i => !i.daftra_id).length;
+  const msg = manualCount > 0
+    ? `سيتم مسح ${invoices.filter(i=>i.daftra_id).length} فاتورة دفترة مع الإبقاء على ${manualCount} فاتورة يدوية، ثم إعادة الاستيراد. هل أنت متأكد؟`
+    : `سيتم مسح جميع الفواتير (${invoices.length}) وإعادة الاستيراد من دفترة. هل أنت متأكد؟`;
+  if (!confirm(msg)) return;
+  invoices = invoices.filter(i => !i.daftra_id);
+  saveData(); renderTable(); updateStats();
+  showToast('🗑️ تم المسح — جاري إعادة الاستيراد...');
+  await runFullDaftraImport();
+  runDeepDebug();
 }
 
 function deleteNoPhone() {
@@ -6112,6 +6300,9 @@ window.runFullDaftraImport = runFullDaftraImport;
 window.runDiagnostics = runDiagnostics;
 window.fixDuplicateDaftraIds = fixDuplicateDaftraIds;
 window.syncAllStatusFromDaftra = syncAllStatusFromDaftra;
+window.runDeepDebug = runDeepDebug;
+window.fixMissingDaftraIds = fixMissingDaftraIds;
+window.nukeDaftraAndReimport = nukeDaftraAndReimport;
 window.toggleZatcaTemplate = toggleZatcaTemplate;
 window.filterDaftraResults = filterDaftraResults;
 window.settingsDirty = settingsDirty;
