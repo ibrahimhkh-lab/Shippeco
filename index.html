@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════
    SHARED VARIABLES & RESET
@@ -649,6 +650,8 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
 .dash-period-btn { padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-family:var(--font);font-size:13px;transition:all 0.2s; }
 .dash-period-btn:hover { color:var(--text); }
 .dash-period-btn.active { background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600; }
+.dash-chart-btn { padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;font-family:var(--font);font-size:11px;font-weight:600;transition:all 0.2s; }
+.dash-chart-btn.active { background:var(--accent);color:#fff;border-color:var(--accent); }
 
 /* ─── QUICK FILTER BUTTONS ─── */
 .quick-date-btn { padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-family:var(--font);font-size:12px;transition:all 0.2s; }
@@ -774,12 +777,57 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
       <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-label">إجمالي المدفوعات</div><div class="stat-value" id="dash-total-paid">0</div><div class="stat-detail">ريال مدفوع</div></div>
     </div>
     <!-- Stat cards row 2 -->
-    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
       <div class="stat-card" style="--card-color:var(--red-p)"><div class="stat-icon">🔴</div><div class="stat-label">غير مدفوعة</div><div class="stat-value" id="dash-unpaid-count" style="color:var(--red-p)">0</div><div class="stat-detail" id="dash-unpaid-amount">0 ر.س</div></div>
       <div class="stat-card" style="--card-color:var(--gold)"><div class="stat-icon">🟡</div><div class="stat-label">مدفوعة جزئياً</div><div class="stat-value" id="dash-partial-count" style="color:var(--gold)">0</div><div class="stat-detail" id="dash-partial-amount">0 ر.س</div></div>
       <div class="stat-card" style="--card-color:var(--accent)"><div class="stat-icon">💳</div><div class="stat-label">إجمالي المتبقي</div><div class="stat-value" id="dash-remaining" style="color:var(--accent)">0</div><div class="stat-detail">ريال لم يُحصَّل</div></div>
     </div>
 
+    <!-- Charts row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+      <!-- Revenue chart -->
+      <div class="table-card" style="padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="table-title">الإيرادات</div>
+          <div style="display:flex;gap:6px">
+            <button class="dash-chart-btn active" data-chart="revenue" data-view="daily" onclick="setChartView('revenue','daily',this)">يومي</button>
+            <button class="dash-chart-btn" data-chart="revenue" data-view="monthly" onclick="setChartView('revenue','monthly',this)">شهري</button>
+          </div>
+        </div>
+        <canvas id="chart-revenue" height="200"></canvas>
+      </div>
+
+      <!-- Paid vs Unpaid chart -->
+      <div class="table-card" style="padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="table-title">مدفوع vs غير مدفوع</div>
+        </div>
+        <canvas id="chart-status" height="200"></canvas>
+        <div id="chart-status-legend" style="display:flex;gap:16px;justify-content:center;margin-top:12px;flex-wrap:wrap;font-size:12px"></div>
+      </div>
+
+    </div>
+
+    <!-- Charts row 2 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+      <!-- Top clients -->
+      <div class="table-card" style="padding:20px">
+        <div class="table-title" style="margin-bottom:14px">🏆 أكثر العملاء شحناً</div>
+        <div id="dash-top-clients" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <!-- Item types distribution -->
+      <div class="table-card" style="padding:20px">
+        <div class="table-title" style="margin-bottom:14px">📊 توزيع البنود</div>
+        <canvas id="chart-items" height="180"></canvas>
+        <div id="chart-items-legend" style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;font-size:11px"></div>
+      </div>
+
+    </div>
+
+    <!-- Recent invoices -->
     <div class="table-card">
       <div class="table-header">
         <div class="table-title">آخر الفواتير</div>
@@ -884,6 +932,8 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
         <button class="quick-status-btn" data-s="unpaid" onclick="setQuickStatus('unpaid')">غير مدفوعة</button>
         <button class="quick-status-btn" data-s="partial" onclick="setQuickStatus('partial')">جزئية</button>
         <button class="quick-status-btn" data-s="paid" onclick="setQuickStatus('paid')">مدفوعة</button>
+        <button id="sort-price-btn" onclick="togglePriceSort()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;transition:all 0.2s">💰 المبلغ ↕</button>
+        <button id="sort-date-btn" onclick="toggleDateSort()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;transition:all 0.2s">📅 التاريخ ↕</button>
       </div>
     </div>
 
@@ -1977,6 +2027,9 @@ function dashFilterInvoices(list, period) {
   });
 }
 
+// Chart instances
+const _charts = {};
+
 function updateStats() {
   const filtered = dashFilterInvoices(invoices, dashPeriod);
   const totalSales = filtered.reduce((s,i) => s + Number(i.price||0), 0);
@@ -1996,12 +2049,142 @@ function updateStats() {
   document.getElementById('dash-partial-count').textContent = partialInvs.length;
   document.getElementById('dash-partial-amount').textContent = totalPartial.toFixed(0) + ' ر.س';
   document.getElementById('dash-remaining').textContent = remaining.toFixed(0);
+
   renderDashTable(filtered);
+  renderRevenueChart(filtered, _revenueView || 'daily');
+  renderStatusChart(filtered);
+  renderTopClients(filtered);
+  renderItemsChart(filtered);
+}
+
+let _revenueView = 'daily';
+function setChartView(chart, view, btn) {
+  _revenueView = view;
+  btn.closest('.table-card').querySelectorAll('.dash-chart-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRevenueChart(dashFilterInvoices(invoices, dashPeriod), view);
+}
+
+function renderRevenueChart(filtered, view) {
+  const ctx = document.getElementById('chart-revenue');
+  if (!ctx || !window.Chart) return;
+  // Build data
+  const map = {};
+  filtered.forEach(inv => {
+    const d = new Date(inv.date);
+    if (isNaN(d)) return;
+    const key = view === 'daily'
+      ? d.toLocaleDateString('ar-SA', {month:'short', day:'numeric'})
+      : d.toLocaleDateString('ar-SA', {year:'numeric', month:'short'});
+    map[key] = (map[key] || 0) + Number(inv.price || 0);
+  });
+  const labels = Object.keys(map);
+  const data = Object.values(map);
+  if (_charts.revenue) _charts.revenue.destroy();
+  _charts.revenue = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'الإيرادات',
+        data,
+        borderColor: '#0ea5e9',
+        backgroundColor: 'rgba(14,165,233,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#0ea5e9',
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#64748b', font: { family: 'Cairo', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#64748b', font: { family: 'Cairo', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+function renderStatusChart(filtered) {
+  const ctx = document.getElementById('chart-status');
+  if (!ctx || !window.Chart) return;
+  const paid = filtered.filter(i => i.status === 'paid').reduce((s,i) => s + Number(i.price||0), 0);
+  const unpaid = filtered.filter(i => i.status === 'unpaid').reduce((s,i) => s + Number(i.price||0), 0);
+  const partial = filtered.filter(i => i.status === 'partial').reduce((s,i) => s + Number(i.price||0), 0);
+  if (_charts.status) _charts.status.destroy();
+  _charts.status = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['مدفوع', 'غير مدفوع', 'جزئي'],
+      datasets: [{ data: [paid, unpaid, partial], backgroundColor: ['#10b981','#ef4444','#f59e0b'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true, cutout: '65%',
+      plugins: { legend: { display: false } }
+    }
+  });
+  const leg = document.getElementById('chart-status-legend');
+  if (leg) leg.innerHTML = [
+    ['#10b981','مدفوع', paid],
+    ['#ef4444','غير مدفوع', unpaid],
+    ['#f59e0b','جزئي', partial],
+  ].map(([c,l,v]) => `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:${c};display:inline-block"></span>${l}: <b>${v.toFixed(0)} ر.س</b></span>`).join('');
+}
+
+function renderTopClients(filtered) {
+  const el = document.getElementById('dash-top-clients');
+  if (!el) return;
+  const map = {};
+  filtered.forEach(inv => {
+    if (!inv.client) return;
+    if (!map[inv.client]) map[inv.client] = { count: 0, total: 0 };
+    map[inv.client].count++;
+    map[inv.client].total += Number(inv.price || 0);
+  });
+  const sorted = Object.entries(map).sort((a,b) => b[1].count - a[1].count).slice(0, 6);
+  if (!sorted.length) { el.innerHTML = `<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">لا توجد بيانات</div>`; return; }
+  const maxCount = sorted[0][1].count;
+  el.innerHTML = sorted.map(([name, d], i) => `
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:13px;font-weight:700;color:var(--muted);width:18px">${i+1}</span>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:600">${name}</span>
+          <span style="font-size:12px;color:var(--muted)">${d.count} شحنة • ${d.total.toFixed(0)} ر.س</span>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:3px">
+          <div style="height:100%;width:${(d.count/maxCount*100).toFixed(0)}%;background:var(--accent);border-radius:3px;transition:width 0.4s"></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderItemsChart(filtered) {
+  const ctx = document.getElementById('chart-items');
+  if (!ctx || !window.Chart) return;
+  const map = {};
+  filtered.forEach(inv => {
+    const items = inv.items && inv.items.length ? inv.items : [{ type: inv.itemType || 'شحن دولي' }];
+    items.forEach(it => { const t = it.type || 'شحن دولي'; map[t] = (map[t] || 0) + 1; });
+  });
+  const labels = Object.keys(map);
+  const data = Object.values(map);
+  const colors = ['#0ea5e9','#8b5cf6','#f59e0b','#10b981','#ef4444','#06b6d4'];
+  if (_charts.items) _charts.items.destroy();
+  _charts.items = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderWidth: 0, hoverOffset: 6 }] },
+    options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } } }
+  });
+  const leg = document.getElementById('chart-items-legend');
+  if (leg) leg.innerHTML = labels.map((l,i) => `<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:50%;background:${colors[i]};display:inline-block"></span>${l} (${data[i]})</span>`).join('');
 }
 
 function renderDashTable(filtered) {
   const wrap = document.getElementById('dash-table-body');
-  const recent = [...(filtered||invoices)].reverse().slice(0,8);
+  const recent = [...(filtered||invoices)].reverse().slice(0, 8);
   if (!recent.length) { wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">لا توجد فواتير في هذه الفترة</div></div>`; return; }
   wrap.innerHTML = `<table><thead><tr><th>رقم الفاتورة</th><th>العميل</th><th>رقم الشحنة</th><th>السعر</th><th>الحالة</th><th>طريقة الدفع</th><th>التاريخ</th></tr></thead><tbody>` +
     recent.map(inv => `<tr>
@@ -2018,6 +2201,43 @@ function renderDashTable(filtered) {
 // ─── INVOICE FILTERS STATE ───
 let quickDate = 'all';
 let quickStatus = 'all';
+let priceSort = 'none'; // 'none' | 'asc' | 'desc'
+let dateSort = 'none';  // 'none' | 'asc' | 'desc'
+
+function _applySortBtn(btnId, val) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  const active = val !== 'none';
+  btn.style.background = active ? 'rgba(14,165,233,0.15)' : 'var(--card)';
+  btn.style.color = active ? 'var(--accent)' : 'var(--muted)';
+  btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+}
+
+function togglePriceSort() {
+  priceSort = priceSort === 'none' ? 'desc' : priceSort === 'desc' ? 'asc' : 'none';
+  dateSort = 'none'; // reset date sort
+  const labels = { none: '💰 المبلغ ↕', desc: '💰 الأعلى أولاً ↓', asc: '💰 الأدنى أولاً ↑' };
+  const btn = document.getElementById('sort-price-btn');
+  if (btn) btn.textContent = labels[priceSort];
+  _applySortBtn('sort-price-btn', priceSort);
+  _applySortBtn('sort-date-btn', 'none');
+  const dateBtn = document.getElementById('sort-date-btn');
+  if (dateBtn) dateBtn.textContent = '📅 التاريخ ↕';
+  renderTable();
+}
+
+function toggleDateSort() {
+  dateSort = dateSort === 'none' ? 'desc' : dateSort === 'desc' ? 'asc' : 'none';
+  priceSort = 'none'; // reset price sort
+  const labels = { none: '📅 التاريخ ↕', desc: '📅 الأحدث أولاً ↓', asc: '📅 الأقدم أولاً ↑' };
+  const btn = document.getElementById('sort-date-btn');
+  if (btn) btn.textContent = labels[dateSort];
+  _applySortBtn('sort-date-btn', dateSort);
+  _applySortBtn('sort-price-btn', 'none');
+  const priceBtn = document.getElementById('sort-price-btn');
+  if (priceBtn) priceBtn.textContent = '💰 المبلغ ↕';
+  renderTable();
+}
 
 function setQuickDate(d) {
   quickDate = d;
@@ -2111,6 +2331,12 @@ function renderTable() {
     }
     return true;
   });
+
+  // Apply sort
+  if (priceSort === 'desc') filtered.sort((a,b) => Number(b.price||0) - Number(a.price||0));
+  else if (priceSort === 'asc') filtered.sort((a,b) => Number(a.price||0) - Number(b.price||0));
+  else if (dateSort === 'desc') filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
+  else if (dateSort === 'asc') filtered.sort((a,b) => new Date(a.date||0) - new Date(b.date||0));
 
   const wrap = document.getElementById('invoices-table-wrap');
   if (!filtered.length) {
@@ -2295,11 +2521,11 @@ function saveInvoice() {
   const codeType = document.getElementById('f-code-type').value;
   if (!client||!phone||!carrier||!awb||!price) { showToast('⚠️ يرجى ملء جميع الحقول المطلوبة'); return; }
   if (editingId) {
-    const idx = invoices.findIndex(i => i.id === editingId);
+    const idx = invoices.findIndex(i => String(i.id)===String(editingId));
     invoices[idx] = {...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType};
     showToast('✅ تم تعديل الفاتورة بنجاح');
   } else {
-    const newId = invoices.length ? Math.max(...invoices.map(i=>i.id))+1 : 1001;
+    const newId = String(invoices.length ? Math.max(...invoices.map(i=>Number(i.id)||0))+1 : 1001);
     const curUser = getCurrentUser();
     invoices.push({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,created_by:curUser?.name||curUser?.username||'—'});
     showToast('✅ تم إنشاء الفاتورة بنجاح');
@@ -2311,7 +2537,7 @@ function saveInvoice() {
 
 // ─── EDIT ───
 function editInvoice(id) {
-  const inv = invoices.find(i=>i.id===id); if(!inv) return;
+  const inv = invoices.find(i=>String(i.id)===String(id)); if(!inv) return;
   editingId = id;
   document.getElementById('form-modal-title').textContent = 'تعديل الفاتورة #'+id;
   document.getElementById('f-client').value = inv.client||'';
@@ -2346,7 +2572,7 @@ function deleteInvoice(id) {
 
 // ─── VIEW INVOICE ───
 function viewInvoice(id) {
-  const inv = invoices.find(i=>i.id===id); if(!inv) return;
+  const inv = invoices.find(i=>String(i.id)===String(id)); if(!inv) return;
   currentViewInvoice = inv;
   window._currentInvForModal = inv;
   // Reset ZATCA mode
@@ -3663,7 +3889,7 @@ async function sendPaymentLink() {
     const data = await res.json();
 
     if (data.payment_url) {
-      const idx = invoices.findIndex(i => i.id === inv.id);
+      const idx = invoices.findIndex(i => String(i.id)===String(inv.id));
       if (idx !== -1) {
         invoices[idx].paymentUrl = data.payment_url;
         invoices[idx].paymentRef = data.invoice?.paytabs_token || 'pending';
@@ -3729,7 +3955,7 @@ async function checkPaymentStatus() {
     const backendInv = allInvoices.find(i => String(i.id) === String(inv.id));
 
     if (backendInv && backendInv.status === 'مدفوعة بالكامل') {
-      const idx = invoices.findIndex(i => i.id === inv.id);
+      const idx = invoices.findIndex(i => String(i.id)===String(inv.id));
       if (idx !== -1) {
         invoices[idx].status = 'مدفوعة بالكامل';
         invoices[idx].payment = invoices[idx].payment || 'PayTabs';
@@ -3766,7 +3992,7 @@ function startPaymentPolling() {
       const b = all.find(i => String(i.id) === String(currentViewInvoice.id));
       if (b && b.status === 'مدفوعة بالكامل') {
         stopPaymentPolling();
-        const idx = invoices.findIndex(i => i.id === currentViewInvoice.id);
+        const idx = invoices.findIndex(i => String(i.id)===String(currentViewInvoice.id));
         if (idx !== -1) {
           invoices[idx].status = 'مدفوعة بالكامل';
           invoices[idx].payment = invoices[idx].payment || 'PayTabs';
@@ -4461,7 +4687,7 @@ const ITEM_FIXED_PRICES = { 'تغيير عنوان': 56 };
 let addItemTargetId = null;
 
 function openAddItemModal(invId) {
-  const inv = invoices.find(i => i.id === invId);
+  const inv = invoices.find(i => String(i.id)===String(invId));
   if (!inv) return;
   addItemTargetId = invId;
   document.getElementById('add-item-title').textContent = `إضافة بند — فاتورة #${invId} | ${inv.client}`;
@@ -4490,7 +4716,7 @@ function onAiTypeChange() {
     priceInput.style.opacity = '1';
     if (parseFloat(priceInput.value) === 56) priceInput.value = '';
   }
-  const inv = invoices.find(i => i.id === addItemTargetId);
+  const inv = invoices.find(i => String(i.id)===String(addItemTargetId));
   if (inv) updateAiPreview(inv);
 }
 
@@ -4528,7 +4754,7 @@ function getInvTotal(inv) {
 }
 
 async function saveAddedItem() {
-  const inv = invoices.find(i => i.id === addItemTargetId);
+  const inv = invoices.find(i => String(i.id)===String(addItemTargetId));
   if (!inv) return;
   const type = (document.getElementById('ai-type').dataset.cleanType) ||
     document.getElementById('ai-type').value.replace(/ —.*/, '').trim();
@@ -4538,7 +4764,7 @@ async function saveAddedItem() {
   const existingItems = getInvItems(inv);
   const newItems = [...existingItems, { type, details, price }];
   const newTotal = newItems.reduce((s, it) => s + (parseFloat(it.price) || 0), 0);
-  const idx = invoices.findIndex(i => i.id === addItemTargetId);
+  const idx = invoices.findIndex(i => String(i.id)===String(addItemTargetId));
   invoices[idx] = { ...inv, items: newItems, price: newTotal.toFixed(2) };
   await saveInvoiceToDB(invoices[idx]);
   renderTable();
@@ -4551,8 +4777,8 @@ async function saveAddedItem() {
 function bindAddItemInputs() {
   const aiPrice = document.getElementById('ai-price');
   const aiDetails = document.getElementById('ai-details');
-  if (aiPrice) aiPrice.oninput = () => { const inv = invoices.find(i=>i.id===addItemTargetId); if(inv) updateAiPreview(inv); };
-  if (aiDetails) aiDetails.oninput = () => { const inv = invoices.find(i=>i.id===addItemTargetId); if(inv) updateAiPreview(inv); };
+  if (aiPrice) aiPrice.oninput = () => { const inv = invoices.find(i=>String(i.id)===String(addItemTargetId)); if(inv) updateAiPreview(inv); };
+  if (aiDetails) aiDetails.oninput = () => { const inv = invoices.find(i=>String(i.id)===String(addItemTargetId)); if(inv) updateAiPreview(inv); };
 }
 </script>
 </body>
