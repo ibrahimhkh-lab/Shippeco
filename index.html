@@ -565,6 +565,10 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
   #rep-table-wrap td:nth-child(4),
   #rep-table-wrap th:nth-child(8),
   #rep-table-wrap td:nth-child(8) { display: none; }
+
+  /* Section header responsive */
+  .section-header { padding: 12px 16px; }
+  .section-title { font-size: 15px; }
 }
 
 @media (max-width: 400px) {
@@ -804,17 +808,11 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
 .crm-value { font-family: var(--mono); font-weight: 600; }
 .crm-total .crm-value { color: var(--dhl-yellow); font-size: 16px; }
 
-/* ─── RECONCILIATION ─── */
-.rec-step-item { display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);opacity:0.4;transition:all 0.3s;font-size:14px; }
-.rec-step-item.active { opacity:1;border-color:var(--dhl-yellow);background:rgba(245,200,66,0.06); }
-.rec-step-item.done { opacity:0.7;border-color:var(--green); }
-.rec-step-dot { width:10px;height:10px;border-radius:50%;background:var(--border);flex-shrink:0; }
-.rec-step-item.active .rec-step-dot { background:var(--dhl-yellow); }
-.rec-step-item.done .rec-step-dot { background:var(--green); }
-.rec-filter-btn { padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-family:var(--font);font-size:13px;transition:all 0.2s; }
-.rec-filter-btn:hover { color:var(--text); }
-.rec-filter-btn.active { background:var(--dhl-red);color:#fff;border-color:var(--dhl-red);font-weight:600; }
-#rec-dropzone:hover { border-color:var(--dhl-yellow);background:rgba(245,200,66,0.03); }
+/* ─── (Reconciliation CSS already defined above — removed duplicate) ─── */
+
+/* ─── SECTION HEADER ─── */
+.section-header { display:flex; align-items:center; justify-content:space-between; padding:20px 32px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:0; z-index:50; flex-wrap:wrap; gap:10px; }
+.section-title { font-size:18px; font-weight:700; }
 
 /* ─── DASHBOARD PERIOD BUTTONS ─── */
 .dash-period-btn { padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-family:var(--font);font-size:13px;transition:all 0.2s; }
@@ -1681,6 +1679,58 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
       <button id="show-add-user-btn" onclick="document.getElementById('add-user-form').style.display='block';this.style.display='none'" style="background:transparent;color:#8b5cf6;border:1px solid #8b5cf6;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">➕ إضافة موظف</button>
     </div>
 
+    <!-- ══ WhatsApp Message Templates ══ -->
+    <div style="background:#111827;border:1px solid #1e2d47;border-radius:16px;padding:24px;max-width:640px;margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
+        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#25d366,#128c7e);display:flex;align-items:center;justify-content:center;font-size:22px">📲</div>
+        <div><div style="font-size:16px;font-weight:700;color:#e2e8f0">قوالب رسائل واتساب</div><div style="font-size:12px;color:#64748b;margin-top:3px">خصّص نصوص الرسائل المرسلة للعملاء عبر واتساب</div></div>
+      </div>
+      <div style="background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.15);border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:12px;color:#64748b;line-height:1.7">
+        💡 <b style="color:#25d366">المتغيرات المتاحة:</b>
+        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{اسم_العميل}</code>
+        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رقم_الفاتورة}</code>
+        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{المبلغ}</code>
+        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رقم_الشحنة}</code>
+        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{الناقل}</code>
+        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رابط_التتبع}</code>
+        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رابط_الدفع}</code>
+        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رابط_البوليصة}</code>
+        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{التاريخ}</code>
+      </div>
+
+      <!-- Template tabs -->
+      <div style="display:flex;gap:4px;margin-bottom:16px;background:#0a0e1a;border-radius:10px;padding:4px;flex-wrap:wrap">
+        <button class="wa-tmpl-tab active" data-t="paid" onclick="switchWaTmplTab('paid',this)" style="flex:1;min-width:80px;padding:8px 10px;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;font-weight:600;background:#25d366;color:#fff">📦 إرسال بوليصة</button>
+        <button class="wa-tmpl-tab" data-t="unpaid" onclick="switchWaTmplTab('unpaid',this)" style="flex:1;min-width:80px;padding:8px 10px;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;background:transparent;color:#64748b">💰 طلب دفع</button>
+        <button class="wa-tmpl-tab" data-t="collection" onclick="switchWaTmplTab('collection',this)" style="flex:1;min-width:80px;padding:8px 10px;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;background:transparent;color:#64748b">🔔 مطالبة</button>
+        <button class="wa-tmpl-tab" data-t="payment_link" onclick="switchWaTmplTab('payment_link',this)" style="flex:1;min-width:80px;padding:8px 10px;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;background:transparent;color:#64748b">💳 رابط دفع</button>
+      </div>
+
+      <!-- Template editors -->
+      <div id="wa-tmpl-paid" class="wa-tmpl-editor">
+        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رسالة إرسال البوليصة (بعد الدفع)</label>
+        <textarea id="wa-msg-paid" rows="8" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
+      </div>
+      <div id="wa-tmpl-unpaid" class="wa-tmpl-editor" style="display:none">
+        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رسالة طلب الدفع (قبل الدفع)</label>
+        <textarea id="wa-msg-unpaid" rows="8" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
+      </div>
+      <div id="wa-tmpl-collection" class="wa-tmpl-editor" style="display:none">
+        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رسالة مطالبة بفاتورة واحدة</label>
+        <textarea id="wa-msg-collection" rows="8" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
+      </div>
+      <div id="wa-tmpl-payment_link" class="wa-tmpl-editor" style="display:none">
+        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رسالة رابط الدفع (PayTabs)</label>
+        <textarea id="wa-msg-payment_link" rows="8" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center">
+        <button onclick="saveWaTemplates()" style="background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ القوالب</button>
+        <button onclick="resetWaTemplates()" style="background:transparent;color:#64748b;border:1px solid #1e2d47;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🔄 استعادة الافتراضي</button>
+        <span id="wa-tmpl-status" style="font-size:13px"></span>
+      </div>
+    </div>
+
   </div>
 </div><!-- /sec-settings -->
 
@@ -2296,8 +2346,8 @@ function renderUsersList() {
     <div class="user-row">
       <div class="user-avatar" style="width:38px;height:38px;font-size:15px">${u.name?.[0] || '؟'}</div>
       <div class="user-row-info">
-        <div class="user-row-name">${u.name} ${u.username === cur?.username ? '<span style="font-size:11px;color:var(--muted)">(أنت)</span>' : ''}</div>
-        <div class="user-row-role" style="direction:ltr;text-align:right">@${u.username}</div>
+        <div class="user-row-name">${esc(u.name)} ${u.username === cur?.username ? '<span style="font-size:11px;color:var(--muted)">(أنت)</span>' : ''}</div>
+        <div class="user-row-role" style="direction:ltr;text-align:right">@${esc(u.username)}</div>
       </div>
       <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-employee'}">${u.role === 'admin' ? '⭐ مدير' : '👤 موظف'}</span>
       ${isAdmin && u.username !== (cur?.username) ? `<button onclick="deleteUser('${u.username}')" style="background:rgba(239,68,68,0.1);color:var(--red-p);border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">حذف</button>` : ''}
@@ -2317,6 +2367,14 @@ function checkAuth() {
 }
 
 // ─── PLATFORM STATE ───
+// ── XSS sanitization helper ──
+function esc(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = String(str);
+  return d.innerHTML;
+}
+
 let invoices = (() => { try { return JSON.parse(localStorage.getItem('shipco_invoices') || '[]'); } catch(e) { return []; } })();
 
 // Load from D1 on startup
@@ -2362,10 +2420,12 @@ function showSection(id, pushState = true) {
     if (id === 'settings') { try { loadSettings(); } catch(e) { console.warn('loadSettings:', e); } try { renderUsersList(); } catch(e) {} }
     if (id === 'invoice-template') { try { loadInvoiceTemplate(); } catch(e) { console.warn('loadInvoiceTemplate:', e); } }
     if (id === 'reports') { try { initReports(); } catch(e) { console.warn('initReports:', e); } }
-    // Browser history — زر الرجوع يعمل
-    if (pushState && history.state?.section !== id) {
-      history.pushState({ section: id }, '', '#' + id);
-    }
+    // Browser history — زر الرجوع يعمل (safe for iOS Safari)
+    try {
+      if (pushState && history.state?.section !== id) {
+        history.pushState({ section: id }, '', '#' + id);
+      }
+    } catch(e) {}
     closeSidebar();
   } catch(e) {
     console.error('showSection error:', e);
@@ -2374,8 +2434,11 @@ function showSection(id, pushState = true) {
 
 // زر الرجوع في المتصفح
 window.addEventListener('popstate', (e) => {
-  const id = e.state?.section || 'dashboard';
-  showSection(id, false);
+  try {
+    const id = (e.state?.section) || location.hash.replace('#','') || 'dashboard';
+    const valid = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','settings'];
+    if (valid.includes(id)) showSection(id, false);
+  } catch(e) {}
 });
 
 
@@ -2389,14 +2452,16 @@ document.addEventListener('DOMContentLoaded', () => {
   try { calcInit(); } catch(e){ console.error('calcInit:', e); }
   try { recInit(); } catch(e){ console.error('recInit:', e); }
   try { wireDataHandlers(); } catch(e){ console.error('wireDataHandlers:', e); }
-  // hash routing — إذا فُتحت الصفحة بـ #section ابدأ فيها
-  const validSections = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','settings'];
-  const hashSection = location.hash.replace('#','');
-  if (hashSection && validSections.includes(hashSection)) {
-    setTimeout(() => showSection(hashSection, false), 100);
-  } else {
-    history.replaceState({ section: 'dashboard' }, '', '#dashboard');
-  }
+  // hash routing — آمن لـ iOS Safari
+  try {
+    const validSections = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','settings'];
+    const hashSection = (location.hash||'').replace('#','');
+    if (hashSection && validSections.includes(hashSection)) {
+      setTimeout(() => showSection(hashSection, false), 100);
+    } else {
+      history.replaceState({ section: 'dashboard' }, '', location.pathname);
+    }
+  } catch(e) {}
   setTimeout(() => { try { loadFromDB(); } catch(e){ console.warn('loadFromDB:', e); } }, 500);
   setTimeout(() => { try { syncUsersFromDB(); } catch(e){ console.warn('syncUsers:', e); } }, 800);
   setTimeout(() => { try { syncDaftraBackground(); } catch(e){ console.warn('syncDaftra:', e); } }, 2000);
@@ -2448,7 +2513,16 @@ document.addEventListener('change', function(e) {
 });
 
 function saveData() {
-  try { localStorage.setItem('shipco_invoices', JSON.stringify(invoices)); } catch(e) {}
+  _contactsCache = null; // invalidate smart suggest cache
+  try {
+    // حذف labelBase64 قبل الحفظ — يوفر مساحة localStorage (base64 ضخم)
+    const slim = invoices.map(inv => {
+      if (!inv.labelBase64) return inv;
+      const { labelBase64, ...rest } = inv;
+      return rest;
+    });
+    localStorage.setItem('shipco_invoices', JSON.stringify(slim));
+  } catch(e) { console.warn('saveData error:', e); }
 }
 
 async function saveInvoiceToDB(inv) {
@@ -2468,18 +2542,25 @@ async function deleteInvoiceFromDB(id) {
 }
 
 async function bulkSaveToDB(invs) {
-  try {
-    await fetch(`${DB_URL}/db/invoices/bulk`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(invs)
-    });
-  } catch(e) { console.warn('DB bulk save error:', e); }
+  if (!invs || !invs.length) return;
+  // تقسيم إلى chunks بـ 50 فاتورة — يمنع timeout مع كثير فواتير
+  const CHUNK = 50;
+  for (let i = 0; i < invs.length; i += CHUNK) {
+    const chunk = invs.slice(i, i + CHUNK);
+    try {
+      await fetch(`${DB_URL}/db/invoices/bulk`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(chunk)
+      });
+    } catch(e) { console.warn(`DB bulk save error (chunk ${i/CHUNK+1}):`, e); }
+  }
 }
 
 
 // ─── STATS ───
 // ─── DASHBOARD ───
+let currentUser = null; // يُعيَّن في checkAuth
 let dashPeriod = 'all';
 
 function dashSetPeriod(p) {
@@ -2517,14 +2598,15 @@ function updateStats() {
   const totalPartial = partialInvs.reduce((s,i) => s + Number(i.price||0), 0);
   const remaining = totalUnpaid + totalPartial;
 
-  document.getElementById('dash-total-count').textContent = filtered.length;
-  document.getElementById('dash-total-sales').textContent = totalSales.toFixed(0);
-  document.getElementById('dash-total-paid').textContent = totalPaid.toFixed(0);
-  document.getElementById('dash-unpaid-count').textContent = unpaidInvs.length;
-  document.getElementById('dash-unpaid-amount').textContent = totalUnpaid.toFixed(0) + ' ر.س';
-  document.getElementById('dash-partial-count').textContent = partialInvs.length;
-  document.getElementById('dash-partial-amount').textContent = totalPartial.toFixed(0) + ' ر.س';
-  document.getElementById('dash-remaining').textContent = remaining.toFixed(0);
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('dash-total-count',   filtered.length);
+  setEl('dash-total-sales',   totalSales.toFixed(0));
+  setEl('dash-total-paid',    totalPaid.toFixed(0));
+  setEl('dash-unpaid-count',  unpaidInvs.length);
+  setEl('dash-unpaid-amount', totalUnpaid.toFixed(0) + ' ر.س');
+  setEl('dash-partial-count', partialInvs.length);
+  setEl('dash-partial-amount',totalPartial.toFixed(0) + ' ر.س');
+  setEl('dash-remaining',     remaining.toFixed(0));
 
   renderDashTable(filtered);
   renderRevenueChart(filtered, _revenueView || 'daily');
@@ -2823,16 +2905,25 @@ function renderTable() {
     wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">لا توجد نتائج</div><div class="empty-sub">${q?'جرّب بحثاً مختلفاً':'لا توجد فواتير في هذه الفترة'}</div></div>`;
     return;
   }
+
+  // ── Pagination ──
+  const PAGE_SIZE = 50;
+  if (!window._invPage) window._invPage = 1;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  if (window._invPage > totalPages) window._invPage = totalPages;
+  const startIdx = (window._invPage - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+
   const msMode = window._multiSelectMode;
   wrap.innerHTML = `<table><thead><tr>
     ${msMode?'<th><input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this)" style="cursor:pointer;width:15px;height:15px"></th>':''}
     <th>رقم الفاتورة</th><th>العميل</th><th>الجوال</th><th>رقم الشحنة</th>
     <th>البند</th><th>الشركة</th><th>الوزن</th><th>السعر</th><th>الحالة</th><th>طريقة الدفع</th><th>أنشأها</th><th>التاريخ</th><th>إجراءات</th>
   </tr></thead><tbody>` +
-    filtered.map(inv => `<tr class="${inv.isDraft ? 'draft-row' : ''}">
+    pageItems.map(inv => `<tr class="${inv.isDraft ? 'draft-row' : ''}">
       ${msMode?`<td><input type="checkbox" class="inv-checkbox" data-id="${inv.id}" onchange="updateExportBtn()" style="cursor:pointer;width:15px;height:15px"></td>`:''}
       <td class="mono">#${inv.id}</td>
-      <td style="font-weight:600"><span onclick="goToClient('${inv.phone||''}')" style="cursor:pointer;border-bottom:1px dashed var(--accent);color:var(--text)">${inv.client || '<span style="color:var(--muted);font-style:italic;font-size:11px">غير محدد</span>'}</span></td>
+      <td style="font-weight:600"><span onclick="goToClient('${esc(inv.phone||'')}')" style="cursor:pointer;border-bottom:1px dashed var(--accent);color:var(--text)">${inv.client ? esc(inv.client) : '<span style="color:var(--muted);font-style:italic;font-size:11px">غير محدد</span>'}</span></td>
       <td class="mono" style="font-size:12px;direction:ltr">${inv.phone || '<span style="color:var(--border)">—</span>'}</td>
       <td class="mono">${inv.awb || '<span style="color:var(--border);font-size:11px">—</span>'}</td>
       <td><span style="background:rgba(139,92,246,0.12);color:#a78bfa;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${inv.items && inv.items.length > 1 ? inv.items.map(i=>i.type).join(' + ') : (inv.itemType||'شحن دولي')}</span></td>
@@ -2851,6 +2942,17 @@ function renderTable() {
         <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${inv.id})">🗑</button>
       </div></td>
     </tr>`).join('') + `</tbody></table>`;
+  // ── Pagination controls ──
+  if (totalPages > 1) {
+    wrap.innerHTML += `<div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-top:1px solid var(--border)">
+      <button onclick="window._invPage=1;renderTable()" ${window._invPage<=1?'disabled':''} style="background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:12px">⟪ الأولى</button>
+      <button onclick="window._invPage=Math.max(1,window._invPage-1);renderTable()" ${window._invPage<=1?'disabled':''} style="background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:12px">← السابقة</button>
+      <span style="font-size:13px;color:var(--text);font-weight:600;min-width:80px;text-align:center">صفحة ${window._invPage} / ${totalPages}</span>
+      <button onclick="window._invPage=Math.min(${totalPages},window._invPage+1);renderTable()" ${window._invPage>=totalPages?'disabled':''} style="background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:12px">التالية →</button>
+      <button onclick="window._invPage=${totalPages};renderTable()" ${window._invPage>=totalPages?'disabled':''} style="background:var(--card);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:12px">الأخيرة ⟫</button>
+      <span style="font-size:11px;color:var(--muted);margin-right:8px">(${startIdx+1}–${Math.min(startIdx+PAGE_SIZE,filtered.length)} من ${filtered.length})</span>
+    </div>`;
+  }
 }
 
 function statusBadge(s) {
@@ -2999,7 +3101,12 @@ function generateCode() {
 // ═══════════════════════════════════════════════════════════════
 
 // بناء قاعدة بيانات المرسلين والمستلمين من الشحنات السابقة
+let _contactsCache = null;
+let _contactsCacheLen = -1;
 function buildContactsDB() {
+  // Cache: rebuild only if invoices changed
+  if (_contactsCache && _contactsCacheLen === invoices.length) return _contactsCache;
+  _contactsCacheLen = invoices.length;
   const map = new Map(); // key: normalised name|phone
 
   invoices.forEach((inv, invIdx) => {
@@ -3027,7 +3134,8 @@ function buildContactsDB() {
   });
 
   // Sort: most recent first, then by count
-  return [...map.values()].sort((a,b) => (b.lastIdx - a.lastIdx) || (b.count - a.count));
+  _contactsCache = [...map.values()].sort((a,b) => (b.lastIdx - a.lastIdx) || (b.count - a.count));
+  return _contactsCache;
 }
 
 // إظهار قائمة الاقتراحات
@@ -3908,29 +4016,13 @@ function showWALog() {
 
 function sendWAUnpaid() {
   const inv=currentViewInvoice; if(!waValidate(inv,false)) return;
-  const payUrl=inv.paymentUrl||'';
-  const invSuffix=ptSettings?.baseUrl?`\n\n📄 الفاتورة:\n${ptSettings.baseUrl}/invoice/${inv.id}`:'';
-  let msg=`مرحباً ${inv.client} 👋\n\nنشكرك على تواصلك مع شيب بيك 🚀\n\n`;
-  msg+=`🧾 *الفاتورة رقم:* #${inv.id}\n`;
-  msg+=`💰 *المبلغ:* ${Number(inv.price).toFixed(2)} ر.س\n`;
-  msg+=`⏳ *الحالة:* بانتظار الدفع\n`;
-  if(payUrl) msg+=`\n💳 *رابط الدفع:*\n${payUrl}`;
-  msg+=invSuffix;
-  msg+=`\n\n⚠️ سيتم إرسال بوليصة الشحن بعد إتمام الدفع.\n\nشكراً لثقتك 🌟`;
+  const msg = applyWaTemplate('unpaid', inv);
   openWA(inv.phone,msg); logWA(inv,'unpaid',msg); showToast('📲 تم فتح واتساب — رسالة الدفع');
 }
 
 function sendWAPaid() {
   const inv=currentViewInvoice; if(!waValidate(inv,true)) return;
-  const trackUrl=inv.trackingUrl||`https://www.dhl.com/sa-en/home/tracking.html?tracking-id=${inv.awb}&submit=1`;
-  const invSuffix=ptSettings?.baseUrl?`\n\n🧾 الفاتورة:\n${ptSettings.baseUrl}/invoice/${inv.id}`:'';
-  let msg=`مرحباً ${inv.client} 👋\n\n✅ *تم إصدار بوليصة شحنتك بنجاح!*\n\n`;
-  msg+=`📦 *رقم AWB:* \`${inv.awb}\`\n`;
-  if(inv.carrier) msg+=`🚚 *الناقل:* ${inv.carrier}\n`;
-  msg+=`\n🔗 *تتبع الشحنة:*\n${trackUrl}`;
-  if(inv.labelUrl)  msg+=`\n\n🖨️ *بوليصة الشحن (PDF):*\n${inv.labelUrl}`;
-  msg+=invSuffix;
-  msg+=`\n\n📌 في حال اختلاف الوزن عند DHL يُطبَّق الفرق وفق الشروط.\n\nشيب بيك تتمنى لك شحناً موفقاً 🌟`;
+  const msg = applyWaTemplate('paid', inv);
   openWA(inv.phone,msg); logWA(inv,'paid',msg); showToast('📲 تم فتح واتساب — رسالة البوليصة');
 }
 
@@ -3940,17 +4032,7 @@ function sendSingleCollectionWA(invId) {
   if (!inv) return showToast('❌ الفاتورة غير موجودة');
   const phone = normalizePhone(inv.phone || '');
   if (!phone) return showToast('❌ لا يوجد رقم جوال لهذا العميل');
-  const payUrl = inv.paymentUrl || '';
-  const awbLine = inv.awb ? `📦 رقم الشحنة: \`${inv.awb}\`\n` : '';
-  let msg = `مرحباً ${inv.client} 👋\n\n`;
-  msg += `نود تذكيرك بفاتورة مستحقة لدى شيب بيك 🧾\n\n`;
-  msg += `🔖 *رقم الفاتورة:* #${inv.no || inv.id}\n`;
-  msg += awbLine;
-  msg += `💰 *المبلغ المستحق:* *${Number(inv.price||0).toFixed(2)} ر.س*\n`;
-  msg += `📅 *التاريخ:* ${formatDate(inv.date)}\n`;
-  msg += `⏳ *الحالة:* بانتظار الدفع\n`;
-  if (payUrl) msg += `\n💳 *رابط الدفع:*\n${payUrl}\n`;
-  msg += `\nنأمل منكم سرعة التسوية. شكراً لثقتكم 🌟\nشيب بيك`;
+  const msg = applyWaTemplate('collection', inv);
   openWA(phone, msg);
   addTimelineEvent && addTimelineEvent(inv, 'wa_send', 'مطالبة دفع — فاتورة واحدة');
   showToast('📲 تم فتح واتساب — مطالبة الفاتورة #' + (inv.no || inv.id));
@@ -3996,14 +4078,6 @@ function saveAWBManual()     { saveAWB(); }
 function updateWAWorkflowBar(inv) { refreshLabelCenter(inv); }
 
 // ─── CLIENTS ───
-function goToClient(phone) {
-  showSection('clients');
-  setTimeout(() => {
-    const search = document.getElementById('client-search');
-    if (search) { search.value = phone; renderClients(); }
-  }, 100);
-}
-
 function renderClients() {
   const q = (document.getElementById('client-search')?.value || '').toLowerCase();
 
@@ -4927,7 +5001,7 @@ function recRenderTable(filter) {
   if (!recReport) return;
   const rows = recReport.results.filter(r => {
     if (filter === 'all') return true;
-    if (filter === 'not_found') return r.status === 'not_found_in_daftra' || r.status === 'daftra_error';
+    if (filter === 'not_found') return r.status === 'not_found_in_platform' || r.status === 'not_found_in_daftra' || r.status === 'daftra_error';
     return r.status === filter;
   });
   if (!rows.length) {
@@ -4935,7 +5009,8 @@ function recRenderTable(filter) {
     return;
   }
   tbody.innerHTML = rows.map(r => {
-    const daftraTotal = r.daftra_data ? r.daftra_data.summary_total : null;
+    const _pd = r.platform_data || r.daftra_data; // compat: support both names
+    const daftraTotal = _pd ? _pd.summary_total : null;
     const diff = r.total_financial_difference || 0;
     const diffClass = diff > 0.01 ? 'color:var(--red-p)' : diff < -0.01 ? 'color:var(--green)' : 'color:var(--muted)';
     const diffText = Math.abs(diff) > 0.01 ? (diff > 0 ? '+' : '') + recFmt(diff) : '—';
@@ -4943,14 +5018,14 @@ function recRenderTable(filter) {
     const pmCell = pm != null ? `<span style="${pm >= 0 ? 'color:var(--green)' : 'color:var(--red-p)'};font-weight:600">${pm > 0 ? '+' : ''}${pm.toFixed(1)}%</span>` : '—';
     const badge = recBadge(r.status);
     const payCell = (() => {
-      if (!r.daftra_data) return '<span style="color:var(--muted)">—</span>';
-      const ps = r.daftra_data.payment_status;
+      if (!_pd) return '<span style="color:var(--muted)">—</span>';
+      const ps = _pd.payment_status;
       if (ps === 'مدفوع') return '<span style="color:var(--green);font-weight:600">✓ مدفوع</span>';
       if (ps === 'غير مدفوع') return '<span style="color:var(--red-p);font-weight:600">✗ غير مدفوع</span>';
       if (ps === 'مدفوع جزئياً') return '<span style="color:var(--gold);font-weight:600">◑ جزئي</span>';
       return `<span style="color:var(--muted)">${ps || '—'}</span>`;
     })();
-    const detailBtn = r.daftra_data
+    const detailBtn = _pd
       ? `<button onclick="recShowDetail('${r.airwaybill_number}')" style="background:var(--card);border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:6px;cursor:pointer;font-family:var(--font);font-size:12px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">عرض</button>`
       : '<span style="color:var(--muted)">—</span>';
     return `<tr>
@@ -4959,7 +5034,7 @@ function recRenderTable(filter) {
       <td style="color:var(--muted);font-size:12px">${r.dhl_data?.shipment_date || '—'}</td>
       <td><span style="background:var(--bg);padding:2px 8px;border-radius:6px;font-size:12px">${r.dhl_data?.origin_airport || '—'}</span></td>
       <td><span style="background:var(--bg);padding:2px 8px;border-radius:6px;font-size:12px">${r.dhl_data?.destination_code || '—'}</span></td>
-      <td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.daftra_data?.client_name || '—'}</td>
+      <td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_pd?.client_name || '—'}</td>
       <td style="color:var(--muted)">${r.dhl_data?.weight_kg || '—'} كجم</td>
       <td style="font-weight:600">${recFmt(r.dhl_data?.total_charge)}</td>
       <td style="color:var(--muted)">${daftraTotal !== null && daftraTotal !== undefined ? recFmt(daftraTotal) : '—'}</td>
@@ -4976,6 +5051,7 @@ function recBadge(status) {
     matched: ['background:rgba(16,185,129,0.15);color:var(--green)', '✓ متطابق'],
     discrepancy: ['background:rgba(245,158,11,0.15);color:var(--gold)', '⚠ فروقات'],
     not_found_in_daftra: ['background:rgba(239,68,68,0.15);color:var(--red-p)', '✕ غير موجود'],
+    not_found_in_platform: ['background:rgba(239,68,68,0.15);color:var(--red-p)', '✕ غير موجود في المنصة'],
     daftra_error: ['background:rgba(239,68,68,0.15);color:var(--red-p)', '✕ خطأ'],
   };
   const [style, label] = map[status] || ['background:var(--card);color:var(--muted)', status];
@@ -4986,7 +5062,7 @@ function recShowDetail(awb) {
   const r = recReport?.results?.find(x => x.airwaybill_number === awb);
   if (!r) return;
   let html = '';
-  if (r.status === 'not_found_in_daftra' || r.status === 'daftra_error') {
+  if (r.status === 'not_found_in_daftra' || r.status === 'not_found_in_platform' || r.status === 'daftra_error') {
     html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px 24px">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px">
         <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">بيانات DHL</div>
@@ -5103,6 +5179,8 @@ function loadSettings() {
   el('settings-status').style.color = '#10b981';
   const ds = el('daftra-status');
   if (ds) { ds.textContent = '✅ متصل تلقائياً'; ds.style.color = '#10b981'; }
+  // Load WA templates
+  try { loadWaTemplatesUI(); } catch(e) { console.warn('loadWaTemplatesUI:', e); }
 }
 
 function settingsDirty() {
@@ -5322,9 +5400,9 @@ async function syncInvoiceToBackend(inv) {
 function sendPaymentLinkWhatsApp(payUrl) {
   if (!currentViewInvoice) return;
   const inv = currentViewInvoice;
+  const msg = applyWaTemplate('payment_link', { ...inv, paymentUrl: payUrl });
   const phone = inv.phone.replace(/\D/g,'');
   const intlPhone = phone.startsWith('0') ? '966' + phone.slice(1) : phone;
-  const msg = 'مرحباً ' + inv.client + ' 👋\n\nيسعدنا خدمتك! إليك رابط دفع فاتورتك:\n\n🧾 رقم الفاتورة: #' + inv.id + '\n📦 رقم الشحنة: ' + inv.awb + '\n💰 المبلغ: ' + Number(inv.price).toFixed(2) + ' ريال\n\n💳 رابط الدفع الآمن:\n' + payUrl + '\n\nيمكنك الدفع بالبطاقة الائتمانية أو مدى 🔒\nشكراً لتعاملكم مع شيب بيك 🚀';
   window.open('https://wa.me/' + intlPhone + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
@@ -5349,10 +5427,10 @@ async function checkPaymentStatus() {
     const allInvoices = await res.json();
     const backendInv = allInvoices.find(i => String(i.id) === String(inv.id));
 
-    if (backendInv && backendInv.status === 'مدفوعة بالكامل') {
+    if (backendInv && backendInv.status === 'مدفوعة بالكامل' || backendInv.status === 'paid') {
       const idx = invoices.findIndex(i => String(i.id)===String(inv.id));
       if (idx !== -1) {
-        invoices[idx].status = 'مدفوعة بالكامل';
+        invoices[idx].status = 'paid';
         invoices[idx].payment = invoices[idx].payment || 'PayTabs';
         invoices[idx].paymentUrl = null;
         addTimelineEvent(invoices[idx], 'paid', { note: 'تأكيد دفع تلقائي — PayTabs' }, true); // skipSave
@@ -5381,16 +5459,16 @@ function startPaymentPolling() {
   stopPaymentPolling();
   if (!ptSettings.apiUrl || !ptSettings.apiKey) return;
   paymentPollInterval = setInterval(async () => {
-    if (!currentViewInvoice || currentViewInvoice.status === 'مدفوعة بالكامل') { stopPaymentPolling(); return; }
+    if (!currentViewInvoice || currentViewInvoice.status === 'paid') { stopPaymentPolling(); return; }
     try {
       const res = await fetch(ptSettings.apiUrl + '?action=invoices', { headers: { 'X-API-Key': ptSettings.apiKey } });
       const all = await res.json();
       const b = all.find(i => String(i.id) === String(currentViewInvoice.id));
-      if (b && b.status === 'مدفوعة بالكامل') {
+      if (b && b.status === 'مدفوعة بالكامل' || b.status === 'paid') {
         stopPaymentPolling();
         const idx = invoices.findIndex(i => String(i.id)===String(currentViewInvoice.id));
         if (idx !== -1) {
-          invoices[idx].status = 'مدفوعة بالكامل';
+          invoices[idx].status = 'paid';
           invoices[idx].payment = invoices[idx].payment || 'PayTabs';
           invoices[idx].paymentUrl = null;
           addTimelineEvent(invoices[idx], 'paid', { note: 'دفع تلقائي — PayTabs polling' }, true); // skipSave
@@ -5421,7 +5499,7 @@ function refreshPaymentButtons() {
   } else {
     checkBtn.style.display = 'none';
   }
-  if (inv.status === 'مدفوعة بالكامل') {
+  if (inv.status === 'paid') {
     payBtn.style.opacity = '0.4';
     payBtn.title = 'الفاتورة مدفوعة بالفعل';
   } else {
@@ -5735,6 +5813,85 @@ async function fetchAllDaftraPages(endpoint, params = {}) {
     all.push(inv);
   }
   return all;
+}
+
+// ── مطالبات التحصيل الجماعية ──
+function openCollections() {
+  // جمع كل العملاء الذين عندهم فواتير غير مدفوعة
+  const unpaidByPhone = {};
+  invoices.filter(i => i.status === 'unpaid' && i.phone).forEach(inv => {
+    const p = normalizePhone(inv.phone);
+    if (!p) return;
+    if (!unpaidByPhone[p]) unpaidByPhone[p] = { client: inv.client, phone: p, invoices: [], total: 0 };
+    unpaidByPhone[p].invoices.push(inv);
+    unpaidByPhone[p].total += Number(inv.price || 0);
+  });
+  const clients = Object.values(unpaidByPhone).filter(c => c.invoices.length > 0);
+  clients.sort((a, b) => b.total - a.total);
+
+  if (!clients.length) { showToast('✅ لا يوجد عملاء بفواتير غير مدفوعة'); return; }
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML = `
+    <div style="background:var(--card);border-radius:16px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:16px;font-weight:700;color:var(--text)">💸 مطالبات التحصيل (${clients.length} عميل)</div>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${clients.map(c => `
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:600;color:var(--text);font-size:14px">${c.client}</div>
+              <div style="font-size:12px;color:var(--muted)">${c.invoices.length} فاتورة · ${c.phone}</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="font-weight:700;color:var(--red-p);font-size:14px">${c.total.toFixed(0)} ر.س</span>
+              <button onclick="sendCollectionWAForPhone('${c.phone}');this.textContent='✅';this.disabled=true" style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);color:#25d366;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-family:var(--font)">📲 إرسال</button>
+            </div>
+          </div>`).join('')}
+      </div>
+      <button onclick="sendAllCollections(${JSON.stringify(clients.map(c=>c.phone))},this)" style="width:100%;margin-top:16px;background:var(--red-p);color:white;border:none;padding:12px;border-radius:10px;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:700">📲 إرسال للكل</button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function sendCollectionWAForPhone(phone) {
+  const p = normalizePhone(phone);
+  const unpaid = invoices.filter(i => i.status === 'unpaid' && normalizePhone(i.phone) === p);
+  if (!unpaid.length) return;
+  const total = unpaid.reduce((s, i) => s + Number(i.price || 0), 0);
+  const lines = unpaid.map(i => `• #${i.no||i.id} — ${Number(i.price||0).toFixed(0)} ر.س (${formatDate(i.date)})`).join('
+');
+  const msg = `السلام عليكم ${unpaid[0].client}،
+
+نود تذكيركم بالفواتير غير المسددة:
+
+${lines}
+
+💰 الإجمالي: ${total.toFixed(2)} ر.س
+
+نرجو السداد في أقرب وقت. شكراً 🙏`;
+  window.open(`https://wa.me/${p.replace(/^0/, '966')}?text=${encodeURIComponent(msg)}`, '_blank');
+  unpaid.forEach(inv => {
+    const idx = invoices.findIndex(i => i.id === inv.id);
+    if (idx !== -1) {
+      invoices[idx].waLog = invoices[idx].waLog || [];
+      invoices[idx].waLog.push({ type: 'collection', at: new Date().toISOString(), preview: msg.slice(0, 80) });
+    }
+  });
+  saveData();
+}
+
+async function sendAllCollections(phones, btn) {
+  btn.disabled = true;
+  btn.textContent = '⏳ جارٍ الإرسال...';
+  for (const phone of phones) {
+    await sendCollectionWAForPhone(phone);
+    await new Promise(r => setTimeout(r, 1500));
+  }
+  btn.textContent = '✅ تم الإرسال للكل';
 }
 
 function mergeFromDaftra(daftraInvs, daftraClients) {
@@ -6315,6 +6472,7 @@ async function runFullDaftraImport() {
 }
 
 function openDaftraModal() {
+  if (typeof daftraAllInvoices === 'undefined') window.daftraAllInvoices = [];
   // Show cached data immediately, then refresh
   const cache = loadDaftraCache();
   const invs = cache.invoices || [];
@@ -6706,10 +6864,10 @@ function renderReport() {
       },
       options: {
         responsive: true, maintainAspectRatio: true,
-        plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Tajawal' } } } },
+        plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Cairo' } } } },
         scales: {
-          x: { ticks: { color: '#64748b', font: { family: 'Tajawal', size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-          y: { ticks: { color: '#64748b', font: { family: 'Tajawal', size: 11 }, callback: v => v.toLocaleString('ar') + ' ر.س' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+          x: { ticks: { color: '#64748b', font: { family: 'Cairo', size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { ticks: { color: '#64748b', font: { family: 'Cairo', size: 11 }, callback: v => v.toLocaleString('ar') + ' ر.س' }, grid: { color: 'rgba(255,255,255,0.06)' } }
         }
       }
     });
@@ -6860,6 +7018,163 @@ window.focusSuggestItem = focusSuggestItem;
 window.applySuggest = applySuggest;
 window.toggleShipperSame = toggleShipperSame;
 window.saveAsDraft = saveAsDraft;
+
+// ═══════════════════════════════════════════════════════════
+// WHATSAPP MESSAGE TEMPLATES — قوالب رسائل واتساب مخصصة
+// ═══════════════════════════════════════════════════════════
+
+const WA_TEMPLATES_KEY = 'shippec_wa_templates';
+
+const WA_DEFAULT_TEMPLATES = {
+  paid: `مرحباً {اسم_العميل} 👋
+
+✅ *تم إصدار بوليصة شحنتك بنجاح!*
+
+📦 *رقم AWB:* \`{رقم_الشحنة}\`
+🚚 *الناقل:* {الناقل}
+
+🔗 *تتبع الشحنة:*
+{رابط_التتبع}
+{رابط_البوليصة}
+
+📌 في حال اختلاف الوزن عند DHL يُطبَّق الفرق وفق الشروط.
+
+شيب بيك تتمنى لك شحناً موفقاً 🌟`,
+
+  unpaid: `مرحباً {اسم_العميل} 👋
+
+نشكرك على تواصلك مع شيب بيك 🚀
+
+🧾 *الفاتورة رقم:* #{رقم_الفاتورة}
+💰 *المبلغ:* {المبلغ} ر.س
+⏳ *الحالة:* بانتظار الدفع
+{رابط_الدفع}
+
+⚠️ سيتم إرسال بوليصة الشحن بعد إتمام الدفع.
+
+شكراً لثقتك 🌟`,
+
+  collection: `مرحباً {اسم_العميل} 👋
+
+نود تذكيرك بفاتورة مستحقة لدى شيب بيك 🧾
+
+🔖 *رقم الفاتورة:* #{رقم_الفاتورة}
+📦 *رقم الشحنة:* {رقم_الشحنة}
+💰 *المبلغ المستحق:* *{المبلغ} ر.س*
+📅 *التاريخ:* {التاريخ}
+⏳ *الحالة:* بانتظار الدفع
+{رابط_الدفع}
+
+نأمل منكم سرعة التسوية. شكراً لثقتكم 🌟
+شيب بيك`,
+
+  payment_link: `مرحباً {اسم_العميل} 👋
+
+يسعدنا خدمتك! إليك رابط دفع فاتورتك:
+
+🧾 رقم الفاتورة: #{رقم_الفاتورة}
+📦 رقم الشحنة: {رقم_الشحنة}
+💰 المبلغ: {المبلغ} ريال
+
+💳 رابط الدفع الآمن:
+{رابط_الدفع}
+
+يمكنك الدفع بالبطاقة الائتمانية أو مدى 🔒
+شكراً لتعاملكم مع شيب بيك 🚀`
+};
+
+function getWaTemplates() {
+  try {
+    const stored = localStorage.getItem(WA_TEMPLATES_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Merge with defaults so new template types are always available
+      return { ...WA_DEFAULT_TEMPLATES, ...parsed };
+    }
+  } catch(e) {}
+  return { ...WA_DEFAULT_TEMPLATES };
+}
+
+function loadWaTemplatesUI() {
+  const t = getWaTemplates();
+  const el = id => document.getElementById(id);
+  if (el('wa-msg-paid'))         el('wa-msg-paid').value         = t.paid         || '';
+  if (el('wa-msg-unpaid'))       el('wa-msg-unpaid').value       = t.unpaid       || '';
+  if (el('wa-msg-collection'))   el('wa-msg-collection').value   = t.collection   || '';
+  if (el('wa-msg-payment_link')) el('wa-msg-payment_link').value = t.payment_link || '';
+}
+
+function saveWaTemplates() {
+  const el = id => document.getElementById(id);
+  const templates = {
+    paid:         el('wa-msg-paid')?.value         || WA_DEFAULT_TEMPLATES.paid,
+    unpaid:       el('wa-msg-unpaid')?.value       || WA_DEFAULT_TEMPLATES.unpaid,
+    collection:   el('wa-msg-collection')?.value   || WA_DEFAULT_TEMPLATES.collection,
+    payment_link: el('wa-msg-payment_link')?.value || WA_DEFAULT_TEMPLATES.payment_link,
+  };
+  try { localStorage.setItem(WA_TEMPLATES_KEY, JSON.stringify(templates)); } catch(e) {}
+  const st = el('wa-tmpl-status');
+  if (st) { st.textContent = '✅ تم حفظ القوالب'; st.style.color = '#25d366'; }
+  showToast('✅ تم حفظ قوالب واتساب');
+}
+
+function resetWaTemplates() {
+  if (!confirm('هل تريد استعادة القوالب الافتراضية؟ سيتم مسح التعديلات.')) return;
+  try { localStorage.removeItem(WA_TEMPLATES_KEY); } catch(e) {}
+  loadWaTemplatesUI();
+  const st = document.getElementById('wa-tmpl-status');
+  if (st) { st.textContent = '🔄 تم استعادة الافتراضي'; st.style.color = '#f59e0b'; }
+  showToast('🔄 تم استعادة القوالب الافتراضية');
+}
+
+function switchWaTmplTab(tab, btn) {
+  document.querySelectorAll('.wa-tmpl-editor').forEach(e => e.style.display = 'none');
+  document.querySelectorAll('.wa-tmpl-tab').forEach(b => {
+    b.style.background = 'transparent'; b.style.color = '#64748b';
+  });
+  const panel = document.getElementById('wa-tmpl-' + tab);
+  if (panel) panel.style.display = 'block';
+  if (btn) { btn.style.background = '#25d366'; btn.style.color = '#fff'; }
+}
+
+// ── Apply template variables ──
+function applyWaTemplate(templateKey, inv, extraVars) {
+  const templates = getWaTemplates();
+  let msg = templates[templateKey] || WA_DEFAULT_TEMPLATES[templateKey] || '';
+  const trackUrl = inv.trackingUrl || (inv.awb ? `https://www.dhl.com/sa-en/home/tracking.html?tracking-id=${inv.awb}&submit=1` : '');
+  const vars = {
+    'اسم_العميل':  inv.client || 'العميل',
+    'رقم_الفاتورة': inv.no || inv.id || '',
+    'المبلغ':       Number(inv.price || 0).toFixed(2),
+    'رقم_الشحنة':  inv.awb || '',
+    'الناقل':       inv.carrier || 'DHL',
+    'رابط_التتبع':  trackUrl,
+    'رابط_الدفع':   inv.paymentUrl || '',
+    'رابط_البوليصة': inv.labelUrl ? `\n🖨️ *بوليصة الشحن (PDF):*\n${inv.labelUrl}` : '',
+    'التاريخ':      formatDate(inv.date),
+    ...(extraVars || {})
+  };
+  Object.entries(vars).forEach(([k, v]) => {
+    msg = msg.replace(new RegExp(`\\{${k}\\}`, 'g'), v || '');
+  });
+  // Clean up empty lines from empty variables
+  msg = msg.replace(/\n{3,}/g, '\n\n').trim();
+  return msg;
+}
+
+// Wire into settings load
+const _origLoadSettings = typeof loadSettings === 'function' ? loadSettings : null;
+const _newLoadSettings = function() {
+  if (_origLoadSettings) _origLoadSettings();
+  loadWaTemplatesUI();
+};
+window.loadSettings = _newLoadSettings;
+
+window.saveWaTemplates = saveWaTemplates;
+window.resetWaTemplates = resetWaTemplates;
+window.switchWaTmplTab = switchWaTmplTab;
+window.applyWaTemplate = applyWaTemplate;
+window.getWaTemplates = getWaTemplates;
 </script>
 
 
