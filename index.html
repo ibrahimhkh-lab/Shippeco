@@ -2440,10 +2440,30 @@ async function loadFromDB() {
     if (!res.ok) return;
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) {
-      // Merge DB invoices with local — DB wins for shared data
+      // Merge DB invoices with local — DB wins for shared IDs
       const dbIds = new Set(data.map(i => String(i.id)));
       const localOnly = invoices.filter(i => !dbIds.has(String(i.id)));
       invoices = [...data.map(i => ({...i, codeType: i.code_type || 'barcode'})), ...localOnly];
+
+      // ── إزالة المكررات بعد الدمج ──
+      // بالـ id أولاً
+      const seenIds = new Map();
+      invoices = invoices.filter((inv, idx) => {
+        const k = String(inv.id);
+        if (seenIds.has(k)) return false;
+        seenIds.set(k, idx);
+        return true;
+      });
+      // بالـ daftra_id ثانياً
+      const seenDaftra = new Map();
+      invoices = invoices.filter((inv) => {
+        if (!inv.daftra_id) return true;
+        const k = String(inv.daftra_id);
+        if (seenDaftra.has(k)) return false;
+        seenDaftra.set(k, true);
+        return true;
+      });
+
       try { localStorage.setItem('shipco_invoices', JSON.stringify(invoices)); } catch(e) {}
       renderTable && renderTable();
       updateStats && updateStats();
@@ -2469,7 +2489,7 @@ function showSection(id, pushState = true) {
     if (!sec) { console.error('Section not found: sec-' + id); return; }
     sec.classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    const map = {dashboard:0, invoices:1, reports:2, clients:3, calculator:6, reconcile:7, 'invoice-template':8, 'wa-templates':9, settings:10};
+    const map = {dashboard:0, invoices:1, reports:2, clients:3, calculator:5, reconcile:6, 'invoice-template':7, 'wa-templates':8, settings:9};
     const items = document.querySelectorAll('.nav-item');
     if (map[id] !== undefined) items[map[id]].classList.add('active');
     if (id === 'clients') { try { backToClients(); } catch(e) { console.warn('backToClients:', e); } }
@@ -2501,9 +2521,36 @@ window.addEventListener('popstate', (e) => {
 
 // ─── INIT ───
 document.addEventListener('DOMContentLoaded', () => {
+  // ── تنظيف المكررات عند بداية التشغيل ──
+  try {
+    const beforeCount = invoices.length;
+    // إزالة مكررات بالـ id
+    const seenIds = new Set();
+    invoices = invoices.filter(inv => {
+      const k = String(inv.id);
+      if (seenIds.has(k)) return false;
+      seenIds.add(k);
+      return true;
+    });
+    // إزالة مكررات بالـ daftra_id
+    const seenDaftra = new Set();
+    invoices = invoices.filter(inv => {
+      if (!inv.daftra_id) return true;
+      const k = String(inv.daftra_id);
+      if (seenDaftra.has(k)) return false;
+      seenDaftra.add(k);
+      return true;
+    });
+    const removed = beforeCount - invoices.length;
+    if (removed > 0) {
+      console.log(`Startup dedup: removed ${removed} duplicates (${beforeCount} → ${invoices.length})`);
+      try { localStorage.setItem('shipco_invoices', JSON.stringify(invoices)); } catch(e) {}
+    }
+  } catch(e) { console.warn('Startup dedup error:', e); }
+
   try { checkAuth(); } catch(e){ console.error('checkAuth:', e); }
   try { document.getElementById('f-date').valueAsDate = new Date(); } catch(e){}
-  try { document.getElementById('today-date').textContent = new Date().toLocaleDateString('ar-SA', {weekday:'long',year:'numeric',month:'long',day:'numeric'}); } catch(e){}
+  try { document.getElementById('today-date').textContent = new Date().toLocaleDateString('ar-EG', {weekday:'long',year:'numeric',month:'long',day:'numeric'}); } catch(e){}
   try { renderTable(); } catch(e){ console.error('renderTable:', e); }
   try { updateStats(); } catch(e){ console.error('updateStats:', e); }
   try { calcInit(); } catch(e){ console.error('calcInit:', e); }
@@ -2689,8 +2736,8 @@ function renderRevenueChart(filtered, view) {
     const d = new Date(inv.date);
     if (isNaN(d)) return;
     const key = view === 'daily'
-      ? d.toLocaleDateString('ar-SA', {month:'short', day:'numeric'})
-      : d.toLocaleDateString('ar-SA', {year:'numeric', month:'short'});
+      ? d.toLocaleDateString('ar-EG', {month:'short', day:'numeric'})
+      : d.toLocaleDateString('ar-EG', {year:'numeric', month:'short'});
     map[key] = (map[key] || 0) + Number(inv.price || 0);
   });
   const labels = Object.keys(map);
@@ -3018,7 +3065,7 @@ function statusBadge(s) {
   if (s==='partial') return `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><span class="badge-dot" style="background:var(--gold)"></span>جزئية</span>`;
   return `<span class="badge badge-unpaid"><span class="badge-dot"></span>غير مدفوعة</span>`;
 }
-function formatDate(d) { return d ? new Date(d).toLocaleDateString('ar-SA') : '—'; }
+function formatDate(d) { return d ? new Date(d).toLocaleDateString('en-GB', {year:'numeric', month:'2-digit', day:'2-digit'}) : '—'; }
 
 // ─── MODAL HELPERS ───
 function openModal(id) { document.getElementById(id).classList.add('show'); }
@@ -3685,7 +3732,7 @@ function renderTimeline(inv) {
     // Time formatting
     const d = new Date(ev.at);
     const timeAgo = tlTimeAgo(ev.at);
-    const fullDate = d.toLocaleDateString('ar-SA', {
+    const fullDate = d.toLocaleDateString('ar-EG', {
       weekday:'short', day:'numeric', month:'short', year:'numeric'
     }) + ' — ' + d.toLocaleTimeString('ar-SA', { hour:'2-digit', minute:'2-digit' });
 
@@ -3753,7 +3800,7 @@ function tlTimeAgo(iso) {
   if (h < 24)  return `منذ ${h} ساعة`;
   if (d < 7)   return `منذ ${d} يوم`;
   if (w < 5)   return `منذ ${w} أسبوع`;
-  return new Date(iso).toLocaleDateString('ar-SA', {day:'numeric', month:'short', year:'numeric'});
+  return new Date(iso).toLocaleDateString('ar-EG', {day:'numeric', month:'short', year:'numeric'});
 }
 
 // ─── PDF ───
@@ -4089,7 +4136,7 @@ function showWALog() {
   const logs=inv.waLog||[];
   const lbl={unpaid:'فاتورة ودفع',paid:'بوليصة وتتبع',resend:'إعادة إرسال'};
   body.innerHTML=logs.length ? logs.slice().reverse().map((l,i)=>{
-    const d=new Date(l.at), ds=d.toLocaleDateString('ar-SA',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+    const d=new Date(l.at), ds=d.toLocaleDateString('ar-EG',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
     return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;${i===0?'border-color:rgba(37,211,102,0.35);background:rgba(37,211,102,0.03)':''}">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px">
         <span style="font-size:12px;font-weight:700;color:#25d366">📲 ${lbl[l.type]||l.type}</span>
@@ -5984,32 +6031,60 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
   const clientMap = {};
   (daftraClients || []).forEach(c => {
     const rawName = c.business_name || c.name || c.client_name || '';
-    const name  = /[\u00C0-\u00FF]{3,}/.test(rawName) ? '' : rawName; // تجاهل garbled latin
+    const name  = /[\u00C0-\u00FF]{3,}/.test(rawName) ? '' : rawName;
     const phone = normalizePhone(c.phone2 || c.phone1 || c.phone || c.mobile || '');
     if (c.id) {
       clientMap[String(c.id)] = { name: name || '', phone: phone || '' };
     }
   });
 
-  // ── بناء Map الفواتير الموجودة بـ daftra_id ──
-  // هذا هو مصدر الحقيقة لمنع التكرار
+  // ══════════════════════════════════════════════════════
+  // الخطوة 1: إزالة كل المكررات الموجودة أولاً
+  // نحتفظ بنسخة واحدة فقط لكل daftra_id (الأحدث)
+  // ══════════════════════════════════════════════════════
+  const seenDaftraIds = new Map(); // daftra_id → index of BEST copy
+  const toRemoveIndices = new Set();
+
+  // نمر من الأحدث للأقدم — نحتفظ بأول واحد نلاقيه (الأحدث)
+  for (let i = invoices.length - 1; i >= 0; i--) {
+    const inv = invoices[i];
+    if (!inv.daftra_id) continue;
+    const dId = String(inv.daftra_id);
+    if (seenDaftraIds.has(dId)) {
+      // مكررة — احذفها
+      toRemoveIndices.add(i);
+    } else {
+      seenDaftraIds.set(dId, i);
+    }
+  }
+
+  // حذف المكررات
+  if (toRemoveIndices.size > 0) {
+    invoices = invoices.filter((_, idx) => !toRemoveIndices.has(idx));
+    console.log(`mergeFromDaftra: removed ${toRemoveIndices.size} duplicate invoices`);
+  }
+
+  // ══════════════════════════════════════════════════════
+  // الخطوة 2: بناء Map نظيف بعد إزالة المكررات
+  // ══════════════════════════════════════════════════════
   const byDaftraId = new Map();
   invoices.forEach((inv, idx) => {
     if (inv.daftra_id) byDaftraId.set(String(inv.daftra_id), idx);
   });
 
+  // أيضاً: بناء Set من الـ IDs لمنع التكرار بالـ id
+  const existingIds = new Set(invoices.map(i => String(i.id)));
+
   let added = 0, updated = 0;
-  const toSave = []; // فواتير تحتاج حفظ في DB
+  const toSave = [];
 
   daftraInvs.forEach(dInv => {
     const dId = String(dInv.id || dInv.invoice_id || '');
     if (!dId || dId === 'undefined') return;
 
-    // ── الحالة ──
     const pst = String(dInv.payment_status ?? dInv.status ?? '0');
     const newStatus = statusMap[pst] || 'unpaid';
 
-    // ── الاسم ──
     const embed = dInv._client || {};
     const clientId = String(dInv.client_id || '');
     const rawName =
@@ -6020,21 +6095,19 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
     if (!clientName && clientId && clientMap[clientId]) clientName = clientMap[clientId].name;
     if (!clientName) clientName = 'عميل دفترة';
 
-    // ── الجوال ──
     const rawPhone =
       embed.phone2 || embed.phone1 ||
       dInv.client_phone || dInv.phone || dInv.mobile || '';
     let phone = normalizePhone(rawPhone);
     if (!phone && clientId && clientMap[clientId]) phone = clientMap[clientId].phone || '';
 
-    // ── بيانات أخرى ──
     const price  = parseFloat(dInv.summary_total || dInv.total || dInv.grand_total || 0);
     const date   = (dInv.date || dInv.issue_date || '').substring(0, 10) || new Date().toISOString().split('T')[0];
     const awb    = dInv.order_number || dInv.po_number || '';
     const no     = dInv.no || dId;
 
     if (byDaftraId.has(dId)) {
-      // ── موجودة: حدّث الحالة والسعر فقط، لا تكسر البيانات اليدوية ──
+      // ── موجودة: حدّث الحالة والسعر فقط ──
       const idx = byDaftraId.get(dId);
       const existing = invoices[idx];
       const statusChanged = existing.status !== newStatus;
@@ -6045,9 +6118,12 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
         updated++;
       }
     } else {
-      // ── جديدة: أضف مرة واحدة فقط ──
+      // ── جديدة: تحقق مزدوج من الـ id قبل الإضافة ──
+      const newId = 'd' + dId;
+      if (existingIds.has(newId)) return; // موجودة بالـ id — تخطى
+
       const newInv = {
-        id: 'd' + dId, // ID ثابت ومحدد = لا تكرار أبداً
+        id: newId,
         daftra_id: dId,
         no,
         client: clientName,
@@ -6064,26 +6140,30 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
       };
       invoices.push(newInv);
       byDaftraId.set(dId, invoices.length - 1);
+      existingIds.add(newId);
       toSave.push(newInv);
       added++;
     }
   });
 
-  if (toSave.length > 0) {
+  // ── حفظ دائماً (حتى لو فقط حذفنا مكررات) ──
+  const removedDups = toRemoveIndices.size;
+  if (toSave.length > 0 || removedDups > 0) {
     saveData();
-    bulkSaveToDB(toSave).catch(e => console.warn('bulkSaveToDB error:', e));
+    if (toSave.length > 0) bulkSaveToDB(toSave).catch(e => console.warn('bulkSaveToDB error:', e));
     renderTable && renderTable();
     updateStats && updateStats();
   }
 
-  if (added || updated) {
+  if (added || updated || removedDups) {
     const parts = [];
-    if (added)   parts.push(`${added} جديدة`);
-    if (updated) parts.push(`${updated} محدَّثة`);
+    if (added)      parts.push(`${added} جديدة`);
+    if (updated)    parts.push(`${updated} محدَّثة`);
+    if (removedDups) parts.push(`${removedDups} مكررة حُذفت`);
     showToast(`✅ دفترة: ${parts.join(' + ')}`);
   }
 
-  return { added, updated };
+  return { added, updated, removedDups };
 }
 
 // ── ربط الفاتورة الجديدة بدفترة عبر رقم الجوال ──
@@ -6267,6 +6347,8 @@ function runDiagnostics() {
 function fixDuplicateDaftraIds() {
   const seen = {};
   const toRemove = [];
+  const toRemoveFromDB = [];
+
   // نمر من الأحدث للأقدم — نحتفظ بأول واحد (الأحدث)
   [...invoices].reverse().forEach((inv, ridx) => {
     if (!inv.daftra_id) return;
@@ -6274,16 +6356,39 @@ function fixDuplicateDaftraIds() {
     const realIdx = invoices.length - 1 - ridx;
     if (seen[k] !== undefined) {
       toRemove.push(realIdx);
+      toRemoveFromDB.push(inv.id);
     } else {
       seen[k] = realIdx;
     }
   });
+
+  // أيضاً: إزالة مكررات بالـ id (بغض النظر عن daftra_id)
+  const seenIds = {};
+  [...invoices].reverse().forEach((inv, ridx) => {
+    const k = String(inv.id);
+    const realIdx = invoices.length - 1 - ridx;
+    if (seenIds[k] !== undefined && !toRemove.includes(realIdx)) {
+      toRemove.push(realIdx);
+      toRemoveFromDB.push(inv.id);
+    } else if (!seenIds[k]) {
+      seenIds[k] = realIdx;
+    }
+  });
+
   if (!toRemove.length) { showToast('✅ لا توجد مكررات'); return; }
+
   // حذف بالترتيب العكسي لتجنب shift
-  toRemove.sort((a,b)=>b-a).forEach(idx => invoices.splice(idx,1));
+  const uniqueRemove = [...new Set(toRemove)].sort((a,b)=>b-a);
+  uniqueRemove.forEach(idx => invoices.splice(idx,1));
   saveData(); renderTable(); updateStats();
-  showToast(`✅ تم حذف ${toRemove.length} نسخة مكررة`);
-  runDiagnostics(); // تحديث نتائج التشخيص
+
+  // حذف من DB أيضاً
+  toRemoveFromDB.forEach(id => {
+    try { deleteInvoiceFromDB(id); } catch(e) {}
+  });
+
+  showToast(`✅ تم حذف ${uniqueRemove.length} نسخة مكررة (من المنصة و DB)`);
+  runDiagnostics();
 }
 
 // جلب جميع فواتير دفترة (كل الحالات) وتحديث الحالة في المنصة
@@ -6809,7 +6914,7 @@ function getRepRange() {
     const d = new Date(now); d.setDate(d.getDate() + _repOffset);
     from = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     to   = new Date(from); to.setDate(to.getDate() + 1);
-    label = from.toLocaleDateString('ar-SA', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    label = from.toLocaleDateString('ar-EG', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
     groupBy = 'hour';
   } else if (_repPeriod === 'weekly') {
     const d = new Date(now); d.setDate(d.getDate() + _repOffset * 7);
@@ -6817,13 +6922,13 @@ function getRepRange() {
     from = new Date(d); from.setDate(d.getDate() - day);
     from = new Date(from.getFullYear(), from.getMonth(), from.getDate());
     to   = new Date(from); to.setDate(to.getDate() + 7);
-    label = `${from.toLocaleDateString('ar-SA',{month:'short',day:'numeric'})} — ${new Date(to-1).toLocaleDateString('ar-SA',{month:'short',day:'numeric',year:'numeric'})}`;
+    label = `${from.toLocaleDateString('ar-EG',{month:'short',day:'numeric'})} — ${new Date(to-1).toLocaleDateString('ar-EG',{month:'short',day:'numeric',year:'numeric'})}`;
     groupBy = 'day';
   } else if (_repPeriod === 'monthly') {
     const d = new Date(now.getFullYear(), now.getMonth() + _repOffset, 1);
     from = d;
     to   = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-    label = d.toLocaleDateString('ar-SA', { year:'numeric', month:'long' });
+    label = d.toLocaleDateString('ar-EG', { year:'numeric', month:'long' });
     groupBy = 'day';
   } else if (_repPeriod === 'yearly') {
     const y = now.getFullYear() + _repOffset;
@@ -6860,7 +6965,7 @@ function buildRepGroups(from, to, groupBy) {
       next  = new Date(cur); next.setDate(next.getDate() + 1);
     } else { // month
       key   = cur.toISOString().slice(0,7);
-      label = cur.toLocaleDateString('ar-SA', { month:'short', year:'numeric' });
+      label = cur.toLocaleDateString('ar-EG', { month:'short', year:'numeric' });
       next  = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
     }
     groups.push({ key, label, from: new Date(cur), to: next, paid: 0, unpaid: 0, count: 0 });
