@@ -892,6 +892,9 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
     <button class="nav-item" onclick="showSection('invoice-template')">
       <span>🧾</span> قالب الفاتورة
     </button>
+    <button class="nav-item" onclick="showSection('wa-templates')">
+      <span>📲</span> قوالب واتساب
+    </button>
     <div class="nav-divider"></div>
     <button class="nav-item" onclick="showSection('settings')">
       <span>⚙️</span> الإعدادات
@@ -1566,6 +1569,24 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
   <div class="content">
     <div style="background:#111827;border:1px solid #1e2d47;border-radius:16px;padding:24px;max-width:640px;margin-bottom:24px">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
+        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#25d366,#128c7e);display:flex;align-items:center;justify-content:center;font-size:22px">📲</div>
+        <div><div style="font-size:16px;font-weight:700;color:#e2e8f0">رقم واتساب المتجر</div><div style="font-size:12px;color:#64748b;margin-top:3px">رقم واتساب بزنس الموحد لإرسال كل الرسائل للعملاء</div></div>
+      </div>
+      <div style="background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.15);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#64748b;line-height:1.7">
+        ⚠️ <b style="color:#25d366">مهم:</b> لازم كل موظف يكون مسجّل دخول على واتساب ويب أو واتساب بزنس بنفس هالرقم عشان الرسائل تنرسل منه. المنصة تفتح واتساب على جهاز الموظف مباشرة.
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رقم واتساب المتجر (بصيغة دولية)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="store-wa-number" type="text" placeholder="966XXXXXXXXX" style="flex:1;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:16px;direction:ltr;font-family:var(--mono);letter-spacing:1px" oninput="settingsDirty()">
+          <button onclick="testStoreWA()" style="background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.3);border-radius:10px;padding:10px 16px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap">🔗 اختبار</button>
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-top:6px">مثال: 966501234567 — بدون + أو 0 في البداية</div>
+      </div>
+      <div id="store-wa-status" style="display:none;margin-bottom:14px;padding:10px 14px;border-radius:10px;font-size:13px"></div>
+    </div>
+    <div style="background:#111827;border:1px solid #1e2d47;border-radius:16px;padding:24px;max-width:640px;margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
         <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:22px">💳</div>
         <div><div style="font-size:16px;font-weight:700;color:#e2e8f0">ربط بوابة الدفع — PayTabs</div><div style="font-size:12px;color:#64748b;margin-top:3px">اربط المنصة بـ PayTabs لإرسال روابط دفع للعملاء</div></div>
       </div>
@@ -1679,60 +1700,95 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
       <button id="show-add-user-btn" onclick="document.getElementById('add-user-form').style.display='block';this.style.display='none'" style="background:transparent;color:#8b5cf6;border:1px solid #8b5cf6;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">➕ إضافة موظف</button>
     </div>
 
-    <!-- ══ WhatsApp Message Templates ══ -->
-    <div style="background:#111827;border:1px solid #1e2d47;border-radius:16px;padding:24px;max-width:640px;margin-bottom:24px">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
-        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#25d366,#128c7e);display:flex;align-items:center;justify-content:center;font-size:22px">📲</div>
-        <div><div style="font-size:16px;font-weight:700;color:#e2e8f0">قوالب رسائل واتساب</div><div style="font-size:12px;color:#64748b;margin-top:3px">خصّص نصوص الرسائل المرسلة للعملاء عبر واتساب</div></div>
-      </div>
-      <div style="background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.15);border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:12px;color:#64748b;line-height:1.7">
-        💡 <b style="color:#25d366">المتغيرات المتاحة:</b>
-        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{اسم_العميل}</code>
-        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رقم_الفاتورة}</code>
-        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{المبلغ}</code>
-        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رقم_الشحنة}</code>
-        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{الناقل}</code>
-        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رابط_التتبع}</code>
-        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رابط_الدفع}</code>
-        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{رابط_البوليصة}</code>
-        <code style="background:#0a0e1a;padding:1px 5px;border-radius:4px;color:#25d366">{التاريخ}</code>
+  </div>
+</div><!-- /sec-settings -->
+
+<!-- ══ WA TEMPLATES SECTION ══ -->
+<div id="sec-wa-templates" class="section">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="hamburger" onclick="openSidebar()">☰</button>
+      <div><div class="page-title">قوالب رسائل واتساب</div><div class="page-sub">خصّص نصوص الرسائل المرسلة للعملاء عبر واتساب</div></div>
+    </div>
+    <button onclick="saveWaTemplates()" style="background:#25d366;color:#fff;border:none;border-radius:10px;padding:9px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ القوالب</button>
+  </div>
+  <div class="content">
+
+    <!-- المتغيرات المتاحة -->
+    <div style="background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.15);border-radius:12px;padding:16px 18px;margin-bottom:20px;font-size:13px;color:#94a3b8;line-height:2;max-width:720px">
+      💡 <b style="color:#25d366">المتغيرات المتاحة — انسخ وألصق في أي قالب:</b><br>
+      <code style="background:#0a0e1a;padding:2px 8px;border-radius:5px;color:#25d366;cursor:pointer" onclick="navigator.clipboard.writeText('{اسم_العميل}');showToast('📋 تم النسخ')">{اسم_العميل}</code>
+      <code style="background:#0a0e1a;padding:2px 8px;border-radius:5px;color:#25d366;cursor:pointer" onclick="navigator.clipboard.writeText('{رقم_الفاتورة}');showToast('📋 تم النسخ')">{رقم_الفاتورة}</code>
+      <code style="background:#0a0e1a;padding:2px 8px;border-radius:5px;color:#25d366;cursor:pointer" onclick="navigator.clipboard.writeText('{المبلغ}');showToast('📋 تم النسخ')">{المبلغ}</code>
+      <code style="background:#0a0e1a;padding:2px 8px;border-radius:5px;color:#25d366;cursor:pointer" onclick="navigator.clipboard.writeText('{رقم_الشحنة}');showToast('📋 تم النسخ')">{رقم_الشحنة}</code>
+      <code style="background:#0a0e1a;padding:2px 8px;border-radius:5px;color:#25d366;cursor:pointer" onclick="navigator.clipboard.writeText('{الناقل}');showToast('📋 تم النسخ')">{الناقل}</code>
+      <code style="background:#0a0e1a;padding:2px 8px;border-radius:5px;color:#25d366;cursor:pointer" onclick="navigator.clipboard.writeText('{رابط_التتبع}');showToast('📋 تم النسخ')">{رابط_التتبع}</code>
+      <code style="background:#0a0e1a;padding:2px 8px;border-radius:5px;color:#25d366;cursor:pointer" onclick="navigator.clipboard.writeText('{رابط_الدفع}');showToast('📋 تم النسخ')">{رابط_الدفع}</code>
+      <code style="background:#0a0e1a;padding:2px 8px;border-radius:5px;color:#25d366;cursor:pointer" onclick="navigator.clipboard.writeText('{رابط_البوليصة}');showToast('📋 تم النسخ')">{رابط_البوليصة}</code>
+      <code style="background:#0a0e1a;padding:2px 8px;border-radius:5px;color:#25d366;cursor:pointer" onclick="navigator.clipboard.writeText('{التاريخ}');showToast('📋 تم النسخ')">{التاريخ}</code>
+    </div>
+
+    <!-- القوالب الأربعة -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px">
+
+      <!-- قالب 1: إرسال بوليصة -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,0.1);display:flex;align-items:center;justify-content:center;font-size:16px">📦</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">إرسال بوليصة</div>
+            <div style="font-size:11px;color:var(--muted)">بعد الدفع وإصدار AWB</div>
+          </div>
+        </div>
+        <textarea id="wa-msg-paid" rows="10" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
       </div>
 
-      <!-- Template tabs -->
-      <div style="display:flex;gap:4px;margin-bottom:16px;background:#0a0e1a;border-radius:10px;padding:4px;flex-wrap:wrap">
-        <button class="wa-tmpl-tab active" data-t="paid" onclick="switchWaTmplTab('paid',this)" style="flex:1;min-width:80px;padding:8px 10px;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;font-weight:600;background:#25d366;color:#fff">📦 إرسال بوليصة</button>
-        <button class="wa-tmpl-tab" data-t="unpaid" onclick="switchWaTmplTab('unpaid',this)" style="flex:1;min-width:80px;padding:8px 10px;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;background:transparent;color:#64748b">💰 طلب دفع</button>
-        <button class="wa-tmpl-tab" data-t="collection" onclick="switchWaTmplTab('collection',this)" style="flex:1;min-width:80px;padding:8px 10px;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;background:transparent;color:#64748b">🔔 مطالبة</button>
-        <button class="wa-tmpl-tab" data-t="payment_link" onclick="switchWaTmplTab('payment_link',this)" style="flex:1;min-width:80px;padding:8px 10px;border:none;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;background:transparent;color:#64748b">💳 رابط دفع</button>
+      <!-- قالب 2: طلب دفع -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;font-size:16px">💰</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">طلب دفع</div>
+            <div style="font-size:11px;color:var(--muted)">قبل الدفع — بانتظار التحويل</div>
+          </div>
+        </div>
+        <textarea id="wa-msg-unpaid" rows="10" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
       </div>
 
-      <!-- Template editors -->
-      <div id="wa-tmpl-paid" class="wa-tmpl-editor">
-        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رسالة إرسال البوليصة (بعد الدفع)</label>
-        <textarea id="wa-msg-paid" rows="8" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
-      </div>
-      <div id="wa-tmpl-unpaid" class="wa-tmpl-editor" style="display:none">
-        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رسالة طلب الدفع (قبل الدفع)</label>
-        <textarea id="wa-msg-unpaid" rows="8" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
-      </div>
-      <div id="wa-tmpl-collection" class="wa-tmpl-editor" style="display:none">
-        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رسالة مطالبة بفاتورة واحدة</label>
-        <textarea id="wa-msg-collection" rows="8" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
-      </div>
-      <div id="wa-tmpl-payment_link" class="wa-tmpl-editor" style="display:none">
-        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رسالة رابط الدفع (PayTabs)</label>
-        <textarea id="wa-msg-payment_link" rows="8" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
+      <!-- قالب 3: مطالبة -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="width:32px;height:32px;border-radius:8px;background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;font-size:16px">🔔</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">مطالبة بالدفع</div>
+            <div style="font-size:11px;color:var(--muted)">تذكير بفاتورة مستحقة</div>
+          </div>
+        </div>
+        <textarea id="wa-msg-collection" rows="10" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
       </div>
 
-      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center">
-        <button onclick="saveWaTemplates()" style="background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ القوالب</button>
-        <button onclick="resetWaTemplates()" style="background:transparent;color:#64748b;border:1px solid #1e2d47;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🔄 استعادة الافتراضي</button>
-        <span id="wa-tmpl-status" style="font-size:13px"></span>
+      <!-- قالب 4: رابط دفع -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="width:32px;height:32px;border-radius:8px;background:rgba(14,165,233,0.1);display:flex;align-items:center;justify-content:center;font-size:16px">💳</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">رابط دفع PayTabs</div>
+            <div style="font-size:11px;color:var(--muted)">إرسال رابط الدفع الإلكتروني</div>
+          </div>
+        </div>
+        <textarea id="wa-msg-payment_link" rows="10" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;resize:vertical;font-family:inherit;line-height:1.8;direction:rtl"></textarea>
       </div>
+
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;align-items:center;max-width:900px">
+      <button onclick="saveWaTemplates()" style="background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ القوالب</button>
+      <button onclick="resetWaTemplates()" style="background:transparent;color:#64748b;border:1px solid #1e2d47;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🔄 استعادة الافتراضي</button>
+      <span id="wa-tmpl-status" style="font-size:13px"></span>
     </div>
 
   </div>
-</div><!-- /sec-settings -->
+</div><!-- /sec-wa-templates -->
 
 </main>
 </div><!-- /layout -->
@@ -2413,13 +2469,14 @@ function showSection(id, pushState = true) {
     if (!sec) { console.error('Section not found: sec-' + id); return; }
     sec.classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    const map = {dashboard:0, invoices:1, reports:2, clients:3, calculator:6, reconcile:7, 'invoice-template':8, settings:9};
+    const map = {dashboard:0, invoices:1, reports:2, clients:3, calculator:6, reconcile:7, 'invoice-template':8, 'wa-templates':9, settings:10};
     const items = document.querySelectorAll('.nav-item');
     if (map[id] !== undefined) items[map[id]].classList.add('active');
     if (id === 'clients') { try { backToClients(); } catch(e) { console.warn('backToClients:', e); } }
     if (id === 'settings') { try { loadSettings(); } catch(e) { console.warn('loadSettings:', e); } try { renderUsersList(); } catch(e) {} }
     if (id === 'invoice-template') { try { loadInvoiceTemplate(); } catch(e) { console.warn('loadInvoiceTemplate:', e); } }
     if (id === 'reports') { try { initReports(); } catch(e) { console.warn('initReports:', e); } }
+    if (id === 'wa-templates') { try { loadWaTemplatesUI(); } catch(e) { console.warn('loadWaTemplatesUI:', e); } }
     // Browser history — زر الرجوع يعمل (safe for iOS Safari)
     try {
       if (pushState && history.state?.section !== id) {
@@ -2436,7 +2493,7 @@ function showSection(id, pushState = true) {
 window.addEventListener('popstate', (e) => {
   try {
     const id = (e.state?.section) || location.hash.replace('#','') || 'dashboard';
-    const valid = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','settings'];
+    const valid = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','wa-templates','settings'];
     if (valid.includes(id)) showSection(id, false);
   } catch(e) {}
 });
@@ -2454,7 +2511,7 @@ document.addEventListener('DOMContentLoaded', () => {
   try { wireDataHandlers(); } catch(e){ console.error('wireDataHandlers:', e); }
   // hash routing — آمن لـ iOS Safari
   try {
-    const validSections = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','settings'];
+    const validSections = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','wa-templates','settings'];
     const hashSection = (location.hash||'').replace('#','');
     if (hashSection && validSections.includes(hashSection)) {
       setTimeout(() => showSection(hashSection, false), 100);
@@ -3977,8 +4034,38 @@ function waValidate(inv, requireAWB) {
   return true;
 }
 function openWA(phone, msg) {
+  // تنبيه الموظف إذا فيه رقم متجر محفوظ
+  const storeWA = ptSettings?.storeWA;
+  if (storeWA) {
+    const formattedStore = storeWA.startsWith('966') ? '0' + storeWA.slice(3) : storeWA;
+    const curUser = getCurrentUser();
+    const userName = curUser?.name || 'الموظف';
+    // عرض تذكير سريع
+    showToast(`📲 ${userName} — تأكد إنك مسجّل على واتساب برقم المتجر: ${formattedStore}`);
+  }
   window.open('https://wa.me/'+formatWAPhone(phone)+'?text='+encodeURIComponent(msg),'_blank');
 }
+
+// اختبار رقم واتساب المتجر
+function testStoreWA() {
+  const input = document.getElementById('store-wa-number');
+  const statusEl = document.getElementById('store-wa-status');
+  const num = (input?.value || '').replace(/[^0-9]/g, '');
+  if (!num || num.length < 10) {
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'rgba(239,68,68,0.1)';
+    statusEl.style.color = '#ef4444';
+    statusEl.textContent = '❌ أدخل رقم صحيح (مثال: 966501234567)';
+    return;
+  }
+  // فتح محادثة تجريبية مع رقم المتجر نفسه
+  statusEl.style.display = 'block';
+  statusEl.style.background = 'rgba(37,211,102,0.1)';
+  statusEl.style.color = '#25d366';
+  statusEl.textContent = '✅ رقم المتجر: ' + num + ' — جاري فتح واتساب للاختبار...';
+  window.open('https://wa.me/' + num + '?text=' + encodeURIComponent('اختبار رقم المتجر — شيب بيك ✅'), '_blank');
+}
+window.testStoreWA = testStoreWA;
 function logWA(inv, type, msg) {
   const idx = invoices.findIndex(i=>String(i.id)===String(inv.id)); if(idx===-1) return;
   if (!invoices[idx].waLog) invoices[idx].waLog=[];
@@ -5175,6 +5262,8 @@ function loadSettings() {
   el('pt-api-key').value = ptSettings.apiKey || '';
   el('pt-currency').value = ptSettings.currency || 'SAR';
   el('invoice-note').value = ptSettings.invoiceNote || '';
+  // Store WA number
+  if (el('store-wa-number')) el('store-wa-number').value = ptSettings.storeWA || '';
   el('settings-status').textContent = ptSettings.apiUrl ? '✅ الإعدادات محفوظة' : '';
   el('settings-status').style.color = '#10b981';
   const ds = el('daftra-status');
@@ -5283,10 +5372,12 @@ function saveSettings() {
   const apiUrl = document.getElementById('pt-api-url').value.trim();
   const apiKey = document.getElementById('pt-api-key').value.trim();
   const invoiceNote = document.getElementById('invoice-note').value.trim();
+  const storeWA = (document.getElementById('store-wa-number')?.value || '').replace(/[^0-9]/g, '').trim();
   ptSettings = {
     apiUrl, apiKey,
     currency: document.getElementById('pt-currency').value,
-    invoiceNote
+    invoiceNote,
+    storeWA
   };
   try { localStorage.setItem('shippec_settings', JSON.stringify(ptSettings)); } catch(e) {}
   document.getElementById('settings-status').textContent = '✅ تم الحفظ';
@@ -7153,13 +7244,7 @@ function applyWaTemplate(templateKey, inv, extraVars) {
   return msg;
 }
 
-// Wire into settings load
-const _origLoadSettings = typeof loadSettings === 'function' ? loadSettings : null;
-const _newLoadSettings = function() {
-  if (_origLoadSettings) _origLoadSettings();
-  loadWaTemplatesUI();
-};
-window.loadSettings = _newLoadSettings;
+// WA templates now loads via showSection('wa-templates') → loadWaTemplatesUI()
 
 window.saveWaTemplates = saveWaTemplates;
 window.resetWaTemplates = resetWaTemplates;
