@@ -619,6 +619,157 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
 .psb-value { font-size: 22px; font-weight: 900; color: var(--dhl-yellow); font-family: var(--mono); }
 .psb-details { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
+/* ─── SMART SUGGEST ─── */
+.suggest-wrap { position: relative; }
+.suggest-list {
+  position: absolute; top: calc(100% + 4px); right: 0; left: 0; z-index: 9999;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  overflow: hidden; max-height: 240px; overflow-y: auto;
+}
+.suggest-hint {
+  padding: 6px 14px; font-size: 10px; color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  background: rgba(14,165,233,0.04);
+  display: flex; align-items: center; gap: 6px;
+}
+.suggest-item {
+  padding: 9px 14px; cursor: pointer; transition: background 0.12s;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.suggest-item:last-child { border-bottom: none; }
+.suggest-item:hover, .suggest-item.focused { background: rgba(14,165,233,0.1); }
+.suggest-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.suggest-name mark { background: rgba(14,165,233,0.25); color: var(--accent); border-radius: 2px; padding: 0 1px; font-style: normal; }
+.suggest-sub  { font-size: 11px; color: var(--muted); direction: ltr; margin-top: 2px; display:flex; gap:6px; flex-wrap:wrap; }
+.suggest-icon { font-size: 15px; flex-shrink: 0; }
+.suggest-count { font-size: 10px; color:var(--muted); margin-right: auto; flex-shrink:0; }
+
+/* ─── DRAFT BADGE ─── */
+.badge-draft { background: rgba(245,158,11,0.12); color: var(--gold); border: 1px solid rgba(245,158,11,0.25); }
+.draft-banner {
+  background: rgba(245,158,11,0.08); border: 1px dashed rgba(245,158,11,0.35);
+  border-radius: 8px; padding: 7px 14px; font-size: 12px; color: var(--gold);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+/* Draft row in table */
+tr.draft-row td { opacity: 0.75; }
+tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
+
+/* AWB Preflight error box */
+.preflight-errors {
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 14px;
+}
+.preflight-errors .pf-title { font-size: 12px; font-weight: 800; color: #ef4444; margin-bottom: 8px; display:flex; align-items:center; gap:6px; }
+.preflight-errors .pf-item { font-size: 12px; color: #fca5a5; padding: 2px 0; }
+
+/* ─── SHIPPER / RECEIVER SECTION ─── */
+.sr-section {
+  border: 1px solid var(--border); border-radius: 12px;
+  margin-bottom: 14px; overflow: visible;
+}
+.sr-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--border); border-radius: 12px 12px 0 0;
+}
+.sr-title { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+.sr-body { padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sr-body .form-group { margin: 0; }
+.sr-body .form-group label { font-size: 11px; }
+.sr-same-check { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); cursor: pointer; }
+.sr-same-check input { cursor: pointer; width: 14px; height: 14px; }
+
+/* ─── ACTIVITY TIMELINE ─── */
+.tl-wrap { padding: 20px 20px 24px; display:flex; flex-direction:column; gap:0; }
+.tl-empty { text-align:center; color:var(--muted); padding:40px 0; font-size:13px; }
+.tl-item {
+  display: flex; gap: 14px; position: relative;
+  padding-bottom: 0;
+}
+/* Vertical connector line */
+.tl-item:not(:last-child)::after {
+  content:''; position:absolute;
+  right: 15px; top: 34px;
+  width: 2px; height: calc(100% - 14px);
+  background: linear-gradient(to bottom, var(--border) 0%, transparent 100%);
+  z-index: 0;
+}
+.tl-line { display:none; } /* legacy - kept for compat */
+.tl-card {
+  flex: 1; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 14px; margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.tl-card:hover { border-color: rgba(14,165,233,0.3); }
+.tl-card.tl-card-first {
+  border-color: rgba(14,165,233,0.35);
+  background: rgba(14,165,233,0.03);
+}
+.tl-card.tl-card-paid   { border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.03); }
+.tl-card.tl-card-awb    { border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.03); }
+.tl-card.tl-card-wa     { border-color:rgba(37,211,102,0.3); background:rgba(37,211,102,0.03); }
+.tl-card.tl-card-print  { border-color:rgba(139,92,246,0.3); background:rgba(139,92,246,0.03); }
+.tl-icon-wrap {
+  flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; position: relative; z-index: 1;
+  border: 2px solid var(--border);
+  background: var(--surface); margin-top: 8px;
+}
+.tl-icon-wrap.tl-create  { border-color:rgba(14,165,233,0.5);  background:rgba(14,165,233,0.1); }
+.tl-icon-wrap.tl-paid    { border-color:rgba(16,185,129,0.5);  background:rgba(16,185,129,0.1); }
+.tl-icon-wrap.tl-awb     { border-color:rgba(245,158,11,0.6);  background:rgba(245,158,11,0.1); box-shadow:0 0 8px rgba(245,158,11,0.15); }
+.tl-icon-wrap.tl-wa      { border-color:rgba(37,211,102,0.5);  background:rgba(37,211,102,0.1); }
+.tl-icon-wrap.tl-print   { border-color:rgba(139,92,246,0.5);  background:rgba(139,92,246,0.1); }
+.tl-icon-wrap.tl-edit    { border-color:rgba(100,116,139,0.4); background:rgba(100,116,139,0.07); }
+.tl-icon-wrap.tl-payment { border-color:rgba(251,146,60,0.5);  background:rgba(251,146,60,0.1); }
+.tl-body { flex: 1; }
+.tl-title { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.4; }
+.tl-meta  { font-size: 11px; color: var(--muted); margin-top: 4px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.tl-actor { font-size: 11px; font-weight: 700; color: var(--accent); background:rgba(14,165,233,0.08); padding:1px 7px; border-radius:10px; }
+.tl-time  { font-size: 11px; color: var(--muted); direction: ltr; }
+.tl-fulldate { font-size: 10px; color:rgba(100,116,139,0.7); direction:ltr; }
+.tl-badge {
+  font-size: 10px; font-weight: 800; padding: 2px 8px;
+  border-radius: 10px; letter-spacing: 0.3px; text-transform:uppercase;
+}
+.tl-badge-blue   { background:rgba(14,165,233,0.12);  color:var(--accent);  border:1px solid rgba(14,165,233,0.25); }
+.tl-badge-green  { background:rgba(16,185,129,0.12);  color:#10b981;        border:1px solid rgba(16,185,129,0.25); }
+.tl-badge-gold   { background:rgba(245,158,11,0.12);  color:var(--gold);    border:1px solid rgba(245,158,11,0.25); }
+.tl-badge-wa     { background:rgba(37,211,102,0.12);  color:#25d366;        border:1px solid rgba(37,211,102,0.25); }
+.tl-badge-purple { background:rgba(139,92,246,0.12);  color:#a78bfa;        border:1px solid rgba(139,92,246,0.25); }
+.tl-badge-red    { background:rgba(239,68,68,0.1);    color:#f87171;        border:1px solid rgba(239,68,68,0.2);  }
+.tl-detail { margin-top:5px; }
+
+/* Tab switcher inside modal */
+.inv-tabs { display:flex; gap:2px; padding:0 20px; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0; }
+.inv-tab-btn {
+  padding: 10px 16px; font-size: 12px; font-weight: 700;
+  color: var(--muted); background: none; border: none; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  font-family: var(--font); white-space: nowrap; transition: color 0.15s, border-color 0.15s;
+}
+.inv-tab-btn:hover { color: var(--text); }
+.inv-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ─── LABEL CENTER BUTTONS ─── */
+.lc-btn {
+  padding: 6px 13px; border-radius: 8px; cursor: pointer;
+  font-family: var(--font); font-size: 12px; font-weight: 700;
+  border: 1px solid transparent; white-space: nowrap; transition: filter 0.15s;
+}
+.lc-btn:hover { filter: brightness(1.12); }
+.lc-btn-gold   { background:rgba(245,158,11,0.12); border-color:rgba(245,158,11,0.35); color:#f59e0b; }
+.lc-btn-purple { background:rgba(139,92,246,0.1);  border-color:rgba(139,92,246,0.25); color:#a78bfa; }
+.lc-btn-blue   { background:rgba(14,165,233,0.1);  border-color:rgba(14,165,233,0.22); color:var(--accent); }
+.lc-btn-green  { background:rgba(16,185,129,0.08); border-color:rgba(16,185,129,0.2);  color:#10b981; }
+.lc-btn-wa     { background:rgba(37,211,102,0.1);  border-color:rgba(37,211,102,0.28); color:#25d366; }
+.lc-btn-muted  { background:rgba(100,116,139,0.08);border-color:var(--border);         color:var(--muted); }
+
 /* Calc inside modal */
 .modal-calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .modal-calc-grid .c-card { background: var(--bg); border-radius: 10px; padding: 16px; border: 1px solid var(--border); }
@@ -933,7 +1084,8 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
         <button class="quick-status-btn" data-s="partial" onclick="setQuickStatus('partial')">جزئية</button>
         <button class="quick-status-btn" data-s="paid" onclick="setQuickStatus('paid')">مدفوعة</button>
         <button id="sort-price-btn" onclick="togglePriceSort()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;transition:all 0.2s">💰 المبلغ ↕</button>
-        <button id="sort-date-btn" onclick="toggleDateSort()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;transition:all 0.2s">📅 التاريخ ↕</button>
+        <button id="sort-date-btn" onclick="toggleDateSort()" style="background:rgba(14,165,233,0.15);border:1px solid var(--accent);color:var(--accent);padding:5px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;transition:all 0.2s">📅 الأحدث أولاً ↓</button>
+        <span id="inv-results-count" style="font-size:12px;color:var(--muted);margin-right:4px"></span>
       </div>
     </div>
 
@@ -1389,8 +1541,18 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
         <button onclick="runFullDaftraImport()" id="full-import-btn" style="background:transparent;color:#10b981;border:1px solid #10b981;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">📥 استيراد كل الفواتير</button>
         <button onclick="clearAndReimport()" style="background:transparent;color:#ef4444;border:1px solid #ef4444;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🗑️ مسح وإعادة استيراد</button>
         <button onclick="deleteNoPhone()" style="background:transparent;color:#f59e0b;border:1px solid #f59e0b;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🗑️ حذف فواتير بدون رقم</button>
+        <button onclick="runDiagnostics()" style="background:transparent;color:#a78bfa;border:1px solid #a78bfa;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🔍 تشخيص المكررات</button>
         <span id="daftra-status" style="font-size:13px"></span>
         <span id="full-import-status" style="font-size:13px;display:none"></span>
+      </div>
+      <!-- Diagnostic results panel -->
+      <div id="diag-panel" style="display:none;margin-top:16px;background:#0a0e1a;border:1px solid var(--border);border-radius:12px;padding:16px;font-size:13px">
+        <div style="font-weight:700;color:var(--text);margin-bottom:12px;display:flex;justify-content:space-between">
+          <span>🔍 نتيجة التشخيص</span>
+          <button onclick="document.getElementById('diag-panel').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">✕</button>
+        </div>
+        <div id="diag-body"></div>
+      </div>
       </div>
     </div>
 
@@ -1605,6 +1767,12 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
       <!-- ══ STEP 2: CLIENT DATA ══ -->
       <div id="wizard-step2" style="display:none">
 
+        <!-- Draft banner (shown when editing a draft) -->
+        <div id="draft-banner" style="display:none" class="draft-banner">
+          <span>✏️</span>
+          <span>مسودة — يمكنك إكمال البيانات الناقصة والحفظ النهائي لاحقاً</span>
+        </div>
+
         <!-- Price summary bar -->
         <div class="price-summary-bar" id="w-price-bar">
           <div>
@@ -1618,8 +1786,8 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
         </div>
 
         <div class="form-grid">
-          <div class="form-group"><label>اسم العميل *</label><input type="text" id="f-client" placeholder="محمد عبدالله"></div>
-          <div class="form-group"><label>رقم جوال العميل *</label><input type="text" id="f-phone" placeholder="05xxxxxxxx"></div>
+          <div class="form-group"><label>اسم العميل *</label><input type="text" id="f-client" placeholder="محمد عبدالله" autocomplete="off"></div>
+          <div class="form-group"><label>رقم جوال العميل *</label><input type="text" id="f-phone" placeholder="05xxxxxxxx" autocomplete="off"></div>
           <div class="form-group"><label>بند الفاتورة *</label>
             <select id="f-item-type">
               <option value="شحن دولي">شحن دولي</option>
@@ -1633,8 +1801,8 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
           <div class="form-group"><label>شركة الشحن *</label>
             <select id="f-carrier"><option value="">اختر شركة الشحن</option><option selected>DHL Express</option><option>Aramex</option><option>FedEx</option><option>SMSA</option><option>Naqel</option><option>J&T Express</option><option>أخرى</option></select>
           </div>
-          <div class="form-group"><label>رقم الشحنة / AWB *</label><input type="text" id="f-awb" placeholder="1234567890" oninput="generateCode()"></div>
-          <div class="form-group"><label>السعر النهائي (ريال) *</label><input type="number" id="f-price" placeholder="0.00" min="0" step="0.01"></div>
+          <div class="form-group"><label>رقم الشحنة / AWB</label><input type="text" id="f-awb" placeholder="1234567890 (اختياري في المسودة)" oninput="generateCode()"></div>
+          <div class="form-group"><label>السعر النهائي (ريال)</label><input type="number" id="f-price" placeholder="0.00 (اختياري في المسودة)" min="0" step="0.01"></div>
           <div class="form-group"><label>الوزن (كجم)</label><input type="number" id="f-weight" placeholder="اختياري" min="0" step="0.1"></div>
           <div class="form-group"><label>تاريخ الفاتورة</label><input type="date" id="f-date"></div>
           <div class="form-group"><label>حالة الدفع</label>
@@ -1651,6 +1819,65 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
           </div>
         </div>
 
+        <!-- ── SHIPPER ── -->
+        <div class="sr-section">
+          <div class="sr-header">
+            <span class="sr-title">📤 المرسل (Shipper)</span>
+            <label class="sr-same-check">
+              <input type="checkbox" id="f-shipper-same" onchange="toggleShipperSame()">
+              نفس بيانات العميل
+            </label>
+          </div>
+          <div class="sr-body">
+            <div class="form-group suggest-wrap">
+              <label>الاسم</label>
+              <input type="text" id="f-shipper-name" placeholder="اسم المرسل" autocomplete="off"
+                oninput="smartSuggest(this,'shipper')" onblur="hideSuggest('shipper-name')" onkeydown="navigateSuggest(event,'shipper-name')">
+              <div class="suggest-list" id="suggest-shipper-name" style="display:none"></div>
+            </div>
+            <div class="form-group suggest-wrap">
+              <label>الجوال</label>
+              <input type="text" id="f-shipper-phone" placeholder="05xxxxxxxx" autocomplete="off"
+                oninput="smartSuggest(this,'shipper')" onblur="hideSuggest('shipper-phone')" onkeydown="navigateSuggest(event,'shipper-phone')">
+              <div class="suggest-list" id="suggest-shipper-phone" style="display:none"></div>
+            </div>
+            <div class="form-group full">
+              <label>العنوان</label>
+              <input type="text" id="f-shipper-address" placeholder="المدينة، الشارع، الرمز البريدي">
+            </div>
+          </div>
+        </div>
+
+        <!-- ── RECEIVER ── -->
+        <div class="sr-section">
+          <div class="sr-header">
+            <span class="sr-title">📥 المستلم (Receiver)</span>
+            <span style="font-size:11px;color:var(--muted)">مطلوب قبل إصدار AWB</span>
+          </div>
+          <div class="sr-body">
+            <div class="form-group suggest-wrap">
+              <label>الاسم</label>
+              <input type="text" id="f-receiver-name" placeholder="اسم المستلم" autocomplete="off"
+                oninput="smartSuggest(this,'receiver')" onblur="hideSuggest('receiver-name')" onkeydown="navigateSuggest(event,'receiver-name')">
+              <div class="suggest-list" id="suggest-receiver-name" style="display:none"></div>
+            </div>
+            <div class="form-group suggest-wrap">
+              <label>الجوال</label>
+              <input type="text" id="f-receiver-phone" placeholder="05xxxxxxxx" autocomplete="off"
+                oninput="smartSuggest(this,'receiver')" onblur="hideSuggest('receiver-phone')" onkeydown="navigateSuggest(event,'receiver-phone')">
+              <div class="suggest-list" id="suggest-receiver-phone" style="display:none"></div>
+            </div>
+            <div class="form-group full">
+              <label>العنوان</label>
+              <input type="text" id="f-receiver-address" placeholder="المدينة، الشارع، الرمز البريدي">
+            </div>
+            <div class="form-group">
+              <label>الدولة</label>
+              <input type="text" id="f-receiver-country" placeholder="Saudi Arabia">
+            </div>
+          </div>
+        </div>
+
         <div id="barcode-wrap" class="barcode-preview"><svg id="barcode-svg"></svg></div>
         <div id="qr-wrap" style="display:none;margin-top:8px;justify-content:center"><div id="qr-canvas"></div></div>
 
@@ -1663,26 +1890,179 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
     <div class="modal-footer" id="wizard-footer">
       <button class="btn btn-ghost" id="wizard-back-btn" style="display:none" onclick="wGoBack()">← رجوع</button>
       <button class="btn btn-ghost" onclick="closeModal('form-modal')">إلغاء</button>
+      <button class="btn btn-ghost" id="wizard-draft-btn" style="display:none;background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:var(--gold)" onclick="saveAsDraft()">📋 حفظ مسودة</button>
       <button class="btn btn-primary" id="wizard-save-btn" style="display:none" onclick="saveInvoice()">💾 حفظ الفاتورة</button>
     </div>
   </div>
 </div>
 
 <!-- Invoice View -->
+<!-- ══════════════════════════════════════════════════════
+     INVOICE + LABEL CENTER MODAL
+══════════════════════════════════════════════════════ -->
 <div class="overlay" id="invoice-modal">
-  <div class="modal" style="width:720px">
-    <div class="modal-header">
-      <div class="modal-title">معاينة الفاتورة</div>
+  <div class="modal" style="width:760px;max-width:98vw;display:flex;flex-direction:column;max-height:96vh">
+    <div class="modal-header" style="flex-shrink:0">
+      <div class="modal-title" id="inv-modal-title">معاينة الشحنة</div>
       <button class="close-btn" onclick="closeModal('invoice-modal')">✕</button>
     </div>
-    <div class="modal-body" style="padding:0"><div class="invoice-doc" id="invoice-print-area"></div></div>
-    <div class="modal-footer">
+
+    <!-- ══ LABEL CENTER ══════════════════════════════ -->
+    <div id="label-center" style="flex-shrink:0;border-bottom:2px solid var(--border)">
+
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;box-shadow:0 0 6px var(--accent)"></span>
+          <span style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px">Shipping Label · Label Center</span>
+        </div>
+        <div id="lc-awb-badge" style="display:none;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold);background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);padding:3px 10px;border-radius:20px"></div>
+      </div>
+
+      <!-- ── State: No AWB ── -->
+      <div id="lc-no-awb" style="padding:10px 20px 14px;display:flex;align-items:center;gap:12px">
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:3px">لم تُصدَر بوليصة لهذه الشحنة بعد.</div>
+          <div style="font-size:11px;color:rgba(148,163,184,0.6)">بعد الدفع، اضغط Generate AWB لإصدار البوليصة يدوياً (سيُربط بـ DHL API لاحقاً)</div>
+        </div>
+        <button onclick="openAWBModal()" class="lc-btn lc-btn-gold">🏷️ Generate AWB</button>
+      </div>
+
+      <!-- ── State: Has AWB ── -->
+      <div id="lc-has-awb" style="display:none;padding:10px 20px 14px">
+
+        <!-- AWB + actions row -->
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+
+          <!-- AWB chip -->
+          <div style="background:rgba(14,165,233,0.07);border:1px solid rgba(14,165,233,0.2);border-radius:8px;padding:5px 12px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase">AWB</span>
+            <span id="lc-awb-val" style="font-family:var(--mono);font-size:15px;font-weight:800;color:var(--text);letter-spacing:0.5px"></span>
+            <button onclick="lcCopyAWB()" title="نسخ" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">⎘</button>
+          </div>
+
+          <!-- Action buttons -->
+          <button onclick="lcViewPDF()" class="lc-btn lc-btn-purple" title="عرض البوليصة PDF">👁 عرض PDF</button>
+          <button onclick="lcDownloadLabel()" class="lc-btn lc-btn-blue" title="تحميل البوليصة">⬇ تحميل</button>
+          <button onclick="lcPrintLabel()" class="lc-btn lc-btn-green" title="طباعة من الفرع">🖨️ طباعة</button>
+          <button onclick="lcSendWA()" class="lc-btn lc-btn-wa" title="إرسال للعميل">📲 إرسال WA</button>
+          <button onclick="lcResendWA()" class="lc-btn lc-btn-muted" title="إعادة إرسال">🔁 إعادة إرسال</button>
+          <button onclick="openAWBModal()" title="تعديل AWB" style="background:none;border:1px solid var(--border);color:var(--muted);padding:5px 9px;border-radius:7px;cursor:pointer;font-size:12px" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">✏️</button>
+
+          <!-- WA log badge -->
+          <button id="lc-wa-log-btn" onclick="showWALog()" style="display:none;margin-right:auto;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.2);color:#25d366;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer"></button>
+        </div>
+
+        <!-- Label PDF stored hint -->
+        <div id="lc-label-hint" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:7px;font-size:12px;color:#10b981;display:flex;align-items:center;gap:8px">
+          <span>📎 Label PDF محفوظ</span>
+          <a id="lc-label-link" href="#" target="_blank" style="color:#10b981;font-weight:700;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">فتح الرابط ↗</a>
+        </div>
+      </div>
+
+      <!-- ── Unpaid warning bar ── -->
+      <div id="lc-unpaid-bar" style="display:none;padding:8px 20px 12px;border-top:1px dashed rgba(245,158,11,0.3)">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--gold)">⚠️ الفاتورة غير مدفوعة — لن تُرسَل البوليصة حتى يتم الدفع</span>
+          <button onclick="sendWAUnpaid()" class="lc-btn lc-btn-wa">📤 إرسال رابط الفاتورة والدفع</button>
+        </div>
+      </div>
+    </div>
+    <!-- ══ END LABEL CENTER ══ -->
+
+    <!-- ══ TAB SWITCHER ══ -->
+    <div class="inv-tabs">
+      <button class="inv-tab-btn active" id="tab-btn-invoice" onclick="switchInvTab('invoice')">📄 الفاتورة</button>
+      <button class="inv-tab-btn" id="tab-btn-timeline" onclick="switchInvTab('timeline')">
+        🕐 Activity Timeline
+        <span id="tl-count-badge" style="display:none;background:rgba(14,165,233,0.15);color:var(--accent);border:1px solid rgba(14,165,233,0.2);padding:1px 7px;border-radius:10px;font-size:10px;font-weight:800;margin-right:5px"></span>
+      </button>
+    </div>
+
+    <!-- ══ INVOICE TAB ══ -->
+    <div id="tab-panel-invoice" style="flex:1;overflow-y:auto;padding:0">
+      <div class="invoice-doc" id="invoice-print-area"></div>
+    </div>
+
+    <!-- ══ TIMELINE TAB ══ -->
+    <div id="tab-panel-timeline" style="display:none;flex:1;overflow-y:auto">
+      <div class="tl-wrap" id="timeline-body"></div>
+    </div>
+
+    <div class="modal-footer" style="flex-shrink:0">
       <button class="btn btn-ghost" onclick="closeModal('invoice-modal')">إغلاق</button>
       <button class="btn btn-ghost" id="zatca-toggle-btn" onclick="toggleZatcaTemplate()" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#a78bfa">🧾 فاتورة ضريبية</button>
       <button class="btn btn-ghost" id="pay-link-btn" onclick="sendPaymentLink()" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#10b981">💳 رابط الدفع</button>
       <button class="btn btn-ghost" id="check-pay-btn" onclick="checkPaymentStatus()" style="display:none;background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#f59e0b">🔄 تحقق من الدفع</button>
-      <button class="btn btn-ghost" onclick="sendWhatsAppWithPDF()" style="background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.3);color:#25d366">📲 واتساب + PDF</button>
-      <button class="btn btn-primary" onclick="downloadPDF()">⬇ تحميل PDF</button>
+      <button class="btn btn-primary" onclick="downloadInvoicePDF()">⬇ تحميل الفاتورة</button>
+    </div>
+  </div>
+</div>
+
+<!-- WA Log Modal -->
+<div class="overlay" id="wa-log-modal" onclick="if(event.target===this)closeModal('wa-log-modal')">
+  <div class="modal" style="max-width:520px;width:95%">
+    <div class="modal-header">
+      <h3 style="margin:0;font-size:16px">📋 سجل إرسال واتساب</h3>
+      <button class="close-btn" onclick="closeModal('wa-log-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="wa-log-body" style="padding:20px;max-height:420px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- AWB Modal (Manual + DHL-ready) -->
+<div class="overlay" id="awb-modal" onclick="if(event.target===this)closeModal('awb-modal')">
+  <div class="modal" style="max-width:500px;width:95%">
+    <div class="modal-header">
+      <h3 style="margin:0;font-size:16px">🏷️ إصدار / تعديل AWB</h3>
+      <button class="close-btn" onclick="closeModal('awb-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px;display:flex;flex-direction:column;gap:14px">
+
+      <!-- DHL ready notice -->
+      <div style="background:rgba(212,5,17,0.05);border:1px solid rgba(212,5,17,0.18);border-radius:10px;padding:12px 14px">
+        <div style="font-size:12px;font-weight:700;color:#ff6b6b;margin-bottom:3px">🔌 DHL API — جاهز للربط</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6">الحقول التالية ستُملأ تلقائياً من DHL API بعد مراجعة الحقول الرسمية. الآن أدخل يدوياً.</div>
+      </div>
+
+      <!--
+        ╔══════════════════════════════════════════════════╗
+        ║  DHL FIELD MAPPING — جاهز للربط لاحقاً          ║
+        ║                                                  ║
+        ║  DHL Response → inv fields:                      ║
+        ║  shipmentTrackingNumber  → inv.awb               ║
+        ║  documents[0].content    → inv.labelBase64       ║
+        ║  trackingUrl             → inv.trackingUrl       ║
+        ║  pieceIds                → inv.dhlPieceIds       ║
+        ║                                                  ║
+        ║  DHL Request → form fields:                      ║
+        ║  (سيُحدَّد بعد مراجعة شاشة DHL الرسمية)          ║
+        ║  shipper.name            → inv.shipper.name      ║
+        ║  shipper.postalAddress   → inv.shipper.address   ║
+        ║  receiver.name           → inv.receiver.name     ║
+        ║  receiver.postalAddress  → inv.receiver.address  ║
+        ║  content.weight.value    → inv.weight            ║
+        ║  content.packages        → inv.items             ║
+        ╚══════════════════════════════════════════════════╝
+      -->
+
+      <div class="form-group">
+        <label>رقم AWB (بوليصة الشحن) *</label>
+        <input type="text" id="awb-input" placeholder="مثال: 1234567890" style="font-family:var(--mono);letter-spacing:1px">
+      </div>
+
+      <div class="form-group">
+        <label>رابط Label PDF <span style="color:var(--muted);font-weight:400">(اختياري — إذا كان متاحاً)</span></label>
+        <input type="text" id="awb-label-url" placeholder="https://...">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">سيُستخدم لعرض، تحميل، وإرسال البوليصة عبر واتساب</div>
+      </div>
+
+      <!-- Shipment summary -->
+      <div id="awb-shipment-summary" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;display:flex;flex-direction:column;gap:5px"></div>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('awb-modal')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveAWB()">💾 حفظ AWB</button>
     </div>
   </div>
 </div>
@@ -2202,7 +2582,7 @@ function renderDashTable(filtered) {
 let quickDate = 'all';
 let quickStatus = 'all';
 let priceSort = 'none'; // 'none' | 'asc' | 'desc'
-let dateSort = 'none';  // 'none' | 'asc' | 'desc'
+let dateSort = 'desc';  // الافتراضي: الأحدث أولاً دائماً
 
 function _applySortBtn(btnId, val) {
   const btn = document.getElementById(btnId);
@@ -2227,12 +2607,13 @@ function togglePriceSort() {
 }
 
 function toggleDateSort() {
-  dateSort = dateSort === 'none' ? 'desc' : dateSort === 'desc' ? 'asc' : 'none';
-  priceSort = 'none'; // reset price sort
-  const labels = { none: '📅 التاريخ ↕', desc: '📅 الأحدث أولاً ↓', asc: '📅 الأقدم أولاً ↑' };
+  // تبديل بين: الأحدث أولاً ↓  ←→  الأقدم أولاً ↑
+  dateSort = dateSort === 'desc' ? 'asc' : 'desc';
+  priceSort = 'none';
+  const labels = { desc: '📅 الأحدث أولاً ↓', asc: '📅 الأقدم أولاً ↑' };
   const btn = document.getElementById('sort-date-btn');
   if (btn) btn.textContent = labels[dateSort];
-  _applySortBtn('sort-date-btn', dateSort);
+  _applySortBtn('sort-date-btn', 'desc'); // دائماً active لأنه الترتيب الافتراضي
   _applySortBtn('sort-price-btn', 'none');
   const priceBtn = document.getElementById('sort-price-btn');
   if (priceBtn) priceBtn.textContent = '💰 المبلغ ↕';
@@ -2305,14 +2686,13 @@ function renderTable() {
   const advDateTo = document.getElementById('adv-date-to')?.value || '';
   const quickFrom = document.getElementById('quick-date-from')?.value || '';
   const quickTo = document.getElementById('quick-date-to')?.value || '';
-  // Merge: quick date range takes priority if set
   const dateFrom = quickFrom || advDateFrom;
   const dateTo = quickTo || advDateTo;
 
   const now = new Date();
-  let filtered = [...invoices].reverse().filter(i => {
+  let filtered = [...invoices].filter(i => {
     // text search
-    if (q && !i.client.toLowerCase().includes(q) && !i.awb.toLowerCase().includes(q) &&
+    if (q && !i.client.toLowerCase().includes(q) && !(i.awb||'').toLowerCase().includes(q) &&
         !(i.phone||'').includes(q) && !(i.id+'').includes(q)) return false;
     // adv filters
     if (advCarrier && i.carrier !== advCarrier) return false;
@@ -2332,11 +2712,15 @@ function renderTable() {
     return true;
   });
 
-  // Apply sort
+  // الترتيب — dateSort='desc' افتراضياً = الأحدث أولاً
   if (priceSort === 'desc') filtered.sort((a,b) => Number(b.price||0) - Number(a.price||0));
   else if (priceSort === 'asc') filtered.sort((a,b) => Number(a.price||0) - Number(b.price||0));
-  else if (dateSort === 'desc') filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
   else if (dateSort === 'asc') filtered.sort((a,b) => new Date(a.date||0) - new Date(b.date||0));
+  else filtered.sort((a,b) => new Date(b.date||0) - new Date(a.date||0)); // desc = newest first (default)
+
+  // عرض عدد النتائج
+  const countEl = document.getElementById('inv-results-count');
+  if (countEl) countEl.textContent = `${filtered.length} فاتورة`;
 
   const wrap = document.getElementById('invoices-table-wrap');
   if (!filtered.length) {
@@ -2349,30 +2733,31 @@ function renderTable() {
     <th>رقم الفاتورة</th><th>العميل</th><th>الجوال</th><th>رقم الشحنة</th>
     <th>البند</th><th>الشركة</th><th>الوزن</th><th>السعر</th><th>الحالة</th><th>طريقة الدفع</th><th>أنشأها</th><th>التاريخ</th><th>إجراءات</th>
   </tr></thead><tbody>` +
-    filtered.map(inv => `<tr>
+    filtered.map(inv => `<tr class="${inv.isDraft ? 'draft-row' : ''}">
       ${msMode?`<td><input type="checkbox" class="inv-checkbox" data-id="${inv.id}" onchange="updateExportBtn()" style="cursor:pointer;width:15px;height:15px"></td>`:''}
       <td class="mono">#${inv.id}</td>
-      <td style="font-weight:600"><span onclick="goToClient('${inv.phone}')" style="cursor:pointer;border-bottom:1px dashed var(--accent);color:var(--text)">${inv.client}</span></td>
-      <td class="mono" style="font-size:12px;direction:ltr">${inv.phone}</td>
-      <td class="mono">${inv.awb}</td>
+      <td style="font-weight:600"><span onclick="goToClient('${inv.phone||''}')" style="cursor:pointer;border-bottom:1px dashed var(--accent);color:var(--text)">${inv.client || '<span style="color:var(--muted);font-style:italic;font-size:11px">غير محدد</span>'}</span></td>
+      <td class="mono" style="font-size:12px;direction:ltr">${inv.phone || '<span style="color:var(--border)">—</span>'}</td>
+      <td class="mono">${inv.awb || '<span style="color:var(--border);font-size:11px">—</span>'}</td>
       <td><span style="background:rgba(139,92,246,0.12);color:#a78bfa;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${inv.items && inv.items.length > 1 ? inv.items.map(i=>i.type).join(' + ') : (inv.itemType||'شحن دولي')}</span></td>
       <td style="color:var(--muted);font-size:12px">${inv.carrier}</td>
       <td style="color:var(--muted);font-size:12px">${inv.weight ? `<span style="background:rgba(14,165,233,0.1);color:var(--accent);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">${inv.weight} كجم</span>` : '<span style="color:var(--border)">—</span>'}</td>
-      <td style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)} ر.س</td>
-      <td>${statusBadge(inv.status)}</td>
+      <td style="font-weight:700;color:var(--gold)">${inv.price ? Number(inv.price).toFixed(2) + ' ر.س' : '<span style="color:var(--border);font-weight:400;font-size:11px">—</span>'}</td>
+      <td>${inv.isDraft ? `<span class="badge badge-draft"><span class="badge-dot" style="background:var(--gold)"></span>مسودة</span>` : statusBadge(inv.status)}</td>
       <td style="color:var(--muted);font-size:12px">${inv.payment||'—'}</td>
       <td>${inv.created_by ? `<span class="creator-badge">👤 ${inv.created_by}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}</td>
       <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
       <td><div class="actions">
         <button class="btn btn-ghost btn-sm" onclick="viewInvoice(${inv.id})">👁</button>
         <button class="btn btn-ghost btn-sm" title="إضافة بند" onclick="openAddItemModal(${inv.id})" style="color:#a78bfa">＋</button>
-        <button class="btn btn-ghost btn-sm" onclick="editInvoice(${inv.id})">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="editInvoice(${inv.id})" ${inv.isDraft ? 'style="color:var(--gold)"' : ''} title="${inv.isDraft ? 'إكمال المسودة' : 'تعديل'}">✏️${inv.isDraft ? ' إكمال' : ''}</button>
         <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${inv.id})">🗑</button>
       </div></td>
     </tr>`).join('') + `</tbody></table>`;
 }
 
 function statusBadge(s) {
+  if (s==='draft' || s==='isDraft') return `<span class="badge badge-draft"><span class="badge-dot" style="background:var(--gold)"></span>مسودة</span>`;
   if (s==='paid') return `<span class="badge badge-paid"><span class="badge-dot"></span>مدفوعة</span>`;
   if (s==='partial') return `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><span class="badge-dot" style="background:var(--gold)"></span>جزئية</span>`;
   return `<span class="badge badge-unpaid"><span class="badge-dot"></span>غير مدفوعة</span>`;
@@ -2422,6 +2807,10 @@ function openNewInvoice(prefill) {
   document.getElementById('barcode-wrap').style.display = 'none';
   document.getElementById('qr-wrap').style.display = 'none';
   document.getElementById('edit-mode-note').style.display = 'none';
+  // Clear shipper/receiver + draft banner
+  clearShipperReceiver();
+  const draftBanner = document.getElementById('draft-banner');
+  if (draftBanner) draftBanner.style.display = 'none';
 
   if (prefill) {
     // Skip to step 2 directly with prefilled price
@@ -2468,6 +2857,8 @@ function wShowStep(n) {
   back.style.display = 'none';
   save.style.display = 'none';
   steps.style.display = 'none';
+  const draftBtn = document.getElementById('wizard-draft-btn');
+  if (draftBtn) draftBtn.style.display = 'none';
 
   if (n === 0) {
     s0.style.display = 'block';
@@ -2482,6 +2873,7 @@ function wShowStep(n) {
     s2.style.display = 'block';
     back.style.display = 'flex';
     save.style.display = 'flex';
+    if (draftBtn) draftBtn.style.display = 'flex';
     ws1.className = 'wstep done'; ws2.className = 'wstep active'; wl1.className = 'wstep-line done';
   }
 }
@@ -2505,6 +2897,282 @@ function generateCode() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// SMART SUGGEST — اقتراحات ذكية من البيانات السابقة
+// ═══════════════════════════════════════════════════════════════
+
+// بناء قاعدة بيانات المرسلين والمستلمين من الشحنات السابقة
+function buildContactsDB() {
+  const map = new Map(); // key: normalised name|phone
+
+  invoices.forEach((inv, invIdx) => {
+    const addContact = (src, label) => {
+      if (!src?.name && !src?.phone) return;
+      const key = (src.name||'').trim().toLowerCase() + '|' + (src.phone||'').replace(/\D/g,'');
+      if (!map.has(key)) {
+        map.set(key, { name: src.name||'', phone: src.phone||'',
+          address: src.address||'', country: src.country||'',
+          count: 0, lastIdx: invIdx, label });
+      }
+      const entry = map.get(key);
+      entry.count++;
+      entry.lastIdx = Math.max(entry.lastIdx, invIdx);
+      // Prefer most complete record
+      if (src.address && !entry.address) entry.address = src.address;
+      if (src.country && !entry.country) entry.country = src.country;
+    };
+    addContact(inv.shipper, 'مرسل');
+    addContact(inv.receiver, 'مستلم');
+    // Client as candidate
+    if (inv.client || inv.phone) {
+      addContact({ name: inv.client||'', phone: inv.phone||'', address:'' }, 'عميل');
+    }
+  });
+
+  // Sort: most recent first, then by count
+  return [...map.values()].sort((a,b) => (b.lastIdx - a.lastIdx) || (b.count - a.count));
+}
+
+// إظهار قائمة الاقتراحات
+const _suggestStore = {}; // مخزن آمن بدلاً من JSON في onclick
+
+function smartSuggest(inputEl, role) {
+  const rawQ = inputEl.value.trim();
+  const q = rawQ.toLowerCase();
+  const isPhone = inputEl.id.includes('phone');
+  const listId = 'suggest-' + inputEl.id.replace('f-','');
+  const list = document.getElementById(listId);
+  if (!list) return;
+
+  if (q.length < 1) { list.style.display = 'none'; return; }
+
+  const contacts = buildContactsDB();
+  const matches = contacts.filter(c => {
+    if (isPhone) return c.phone && c.phone.replace(/\D/g,'').includes(q.replace(/\D/g,''));
+    return (c.name && c.name.toLowerCase().includes(q)) ||
+           (c.phone && c.phone.includes(q));
+  }).slice(0, 6);
+
+  if (!matches.length) { list.style.display = 'none'; return; }
+
+  // حفظ النتائج في الذاكرة — أآمن من JSON في HTML attributes
+  _suggestStore[listId] = matches;
+
+  // تمييز النص المطابق
+  const hl = (text, q) => {
+    if (!text || !q) return text || '';
+    const idx = text.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return text;
+    return text.slice(0,idx) + '<mark>' + text.slice(idx, idx+q.length) + '</mark>' + text.slice(idx+q.length);
+  };
+
+  list.innerHTML =
+    `<div class="suggest-hint">💡 اقتراحات من شحنات سابقة — اختر أو أكمل يدوياً</div>` +
+    matches.map((c, i) => {
+      const displayName = hl(c.name, isPhone ? '' : rawQ);
+      const displayPhone = hl(c.phone, isPhone ? rawQ : '');
+      const subParts = [];
+      if (c.name && isPhone) subParts.push(c.name);
+      if (c.phone && !isPhone) subParts.push(`<span style="direction:ltr">${c.phone}</span>`);
+      if (c.address) subParts.push(c.address.slice(0,25) + (c.address.length>25?'…':''));
+      if (c.country) subParts.push(`🌍 ${c.country}`);
+      return `<div class="suggest-item" data-idx="${i}"
+        onmousedown="applySuggest(event,'${role}','${listId}',${i})"
+        onmouseover="focusSuggestItem(this,'${listId}')">
+        <span class="suggest-icon">${isPhone ? '📱' : '👤'}</span>
+        <div style="flex:1;min-width:0">
+          <div class="suggest-name">${isPhone ? displayPhone : displayName}</div>
+          <div class="suggest-sub">${subParts.join(' · ')}</div>
+        </div>
+        ${c.count > 1 ? `<span class="suggest-count">${c.count}×</span>` : ''}
+      </div>`;
+    }).join('');
+  list.style.display = 'block';
+}
+
+// تطبيق الاقتراح المختار — يقرأ من _suggestStore الآمن
+function applySuggest(e, role, listId, idx) {
+  e.preventDefault();
+  const contact = (_suggestStore[listId] || [])[idx];
+  if (!contact) return;
+
+  const prefix = 'f-' + role + '-';
+  const nameEl    = document.getElementById(prefix + 'name');
+  const phoneEl   = document.getElementById(prefix + 'phone');
+  const addrEl    = document.getElementById(prefix + 'address');
+  const countryEl = document.getElementById(prefix + 'country');
+
+  if (nameEl    && contact.name)    nameEl.value    = contact.name;
+  if (phoneEl   && contact.phone)   phoneEl.value   = contact.phone;
+  if (addrEl    && contact.address) addrEl.value    = contact.address;
+  if (countryEl && contact.country) countryEl.value = contact.country;
+
+  // إخفاء كل قوائم الاقتراحات لهذا الدور
+  ['name','phone'].forEach(f => {
+    const l = document.getElementById('suggest-' + role + '-' + f);
+    if (l) l.style.display = 'none';
+  });
+}
+
+// إخفاء قائمة مع تأخير (لإتاحة حدث mousedown)
+function hideSuggest(fieldId) {
+  setTimeout(() => {
+    const l = document.getElementById('suggest-' + fieldId);
+    if (l) l.style.display = 'none';
+  }, 200);
+}
+
+// تنقل بالكيبورد
+// listId هنا هو fieldId مثل 'shipper-name' — يُضاف إليه suggest- للوصول للـ DOM
+function navigateSuggest(e, fieldId) {
+  const listDomId = 'suggest-' + fieldId;
+  const list = document.getElementById(listDomId);
+  if (!list || list.style.display === 'none') return;
+  const items = list.querySelectorAll('.suggest-item');
+  const current = list.querySelector('.suggest-item.focused');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = current ? current.nextElementSibling : items[0];
+    if (next && next.classList.contains('suggest-item')) {
+      current?.classList.remove('focused'); next.classList.add('focused'); next.scrollIntoView({block:'nearest'});
+    }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = current?.previousElementSibling;
+    if (prev && prev.classList.contains('suggest-item')) {
+      current.classList.remove('focused'); prev.classList.add('focused'); prev.scrollIntoView({block:'nearest'});
+    }
+  } else if (e.key === 'Enter' && current) {
+    e.preventDefault();
+    current.dispatchEvent(new MouseEvent('mousedown'));
+  } else if (e.key === 'Escape') {
+    list.style.display = 'none';
+  }
+}
+
+function focusSuggestItem(el, listId) {
+  document.querySelectorAll(`#${listId} .suggest-item`).forEach(i => i.classList.remove('focused'));
+  el.classList.add('focused');
+}
+
+// ─── Shipper "نفس بيانات العميل" ───
+function toggleShipperSame() {
+  const same = document.getElementById('f-shipper-same').checked;
+  const nameEl  = document.getElementById('f-shipper-name');
+  const phoneEl = document.getElementById('f-shipper-phone');
+  const addrEl  = document.getElementById('f-shipper-address');
+  if (same) {
+    nameEl.value  = document.getElementById('f-client').value;
+    phoneEl.value = document.getElementById('f-phone').value;
+    nameEl.readOnly = phoneEl.readOnly = true;
+    nameEl.style.opacity = phoneEl.style.opacity = '0.6';
+  } else {
+    nameEl.readOnly = phoneEl.readOnly = false;
+    nameEl.style.opacity = phoneEl.style.opacity = '1';
+  }
+}
+
+// ─── قراءة بيانات Shipper/Receiver من النموذج ───
+function readShipper() {
+  return {
+    name:    document.getElementById('f-shipper-name')?.value.trim()    || '',
+    phone:   document.getElementById('f-shipper-phone')?.value.trim()   || '',
+    address: document.getElementById('f-shipper-address')?.value.trim() || '',
+    sameAsCustomer: document.getElementById('f-shipper-same')?.checked  || false,
+  };
+}
+function readReceiver() {
+  return {
+    name:    document.getElementById('f-receiver-name')?.value.trim()    || '',
+    phone:   document.getElementById('f-receiver-phone')?.value.trim()   || '',
+    address: document.getElementById('f-receiver-address')?.value.trim() || '',
+    country: document.getElementById('f-receiver-country')?.value.trim() || '',
+  };
+}
+
+// ─── ملء حقول Shipper/Receiver عند تعديل شحنة ───
+function fillShipperReceiver(inv) {
+  const s = inv.shipper || {};
+  const r = inv.receiver || {};
+  if (document.getElementById('f-shipper-name'))    document.getElementById('f-shipper-name').value    = s.name    || '';
+  if (document.getElementById('f-shipper-phone'))   document.getElementById('f-shipper-phone').value   = s.phone   || '';
+  if (document.getElementById('f-shipper-address')) document.getElementById('f-shipper-address').value = s.address || '';
+  if (document.getElementById('f-shipper-same'))    document.getElementById('f-shipper-same').checked  = s.sameAsCustomer || false;
+  if (document.getElementById('f-receiver-name'))    document.getElementById('f-receiver-name').value    = r.name    || '';
+  if (document.getElementById('f-receiver-phone'))   document.getElementById('f-receiver-phone').value   = r.phone   || '';
+  if (document.getElementById('f-receiver-address')) document.getElementById('f-receiver-address').value = r.address || '';
+  if (document.getElementById('f-receiver-country')) document.getElementById('f-receiver-country').value = r.country || '';
+}
+
+// ─── مسح حقول Shipper/Receiver ───
+function clearShipperReceiver() {
+  ['f-shipper-name','f-shipper-phone','f-shipper-address','f-receiver-name','f-receiver-phone','f-receiver-address','f-receiver-country'].forEach(id => {
+    const el = document.getElementById(id); if (el) { el.value = ''; el.readOnly = false; el.style.opacity = '1'; }
+  });
+  const same = document.getElementById('f-shipper-same'); if (same) same.checked = false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SAVE AS DRAFT — حفظ كمسودة
+// ═══════════════════════════════════════════════════════════════
+
+function saveAsDraft() {
+  const client  = document.getElementById('f-client').value.trim();
+  const carrier = document.getElementById('f-carrier').value;
+  // يكفي اسم العميل أو أي حقل واحد
+  if (!client && !carrier) { showToast('⚠️ أدخل اسم العميل على الأقل لحفظ المسودة'); return; }
+
+  const phone   = document.getElementById('f-phone').value.trim();
+  const itemType= document.getElementById('f-item-type').value;
+  const awb     = document.getElementById('f-awb').value.trim();
+  const price   = document.getElementById('f-price').value;
+  const weight  = document.getElementById('f-weight').value;
+  const date    = document.getElementById('f-date').value;
+  const status  = document.getElementById('f-status').value;
+  const payment = document.getElementById('f-payment').value;
+  const details = document.getElementById('f-details').value.trim();
+  const codeType= document.getElementById('f-code-type').value;
+  const shipper = readShipper();
+  const receiver= readReceiver();
+  const curUser = getCurrentUser();
+  const actor   = curUser?.name || curUser?.username || '—';
+
+  if (editingId) {
+    // تحديث مسودة موجودة
+    const idx = invoices.findIndex(i => String(i.id)===String(editingId));
+    if (idx !== -1) {
+      invoices[idx] = { ...invoices[idx], client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver, isDraft: true };
+      addTimelineEvent(invoices[idx], 'edit', { note: 'تحديث المسودة' }, true); // skipSave — saveData below
+      showToast('📋 تم تحديث المسودة');
+    }
+  } else {
+    const newId = String(invoices.length ? Math.max(...invoices.map(i=>Number(i.id)||0))+1 : 1001);
+    invoices.push({ id:newId, client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver,
+      isDraft: true, created_by: actor,
+      timeline: [{ type:'create', at:new Date().toISOString(), actor, note:`مسودة — ${carrier||'غير محدد'} — ${client||'غير محدد'}` }]
+    });
+    showToast('📋 تم حفظ المسودة — يمكنك إكمالها لاحقاً');
+  }
+  saveData();
+  const savedDraft = editingId ? invoices.find(i=>String(i.id)===String(editingId)) : invoices[invoices.length-1];
+  if (savedDraft) saveInvoiceToDB(savedDraft);
+  renderTable(); updateStats(); closeModal('form-modal');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AWB PRE-FLIGHT CHECK — التحقق قبل إصدار البوليصة
+// ═══════════════════════════════════════════════════════════════
+
+function awbPreflightCheck(inv) {
+  const errors = [];
+  const r = inv.receiver || {};
+  if (!r.name)    errors.push('❌ اسم المستلم (Receiver Name) مطلوب');
+  if (!r.phone && !inv.phone) errors.push('❌ رقم جوال المستلم مطلوب');
+  if (!r.country) errors.push('❌ دولة المستلم (Country) مطلوبة');
+  if (!inv.weight || Number(inv.weight) <= 0) errors.push('❌ الوزن يجب أن يكون أكبر من صفر');
+  return errors;
+}
+
 // ─── SAVE INVOICE ───
 function saveInvoice() {
   const client = document.getElementById('f-client').value.trim();
@@ -2519,19 +3187,45 @@ function saveInvoice() {
   const payment = document.getElementById('f-payment').value;
   const details = document.getElementById('f-details').value.trim();
   const codeType = document.getElementById('f-code-type').value;
+  const shipper = readShipper();
+  const receiver = readReceiver();
   if (!client||!phone||!carrier||!awb||!price) { showToast('⚠️ يرجى ملء جميع الحقول المطلوبة'); return; }
   if (editingId) {
     const idx = invoices.findIndex(i => String(i.id)===String(editingId));
-    invoices[idx] = {...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType};
-    showToast('✅ تم تعديل الفاتورة بنجاح');
+    const prev = invoices[idx];
+    const wasDraft = prev.isDraft;
+    invoices[idx] = {...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,isDraft:false};
+    // Timeline — skipSave=true لتجنب حفظات متعددة (saveData يُستدعى مرة واحدة أدناه)
+    addTimelineEvent(invoices[idx], 'edit', { note: wasDraft ? `إكمال المسودة — ${carrier}` : `تعديل البيانات — ${carrier}` }, true);
+    if (wasDraft) addTimelineEvent(invoices[idx], 'invoice', { note: `${Number(price).toFixed(2)} ر.س` }, true);
+    if (prev.status !== status) {
+      addTimelineEvent(invoices[idx], status === 'paid' ? 'paid' : 'unpaid', { note: `تغيير الحالة من ${prev.status} إلى ${status}` }, true);
+    }
+    if (prev.awb !== awb && awb) {
+      addTimelineEvent(invoices[idx], 'awb', { awb, note: 'تم تعديل AWB يدوياً' }, true);
+    }
+    showToast(wasDraft ? '✅ تم إكمال المسودة وحفظها' : '✅ تم تعديل الفاتورة بنجاح');
   } else {
     const newId = String(invoices.length ? Math.max(...invoices.map(i=>Number(i.id)||0))+1 : 1001);
     const curUser = getCurrentUser();
-    invoices.push({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,created_by:curUser?.name||curUser?.username||'—'});
+    const actor = curUser?.name || curUser?.username || '—';
+    invoices.push({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,
+      isDraft: false,
+      created_by: actor,
+      timeline: [
+        { type:'create',  at:new Date().toISOString(), actor, note:`شحنة ${carrier} — ${client}` },
+        { type:'invoice', at:new Date().toISOString(), actor, note:`${Number(price).toFixed(2)} ر.س` },
+        ...(awb ? [{ type:'awb', at:new Date().toISOString(), actor, awb }] : []),
+        ...(status === 'paid' ? [{ type:'paid', at:new Date().toISOString(), actor, note: payment||'' }] : []),
+      ]
+    });
     showToast('✅ تم إنشاء الفاتورة بنجاح');
   }
   saveData();
-  saveInvoiceToDB(invoices[invoices.length-1] || invoices.find(i=>i.id==currentEditId));
+  const saved = editingId ? invoices.find(i=>String(i.id)===String(editingId)) : invoices[invoices.length-1];
+  if (saved) saveInvoiceToDB(saved);
+  // ── ربط بدفترة عبر رقم الجوال ──
+  if (saved && !saved.daftra_id && phone) linkInvoiceToDaftraByPhone(saved);
   renderTable(); updateStats(); closeModal('form-modal');
 }
 
@@ -2539,7 +3233,7 @@ function saveInvoice() {
 function editInvoice(id) {
   const inv = invoices.find(i=>String(i.id)===String(id)); if(!inv) return;
   editingId = id;
-  document.getElementById('form-modal-title').textContent = 'تعديل الفاتورة #'+id;
+  document.getElementById('form-modal-title').textContent = (inv.isDraft ? '✏️ إكمال المسودة' : 'تعديل الفاتورة') + ' #'+id;
   document.getElementById('f-client').value = inv.client||'';
   document.getElementById('f-phone').value = inv.phone||'';
   document.getElementById('f-item-type').value = inv.itemType||'شحن دولي';
@@ -2552,10 +3246,15 @@ function editInvoice(id) {
   document.getElementById('f-payment').value = inv.payment||'';
   document.getElementById('f-details').value = inv.details||'';
   document.getElementById('f-code-type').value = inv.codeType||'barcode';
+  // Draft banner
+  const draftBanner = document.getElementById('draft-banner');
+  if (draftBanner) draftBanner.style.display = inv.isDraft ? 'flex' : 'none';
+  // Shipper / Receiver
+  fillShipperReceiver(inv);
   document.getElementById('edit-mode-note').style.display = 'block';
   // Go directly to step 2 for edits
   document.getElementById('w-price-bar-val').textContent = inv.price||'—';
-  document.getElementById('w-price-bar-details').textContent = 'وضع التعديل';
+  document.getElementById('w-price-bar-details').textContent = inv.isDraft ? 'مسودة — أكمل البيانات' : 'وضع التعديل';
   document.getElementById('barcode-wrap').style.display = 'none';
   document.getElementById('qr-wrap').style.display = 'none';
   wShowStep(2);
@@ -2621,56 +3320,535 @@ function viewInvoice(id) {
       <div class="inv-footer-text" style="font-family:monospace">AWB: ${inv.awb}</div>
     </div>`;
   openModal('invoice-modal');
+  // Reset to invoice tab when opening
+  switchInvTab('invoice');
+  // Show timeline count in tab button
+  const n = (inv.timeline||[]).length;
+  const tlBtn = document.getElementById('tab-btn-timeline');
+  if (tlBtn) tlBtn.textContent = `🕐 Activity Timeline${n ? ` (${n})` : ''}`;
   setTimeout(() => {
     if (inv.codeType==='barcode') { try{JsBarcode('#inv-barcode-render',inv.awb,{format:'CODE128',lineColor:'#0f172a',width:1.8,height:50,displayValue:true,fontSize:12})}catch(e){} }
     else { const el=document.getElementById('inv-qr-render'); if(el) new QRCode(el,{text:inv.awb,width:100,height:100,colorDark:'#0f172a',colorLight:'#ffffff'}); }
     refreshPaymentButtons();
+    refreshLabelCenter(inv);
   },100);
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ACTIVITY TIMELINE — نظام سجل أحداث الشحنة
+// ═══════════════════════════════════════════════════════════════
+
+// ── addTimelineEvent: أضف حدثاً للشحنة
+// type: 'create'|'invoice'|'paid'|'unpaid'|'awb'|'wa_send'|'wa_unpaid'|'wa_resend'|'print'|'label_view'|'label_dl'|'edit'|'payment_link'|'note'
+// skipSave: true عند الاستدعاء المتعدد لتجنب حفظات مكررة — الدالة الخارجية تحفظ مرة واحدة
+function addTimelineEvent(inv, type, meta = {}, skipSave = false) {
+  const idx = invoices.findIndex(i => String(i.id) === String(inv.id));
+  if (idx === -1) return;
+  if (!invoices[idx].timeline) invoices[idx].timeline = [];
+  const curUser = getCurrentUser();
+  const actor = meta.actor || curUser?.name || curUser?.username || '—';
+  invoices[idx].timeline.push({ type, at: new Date().toISOString(), actor, ...meta });
+  currentViewInvoice = invoices[idx];
+  if (!skipSave) {
+    saveData();
+    saveInvoiceToDB(invoices[idx]);
+  }
+  // Update tab badge count live (without touching button text)
+  const tlBadge = document.getElementById('tl-count-badge');
+  if (tlBadge) {
+    const n = invoices[idx].timeline.length;
+    tlBadge.textContent = n;
+    tlBadge.style.display = 'inline';
+  }
+}
+
+// ── switchInvTab: تبديل بين تبويب الفاتورة والتايم لاين
+function switchInvTab(tab) {
+  ['invoice', 'timeline'].forEach(t => {
+    const panel = document.getElementById(`tab-panel-${t}`);
+    const btn   = document.getElementById(`tab-btn-${t}`);
+    const active = t === tab;
+    if (panel) panel.style.display = active ? 'block' : 'none';
+    if (btn)   btn.classList.toggle('active', active);
+  });
+  if (tab === 'timeline') {
+    renderTimeline(currentViewInvoice);
+  } else {
+    // Reset timeline tab label (count shown on open)
+    const tabBtn = document.getElementById('tab-btn-timeline');
+    if (tabBtn) {
+      const n = (currentViewInvoice?.timeline||[]).length;
+      tabBtn.textContent = `🕐 Activity Timeline${n ? ` (${n})` : ''}`;
+    }
+  }
+}
+
+// ── renderTimeline: يعرض الأحداث في الـ panel
+function renderTimeline(inv) {
+  const body = document.getElementById('timeline-body');
+  if (!body) return;
+
+  const events = (inv?.timeline || []).slice().reverse(); // أحدث أولاً
+
+  if (!events.length) {
+    body.innerHTML = `<div class="tl-empty">
+      <div style="font-size:32px;margin-bottom:10px">📋</div>
+      <div style="font-weight:700;margin-bottom:4px">لا توجد أحداث مسجّلة</div>
+      <div style="font-size:11px;opacity:0.6">ستظهر الأحداث تلقائياً مع كل عملية</div>
+    </div>`;
+    return;
+  }
+
+  // Event config map
+  const cfg = {
+    create:       { icon:'✨', cls:'tl-create',  label:'تم إنشاء الشحنة',                 badge:'إنشاء',         bCls:'tl-badge-blue',   card:'tl-card-first' },
+    invoice:      { icon:'🧾', cls:'tl-create',  label:'تم إصدار الفاتورة',               badge:'فاتورة',        bCls:'tl-badge-blue',   card:''              },
+    paid:         { icon:'✅', cls:'tl-paid',    label:'تم تأكيد الدفع',                  badge:'مدفوع',         bCls:'tl-badge-green',  card:'tl-card-paid'  },
+    unpaid:       { icon:'↩️', cls:'tl-edit',    label:'تم إعادة الفاتورة لغير مدفوعة',   badge:'غير مدفوع',     bCls:'tl-badge-red',    card:''              },
+    awb:          { icon:'🏷️', cls:'tl-awb',    label:'تم إصدار AWB',                     badge:'AWB',           bCls:'tl-badge-gold',   card:'tl-card-awb'   },
+    wa_send:      { icon:'📲', cls:'tl-wa',      label:'تم إرسال البوليصة عبر واتساب',    badge:'WA · بوليصة',  bCls:'tl-badge-wa',     card:'tl-card-wa'    },
+    wa_unpaid:    { icon:'📤', cls:'tl-wa',      label:'تم إرسال رابط الدفع عبر واتساب', badge:'WA · دفع',     bCls:'tl-badge-wa',     card:'tl-card-wa'    },
+    wa_resend:    { icon:'🔁', cls:'tl-wa',      label:'تمت إعادة الإرسال عبر واتساب',    badge:'WA · إعادة',   bCls:'tl-badge-wa',     card:'tl-card-wa'    },
+    print:        { icon:'🖨️', cls:'tl-print',  label:'تمت طباعة البوليصة',              badge:'طباعة',         bCls:'tl-badge-purple', card:'tl-card-print' },
+    label_view:   { icon:'👁', cls:'tl-print',   label:'تم عرض البوليصة PDF',             badge:'عرض PDF',       bCls:'tl-badge-purple', card:''              },
+    label_dl:     { icon:'⬇', cls:'tl-print',   label:'تم تحميل البوليصة',               badge:'تحميل',         bCls:'tl-badge-purple', card:''              },
+    edit:         { icon:'✏️', cls:'tl-edit',   label:'تم تعديل بيانات الشحنة',           badge:'تعديل',         bCls:'tl-badge-blue',   card:''              },
+    payment_link: { icon:'💳', cls:'tl-payment', label:'تم إرسال رابط الدفع',             badge:'رابط دفع',      bCls:'tl-badge-gold',   card:''              },
+    note:         { icon:'💬', cls:'tl-edit',    label:'ملاحظة',                           badge:'ملاحظة',        bCls:'tl-badge-blue',   card:''              },
+  };
+
+  body.innerHTML = events.map((ev, i) => {
+    const c = cfg[ev.type] || { icon:'🔵', cls:'tl-edit', label:ev.type, badge:ev.type, bCls:'tl-badge-blue', card:'' };
+
+    // Time formatting
+    const d = new Date(ev.at);
+    const timeAgo = tlTimeAgo(ev.at);
+    const fullDate = d.toLocaleDateString('ar-SA', {
+      weekday:'short', day:'numeric', month:'short', year:'numeric'
+    }) + ' — ' + d.toLocaleTimeString('ar-SA', { hour:'2-digit', minute:'2-digit' });
+
+    // Extra detail block
+    let detail = '';
+    if (ev.type === 'awb' && ev.awb) {
+      detail = `<div class="tl-detail"><span style="font-family:var(--mono);font-size:13px;font-weight:800;color:var(--gold);background:rgba(245,158,11,0.1);padding:3px 10px;border-radius:6px;letter-spacing:1px">${ev.awb}</span></div>`;
+    }
+    if ((ev.type==='wa_send'||ev.type==='wa_unpaid'||ev.type==='wa_resend') && ev.phone) {
+      detail = `<div class="tl-detail" style="color:var(--muted);font-size:11px;direction:ltr">📱 ${ev.phone}</div>`;
+    }
+    if (ev.type==='paid' && ev.note) {
+      detail = `<div class="tl-detail" style="font-size:11px;color:#10b981">💳 ${ev.note}</div>`;
+    }
+    if (ev.type==='print') {
+      const src = ev.note || '—';
+      detail = `<div class="tl-detail" style="font-size:11px;color:var(--muted)">📄 ${src}</div>`;
+    }
+    if (ev.type==='edit' && ev.note) {
+      detail = `<div class="tl-detail" style="font-size:11px;color:var(--muted)">${ev.note}</div>`;
+    }
+    if (ev.type==='invoice' && ev.note) {
+      detail = `<div class="tl-detail" style="font-size:11px;font-weight:700;color:var(--text)">💰 ${ev.note}</div>`;
+    }
+
+    // Card modifier: first event in list = most recent
+    const cardMod = i === 0 ? '' : c.card;
+
+    return `<div class="tl-item">
+      <div class="tl-line"></div>
+      <div class="tl-icon-wrap ${c.cls}">${c.icon}</div>
+      <div class="tl-card ${cardMod}">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="tl-title">${c.label}</span>
+            <span class="tl-badge ${c.bCls}">${c.badge}</span>
+          </div>
+          <span class="tl-time" title="${fullDate}">${timeAgo}</span>
+        </div>
+        <div class="tl-meta">
+          ${ev.actor ? `<span class="tl-actor">👤 ${ev.actor}</span>` : ''}
+          <span class="tl-fulldate">${fullDate}</span>
+        </div>
+        ${detail}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Count display in tab button
+  const tabBtn = document.getElementById('tab-btn-timeline');
+  if (tabBtn) tabBtn.textContent = `🕐 Activity Timeline (${events.length})`;
+}
+
+// ── tlTimeAgo: وقت نسبي بالعربية
+function tlTimeAgo(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const s = Math.floor(diff / 1000);
+  const m = Math.floor(s / 60);
+  const h = Math.floor(m / 60);
+  const d = Math.floor(h / 24);
+  const w = Math.floor(d / 7);
+  if (s < 10)  return 'الآن';
+  if (s < 60)  return `منذ ${s} ثانية`;
+  if (m < 60)  return `منذ ${m} دقيقة`;
+  if (h < 24)  return `منذ ${h} ساعة`;
+  if (d < 7)   return `منذ ${d} يوم`;
+  if (w < 5)   return `منذ ${w} أسبوع`;
+  return new Date(iso).toLocaleDateString('ar-SA', {day:'numeric', month:'short', year:'numeric'});
+}
+
 // ─── PDF ───
+// ─── PDF — INVOICE ───
 async function downloadPDF() {
   const {jsPDF} = window.jspdf;
   const el = document.getElementById('invoice-print-area');
-  const canvas = await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
-  const pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  if (!el) return;
+  showToast('⏳ جاري تحضير الفاتورة...');
+  const canvas = await html2canvas(el, {scale:2, useCORS:true, backgroundColor:'#ffffff'});
+  const pdf = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
   const w = pdf.internal.pageSize.getWidth();
-  pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,w,(canvas.height*w)/canvas.width);
-  pdf.save(`invoice-${Date.now()}.pdf`);
-  showToast('⬇ جاري تحميل الفاتورة...');
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, (canvas.height * w) / canvas.width);
+  const inv = currentViewInvoice;
+  pdf.save(`invoice-${inv ? inv.id : Date.now()}.pdf`);
+  showToast('⬇ تم تحميل الفاتورة');
+}
+async function downloadInvoicePDF() { await downloadPDF(); }
+
+// ═══════════════════════════════════════════════════════════════
+// LABEL CENTER
+// ═══════════════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────────────────
+// DHL FIELD MAP  (placeholder — fill when DHL fields arrive)
+// ──────────────────────────────────────────────────────────────
+// dhl_response.shipmentTrackingNumber  → inv.awb
+// dhl_response.documents[0].content   → inv.labelBase64  (base64 PDF)
+// dhl_response.trackingUrl             → inv.trackingUrl  (optional)
+// dhl_response.shipmentId              → inv.dhlShipmentId
+//
+// Label display priority:
+//   1. inv.labelBase64  — stored locally, no re-generate
+//   2. inv.labelUrl     — external URL
+//   3. fallback print stub
+// ──────────────────────────────────────────────────────────────
+
+let currentViewInvoice = null;
+
+function refreshLabelCenter(inv) {
+  const hasAWB    = !!(inv && inv.awb && inv.awb.trim());
+  const noAwbEl   = document.getElementById('lc-no-awb');
+  const hasAwbEl  = document.getElementById('lc-has-awb');
+  const awbBadge  = document.getElementById('lc-awb-badge');
+  const unpaidBar = document.getElementById('lc-unpaid-bar');
+
+  // AWB badge top-right
+  if (awbBadge) {
+    awbBadge.style.display = hasAWB ? 'block' : 'none';
+    awbBadge.textContent   = hasAWB ? `AWB: ${inv.awb}` : '';
+  }
+
+  if (!hasAWB) {
+    if (noAwbEl)  noAwbEl.style.display  = 'flex';
+    if (hasAwbEl) hasAwbEl.style.display = 'none';
+    if (unpaidBar) unpaidBar.style.display = (inv && inv.status !== 'paid') ? 'block' : 'none';
+    return;
+  }
+
+  if (noAwbEl)  noAwbEl.style.display  = 'none';
+  if (hasAwbEl) hasAwbEl.style.display = 'block';
+
+  const awbVal = document.getElementById('lc-awb-val');
+  if (awbVal) awbVal.textContent = inv.awb;
+
+  // Label PDF hint
+  const labelHint = document.getElementById('lc-label-hint');
+  const labelLink  = document.getElementById('lc-label-link');
+  const hasLabel   = !!(inv.labelBase64 || inv.labelUrl);
+  if (labelHint) {
+    labelHint.style.display = hasLabel ? 'flex' : 'none';
+    if (hasLabel && labelLink) {
+      if (inv.labelUrl) {
+        labelLink.href = inv.labelUrl; labelLink.textContent = 'فتح الرابط ↗';
+      } else {
+        try {
+          const b = atob(inv.labelBase64), a = new Uint8Array(b.length);
+          for(let i=0;i<b.length;i++) a[i]=b.charCodeAt(i);
+          labelLink.href = URL.createObjectURL(new Blob([a],{type:'application/pdf'}));
+          labelLink.textContent = 'عرض PDF ↗';
+        } catch(e) { labelLink.href='#'; }
+      }
+    }
+  }
+
+  if (unpaidBar) unpaidBar.style.display = (inv.status !== 'paid') ? 'block' : 'none';
+  refreshWALogBadge();
+  // Update timeline count badge
+  const tlBadge = document.getElementById('tl-count-badge');
+  if (tlBadge) {
+    const n = (inv.timeline || []).length;
+    if (n) { tlBadge.style.display = 'inline'; tlBadge.textContent = n; }
+    else   { tlBadge.style.display = 'none'; }
+  }
+}
+
+// ── Open AWB modal (manual + ready for DHL) ──
+function openAWBModal() {
+  const inv = currentViewInvoice; if (!inv) return;
+  document.getElementById('awb-input').value     = inv.awb      || '';
+  document.getElementById('awb-label-url').value = inv.labelUrl || '';
+
+  const info = document.getElementById('awb-shipment-summary');
+  if (info) {
+    // ── Preflight: non-blocking — just warn inside modal ──
+    const errors = awbPreflightCheck(inv);
+    let preflightHTML = '';
+    if (errors.length) {
+      preflightHTML = `<div class="preflight-errors">
+        <div class="pf-title">⚠️ بيانات ناقصة — يُنصح بإكمالها قبل إصدار AWB</div>
+        ${errors.map(e => `<div class="pf-item">${e}</div>`).join('')}
+        <div style="font-size:10px;color:var(--muted);margin-top:6px">يمكنك حفظ AWB الآن، لكن DHL API قد ترفضه لاحقاً.</div>
+      </div>`;
+    }
+
+    const rows = [
+      ['العميل', inv.client||'—'], ['الجوال', inv.phone||'—'],
+      ['الناقل', inv.carrier||'—'], ['الوزن', inv.weight ? inv.weight+' كجم':'—'],
+      ['المرسل', inv.shipper?.name||'—'],
+      ['المستلم', inv.receiver?.name ? `<span style="color:${inv.receiver.name?'var(--text)':'var(--red-p)'}">${inv.receiver.name||'⚠️ مطلوب'}</span>` : '⚠️ مطلوب'],
+      ['دولة المستلم', inv.receiver?.country ? `<span style="color:var(--text)">${inv.receiver.country}</span>` : '<span style="color:var(--red-p)">⚠️ مطلوبة</span>'],
+    ];
+    info.innerHTML = preflightHTML +
+      `<div style="font-weight:700;font-size:12px;color:var(--text);margin-bottom:8px">ملخص الشحنة</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:12px">
+        ${rows.map(([k,v])=>`<span style="color:var(--muted)">${k}:</span><b>${v}</b>`).join('')}
+      </div>`;
+  }
+  openModal('awb-modal');
+}
+
+// ── Save AWB ──
+function saveAWB() {
+  const inv = currentViewInvoice; if (!inv) return;
+  const awb      = document.getElementById('awb-input').value.trim();
+  const labelUrl = document.getElementById('awb-label-url').value.trim();
+  if (!awb) { showToast('⚠️ أدخل رقم AWB'); return; }
+  const idx = invoices.findIndex(i => String(i.id)===String(inv.id));
+  if (idx === -1) return;
+  const isNew = !invoices[idx].awb || invoices[idx].awb !== awb;
+  invoices[idx].awb      = awb;
+  invoices[idx].labelUrl = labelUrl || invoices[idx].labelUrl || '';
+  currentViewInvoice = invoices[idx];
+  // Timeline: إصدار AWB — skipSave=true لأن saveData يأتي مباشرة بعده
+  addTimelineEvent(invoices[idx], 'awb', { awb, note: labelUrl ? 'مع رابط Label PDF' : 'بدون Label PDF' }, true);
+  saveData(); saveInvoiceToDB(invoices[idx]); renderTable();
+  closeModal('awb-modal');
+  refreshLabelCenter(invoices[idx]);
+  showToast(`✅ تم حفظ AWB: ${awb}`);
+}
+
+// ── Copy AWB ──
+function copyAWB() {
+  const awb = currentViewInvoice?.awb; if (!awb) return;
+  navigator.clipboard.writeText(awb).then(()=>showToast('✅ نسخ AWB')).catch(()=>{});
+}
+function lcCopyAWB() { copyAWB(); }
+
+// ── View Label PDF ──
+function lcViewPDF() {
+  const inv = currentViewInvoice; if (!inv) return;
+  if (inv.labelBase64) {
+    try {
+      const b=atob(inv.labelBase64), a=new Uint8Array(b.length);
+      for(let i=0;i<b.length;i++) a[i]=b.charCodeAt(i);
+      window.open(URL.createObjectURL(new Blob([a],{type:'application/pdf'})),'_blank');
+      addTimelineEvent(inv, 'label_view', { awb: inv.awb });
+    } catch(e) { showToast('❌ تعذّر فتح PDF'); }
+  } else if (inv.labelUrl) {
+    window.open(inv.labelUrl,'_blank');
+    addTimelineEvent(inv, 'label_view', { awb: inv.awb });
+  } else {
+    showToast('⚠️ لا يوجد Label PDF — أضف رابطاً من تعديل AWB');
+  }
+}
+
+// ── Download Label (use stored — no re-generate) ──
+function lcDownloadLabel() {
+  const inv = currentViewInvoice; if (!inv) return;
+  if (inv.labelBase64) {
+    const b=atob(inv.labelBase64), a=new Uint8Array(b.length);
+    for(let i=0;i<b.length;i++) a[i]=b.charCodeAt(i);
+    const url=URL.createObjectURL(new Blob([a],{type:'application/pdf'}));
+    const el=document.createElement('a'); el.href=url; el.download=`label-${inv.awb||inv.id}.pdf`; el.click();
+    addTimelineEvent(inv, 'label_dl', { awb: inv.awb });
+    showToast('⬇ تم تحميل البوليصة');
+  } else if (inv.labelUrl) {
+    window.open(inv.labelUrl,'_blank');
+    addTimelineEvent(inv, 'label_dl', { awb: inv.awb });
+    showToast('🔗 فتح رابط البوليصة');
+  } else {
+    showToast('⚠️ لا يوجد Label — أضف رابطاً من تعديل AWB');
+  }
+}
+
+// ── Print Label ──
+function lcPrintLabel() {
+  const inv = currentViewInvoice; if (!inv) return;
+  if (!inv.awb) { showToast('⚠️ لا يوجد AWB'); return; }
+
+  // Timeline: طباعة
+  addTimelineEvent(inv, 'print', { awb: inv.awb, note: inv.labelUrl ? 'PDF رسمي' : 'stub label' });
+
+  // Try real label first (base64 or URL)
+  let src = '';
+  if (inv.labelBase64) {
+    try {
+      const b=atob(inv.labelBase64), a=new Uint8Array(b.length);
+      for(let i=0;i<b.length;i++) a[i]=b.charCodeAt(i);
+      src = URL.createObjectURL(new Blob([a],{type:'application/pdf'}));
+    } catch(e){}
+  } else if (inv.labelUrl) { src = inv.labelUrl; }
+
+  if (src) {
+    const fr = document.createElement('iframe');
+    fr.style.cssText='position:fixed;top:-9999px;left:-9999px;width:1px;height:1px';
+    fr.src = src; document.body.appendChild(fr);
+    fr.onload=()=>{ setTimeout(()=>{ fr.contentWindow.print(); setTimeout(()=>document.body.removeChild(fr),3000); },400); };
+    return;
+  }
+
+  // Fallback stub label for branch printing
+  const pw = window.open('','_blank','width=420,height=320');
+  pw.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">
+<title>Label ${inv.awb}</title>
+<style>body{font-family:monospace;margin:20px;text-align:center}.awb{font-size:30px;font-weight:900;letter-spacing:3px;margin:14px 0}
+.info{font-size:12px;color:#555;margin:3px 0}hr{border:2px dashed #000;margin:14px 0}
+@media print{body{margin:6mm}}</style></head><body>
+<hr><div class="info" style="font-size:14px;font-weight:700">شيب بيك — Shipping Label</div>
+<div class="awb">${inv.awb}</div>
+<div class="info">العميل: ${inv.client||''}</div>
+${inv.carrier?`<div class="info">الناقل: ${inv.carrier}</div>`:''}
+${inv.receiver?.name?`<div class="info">المستلم: ${inv.receiver.name}</div>`:''}
+${inv.receiver?.address?`<div class="info">العنوان: ${inv.receiver.address}</div>`:''}
+<hr><div class="info" style="font-size:10px">#${inv.id} — ${formatDate(inv.date)}</div>
+<script>window.onload=()=>window.print()<\/script></body></html>`);
+  pw.document.close();
+}
+
+// ── WA from Label Center ──
+function lcSendWA() {
+  const inv = currentViewInvoice; if (!inv) return;
+  if (!inv.awb) { showToast('⚠️ أصدر AWB أولاً'); return; }
+  sendWAPaid();
+}
+function lcResendWA() {
+  const inv = currentViewInvoice; if (!inv) return;
+  if (inv.status==='paid' && inv.awb) {
+    // Same message as sendWAPaid but logged as 'resend'
+    if(!waValidate(inv,true)) return;
+    const trackUrl=inv.trackingUrl||`https://www.dhl.com/sa-en/home/tracking.html?tracking-id=${inv.awb}&submit=1`;
+    const invSuffix=ptSettings?.baseUrl?`\n\n🧾 الفاتورة:\n${ptSettings.baseUrl}/invoice/${inv.id}`:'';
+    let msg=`مرحباً ${inv.client} 👋\n\n✅ *تم إصدار بوليصة شحنتك بنجاح!*\n\n`;
+    msg+=`📦 *رقم AWB:* \`${inv.awb}\`\n`;
+    if(inv.carrier) msg+=`🚚 *الناقل:* ${inv.carrier}\n`;
+    msg+=`\n🔗 *تتبع الشحنة:*\n${trackUrl}`;
+    if(inv.labelUrl) msg+=`\n\n🖨️ *بوليصة الشحن (PDF):*\n${inv.labelUrl}`;
+    msg+=invSuffix;
+    msg+=`\n\n📌 في حال اختلاف الوزن عند DHL يُطبَّق الفرق وفق الشروط.\n\nشيب بيك تتمنى لك شحناً موفقاً 🌟`;
+    openWA(inv.phone, msg);
+    logWA(inv, 'resend', msg);
+    showToast('🔁 تمت إعادة إرسال البوليصة عبر واتساب');
+  } else {
+    sendWAUnpaid();
+  }
 }
 
 // ─── WHATSAPP ───
-let currentViewInvoice = null;
+function formatWAPhone(phone) {
+  const p=(phone||'').replace(/\D/g,'');
+  return p.startsWith('0')?'966'+p.slice(1):p;
+}
+function waValidate(inv, requireAWB) {
+  if (!inv)                                              { showToast('⚠️ لا توجد فاتورة');          return false; }
+  if (!inv.phone||inv.phone.replace(/\D/g,'').length<9) { showToast('⚠️ رقم الجوال غير مكتمل');    return false; }
+  if (!inv.client?.trim())                               { showToast('⚠️ اسم العميل غير مكتمل');    return false; }
+  if (!inv.price)                                        { showToast('⚠️ السعر غير محدد');           return false; }
+  if (requireAWB && !inv.awb?.trim())                   { showToast('⚠️ يجب إصدار AWB أولاً');      return false; }
+  return true;
+}
+function openWA(phone, msg) {
+  window.open('https://wa.me/'+formatWAPhone(phone)+'?text='+encodeURIComponent(msg),'_blank');
+}
+function logWA(inv, type, msg) {
+  const idx = invoices.findIndex(i=>String(i.id)===String(inv.id)); if(idx===-1) return;
+  if (!invoices[idx].waLog) invoices[idx].waLog=[];
+  invoices[idx].waLog.push({type, at:new Date().toISOString(), preview:msg.slice(0,120)});
+  currentViewInvoice=invoices[idx];
+  // Timeline hook — skipSave=true لأن saveData يأتي مباشرة بعده
+  const tlType = type==='paid' ? 'wa_send' : type==='unpaid' ? 'wa_unpaid' : 'wa_resend';
+  addTimelineEvent(invoices[idx], tlType, { phone: inv.phone }, true);
+  saveData(); saveInvoiceToDB(invoices[idx]); refreshWALogBadge();
+}
+function refreshWALogBadge() {
+  const inv=currentViewInvoice, btn=document.getElementById('lc-wa-log-btn');
+  if (!btn||!inv) return;
+  const n=(inv.waLog||[]).length;
+  if (n) { btn.style.display='inline-block'; btn.textContent=`📋 سجل (${n})`; }
+  else   { btn.style.display='none'; }
+}
+function showWALog() {
+  const inv=currentViewInvoice, body=document.getElementById('wa-log-body');
+  if (!body||!inv) return;
+  const logs=inv.waLog||[];
+  const lbl={unpaid:'فاتورة ودفع',paid:'بوليصة وتتبع',resend:'إعادة إرسال'};
+  body.innerHTML=logs.length ? logs.slice().reverse().map((l,i)=>{
+    const d=new Date(l.at), ds=d.toLocaleDateString('ar-SA',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;${i===0?'border-color:rgba(37,211,102,0.35);background:rgba(37,211,102,0.03)':''}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:12px;font-weight:700;color:#25d366">📲 ${lbl[l.type]||l.type}</span>
+        <span style="font-size:11px;color:var(--muted)">${ds}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">${l.preview}</div>
+    </div>`;
+  }).join('') : '<div style="text-align:center;color:var(--muted);padding:24px">لا يوجد سجل إرسال بعد</div>';
+  openModal('wa-log-modal');
+}
+
+function sendWAUnpaid() {
+  const inv=currentViewInvoice; if(!waValidate(inv,false)) return;
+  const payUrl=inv.paymentUrl||'';
+  const invSuffix=ptSettings?.baseUrl?`\n\n📄 الفاتورة:\n${ptSettings.baseUrl}/invoice/${inv.id}`:'';
+  let msg=`مرحباً ${inv.client} 👋\n\nنشكرك على تواصلك مع شيب بيك 🚀\n\n`;
+  msg+=`🧾 *الفاتورة رقم:* #${inv.id}\n`;
+  msg+=`💰 *المبلغ:* ${Number(inv.price).toFixed(2)} ر.س\n`;
+  msg+=`⏳ *الحالة:* بانتظار الدفع\n`;
+  if(payUrl) msg+=`\n💳 *رابط الدفع:*\n${payUrl}`;
+  msg+=invSuffix;
+  msg+=`\n\n⚠️ سيتم إرسال بوليصة الشحن بعد إتمام الدفع.\n\nشكراً لثقتك 🌟`;
+  openWA(inv.phone,msg); logWA(inv,'unpaid',msg); showToast('📲 تم فتح واتساب — رسالة الدفع');
+}
+
+function sendWAPaid() {
+  const inv=currentViewInvoice; if(!waValidate(inv,true)) return;
+  const trackUrl=inv.trackingUrl||`https://www.dhl.com/sa-en/home/tracking.html?tracking-id=${inv.awb}&submit=1`;
+  const invSuffix=ptSettings?.baseUrl?`\n\n🧾 الفاتورة:\n${ptSettings.baseUrl}/invoice/${inv.id}`:'';
+  let msg=`مرحباً ${inv.client} 👋\n\n✅ *تم إصدار بوليصة شحنتك بنجاح!*\n\n`;
+  msg+=`📦 *رقم AWB:* \`${inv.awb}\`\n`;
+  if(inv.carrier) msg+=`🚚 *الناقل:* ${inv.carrier}\n`;
+  msg+=`\n🔗 *تتبع الشحنة:*\n${trackUrl}`;
+  if(inv.labelUrl)  msg+=`\n\n🖨️ *بوليصة الشحن (PDF):*\n${inv.labelUrl}`;
+  msg+=invSuffix;
+  msg+=`\n\n📌 في حال اختلاف الوزن عند DHL يُطبَّق الفرق وفق الشروط.\n\nشيب بيك تتمنى لك شحناً موفقاً 🌟`;
+  openWA(inv.phone,msg); logWA(inv,'paid',msg); showToast('📲 تم فتح واتساب — رسالة البوليصة');
+}
+
+// Legacy aliases
 async function sendWhatsAppWithPDF() {
-  if (!currentViewInvoice) return;
-  // Download PDF first
-  await downloadPDF();
-  // Small delay then open WhatsApp
-  setTimeout(() => sendWhatsApp(), 800);
+  const inv=currentViewInvoice; if(!inv) return;
+  if(inv.status==='paid'&&inv.awb) sendWAPaid(); else sendWAUnpaid();
 }
+function sendWhatsApp() { sendWhatsAppWithPDF(); }
+async function sendWAResend() { lcResendWA(); }
 
-function sendWhatsApp() {
-  if (!currentViewInvoice) return;
-  const inv = currentViewInvoice;
-  const phone = inv.phone.replace(/\D/g,'');
-  const intlPhone = phone.startsWith('0') ? '966' + phone.slice(1) : phone;
-  const trackingUrl = `https://www.dhl.com/sa-en/home/tracking.html?tracking-id=${inv.awb}&submit=1`;
-  const msg = `عزيزي العميل،
-نحن سعداء بإبلاغكم أنه قد تم إصدار بوليصة الشحن الخاصة بكم بنجاح! 🎉
-
-تفاصيل الشحن
-رقم البوليصة: *${inv.awb}*
-يمكنكم تتبع شحنتكم عبر الرابط التالي: ${trackingUrl}
-
-نحن هنا لمساعدتكم في أي استفسارات أو احتياجات أخرى قد تكون لديكم. لا تترددوا في التواصل معنا!
-
-• ملاحظة: تم تسجيل الوزن والأبعاد بناءً على المعلومات المقدمة، في حال وجود فرق بعد مراجعة DHL يتحمل العميل دفع الفرق حسب الشروط والأحكام المذكورة على في الفاتورة.
-
-فريق SHIPPEC تتمنى لكم يومًا سعيدًا! 🌟`;
-
-  window.open(`https://wa.me/${intlPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-}
+// Legacy AWB modal aliases (old button names)
+function generateAWBManual() { openAWBModal(); }
+function saveAWBManual()     { saveAWB(); }
+function updateWAWorkflowBar(inv) { refreshLabelCenter(inv); }
 
 // ─── CLIENTS ───
 function goToClient(phone) {
@@ -2683,15 +3861,33 @@ function goToClient(phone) {
 
 function renderClients() {
   const q = (document.getElementById('client-search')?.value || '').toLowerCase();
-  // Group invoices by phone
+
+  // ── تجميع الفواتير بالجوال أولاً (المفتاح الرئيسي)، ثم daftra_client_id، ثم الاسم ──
   const map = {};
+  // خطوة 1: حدد key لكل فاتورة
+  const phoneToKey = {}; // جوال → key موجود (لدمج الفواتير اليدوية مع دفترة)
   invoices.forEach(inv => {
-    const key = inv.phone;
-    if (!map[key]) map[key] = {name: inv.client, phone: inv.phone, invoices: []};
+    const phone = normalizePhone(inv.phone || '');
+    const name  = (inv.client || '').trim();
+    let key;
+    if (phone && phone.length >= 7) {
+      key = 'p::' + phone;
+    } else if (inv.daftra_client_id) {
+      key = 'dc::' + inv.daftra_client_id;
+    } else {
+      key = 'name::' + name.toLowerCase();
+    }
+    if (!key || key === 'name::') return;
+    if (!map[key]) map[key] = { name, phone: phone||'', invoices: [], hasDaftra: false, hasManual: false };
     map[key].invoices.push(inv);
-    // Update name to latest
-    map[key].name = inv.client;
+    if (inv.client) map[key].name = inv.client;
+    if (phone && phone.length >= 7) phoneToKey[phone] = key;
+    if (inv.daftra_id) map[key].hasDaftra = true;
+    else map[key].hasManual = true;
+    // حدّث الجوال من أي فاتورة تملكه
+    if (phone && !map[key].phone) map[key].phone = phone;
   });
+
   let clients = Object.values(map).filter(c =>
     !q || c.name.toLowerCase().includes(q) || c.phone.includes(q)
   ).sort((a,b) => b.invoices.length - a.invoices.length);
@@ -2702,16 +3898,25 @@ function renderClients() {
     return;
   }
   grid.innerHTML = clients.map(c => {
-    const total = c.invoices.reduce((s,i) => s + Number(i.price||0), 0);
-    const paid = c.invoices.filter(i => i.status === 'paid').length;
+    const total  = c.invoices.reduce((s,i) => s + Number(i.price||0), 0);
+    const paid   = c.invoices.filter(i => i.status === 'paid').length;
     const unpaid = c.invoices.filter(i => i.status === 'unpaid').length;
-    const initials = c.name.trim().split(' ').map(w=>w[0]).slice(0,2).join('');
-    return `<div onclick="showClientDetail('${c.phone}')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+    const initials = c.name.trim().split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('') || '?';
+    // badge: مزيج دفترة + يدوي
+    const srcBadge = c.hasDaftra && c.hasManual
+      ? `<span style="font-size:9px;background:rgba(167,139,250,0.15);color:#a78bfa;border-radius:4px;padding:1px 5px;font-weight:600">📒+✏️</span>`
+      : c.hasDaftra
+        ? `<span style="font-size:9px;background:rgba(16,185,129,0.12);color:#10b981;border-radius:4px;padding:1px 5px;font-weight:600">📒 دفترة</span>`
+        : '';
+    return `<div onclick="showClientDetail('${c.phone||''}','${c.name.replace(/'/g,"\\'")}','${c.invoices.map(i=>i.id).join(',')}')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
         <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0">${initials}</div>
-        <div style="min-width:0">
-          <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
-          <div style="font-size:12px;color:var(--muted);direction:ltr;text-align:right">${c.phone}</div>
+        <div style="min-width:0;flex:1">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</span>
+            ${srcBadge}
+          </div>
+          <div style="font-size:12px;color:var(--muted);direction:ltr;text-align:right">${c.phone || '<span style="font-style:italic">بدون جوال</span>'}</div>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
@@ -2732,26 +3937,50 @@ function renderClients() {
   }).join('');
 }
 
-function showClientDetail(phone) {
-  const clientInvs = invoices.filter(i => i.phone === phone);
+function showClientDetail(phone, name, idsStr) {
+  // جمع فواتير العميل — بالجوال إذا وُجد، وإلا بالـ ids المرسلة
+  let clientInvs;
+  if (phone) {
+    clientInvs = invoices.filter(i => (i.phone||'').trim() === phone.trim());
+  } else if (idsStr) {
+    const ids = new Set(idsStr.split(','));
+    clientInvs = invoices.filter(i => ids.has(String(i.id)));
+  } else {
+    return;
+  }
   if (!clientInvs.length) return;
-  const c = {name: clientInvs[clientInvs.length-1].client, phone};
-  document.getElementById('client-detail-name').textContent = c.name;
-  document.getElementById('client-detail-phone').textContent = c.phone;
+
+  // أحدث اسم مُستخدم
+  const displayName = clientInvs[clientInvs.length-1].client || name || '—';
+  document.getElementById('client-detail-name').textContent = displayName;
+  document.getElementById('client-detail-phone').textContent = phone || '—';
+
   // wa button
   const waBtn = document.getElementById('client-wa-btn');
-  const intlPhone = phone.replace(/\D/g,'');
-  const wa = intlPhone.startsWith('0') ? '966' + intlPhone.slice(1) : intlPhone;
-  waBtn.onclick = () => window.open(`https://wa.me/${wa}`, '_blank');
+  if (phone) {
+    const intlPhone = phone.replace(/\D/g,'');
+    const wa = intlPhone.startsWith('0') ? '966' + intlPhone.slice(1) : intlPhone;
+    waBtn.onclick = () => window.open(`https://wa.me/${wa}`, '_blank');
+    waBtn.style.display = '';
+  } else {
+    waBtn.style.display = 'none';
+  }
+
+  // مصدر الفواتير
+  const hasDaftra = clientInvs.some(i => i.daftra_id);
+  const hasManual = clientInvs.some(i => !i.daftra_id);
+  const srcLabel = hasDaftra && hasManual ? '📒 دفترة + ✏️ يدوي'
+    : hasDaftra ? '📒 مستورد من دفترة' : '✏️ يدوي';
 
   // stats
-  const total = clientInvs.reduce((s,i) => s + Number(i.price||0), 0);
-  const paid = clientInvs.filter(i=>i.status==='paid').reduce((s,i)=>s+Number(i.price||0),0);
+  const total  = clientInvs.reduce((s,i) => s + Number(i.price||0), 0);
+  const paid   = clientInvs.filter(i=>i.status==='paid').reduce((s,i)=>s+Number(i.price||0),0);
   const unpaid = clientInvs.filter(i=>i.status==='unpaid').reduce((s,i)=>s+Number(i.price||0),0);
   document.getElementById('client-stats-row').innerHTML = `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
       <div style="font-size:22px;font-weight:700;color:var(--accent)">${clientInvs.length}</div>
       <div style="font-size:12px;color:var(--muted)">إجمالي الفواتير</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">${srcLabel}</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
       <div style="font-size:22px;font-weight:700;color:var(--gold)">${total.toFixed(0)}</div>
@@ -2766,18 +3995,18 @@ function showClientDetail(phone) {
       <div style="font-size:12px;color:var(--muted)">المتبقي ر.س</div>
     </div>`;
 
-  // invoices table
-  const sorted = [...clientInvs].reverse();
+  // invoices table — الأحدث أولاً
+  const sorted = [...clientInvs].sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
   document.getElementById('client-invoices-wrap').innerHTML = `<table><thead><tr>
-    <th>رقم الفاتورة</th><th>رقم الشحنة</th><th>الشركة</th><th>السعر</th><th>الحالة</th><th>طريقة الدفع</th><th>التاريخ</th><th>إجراءات</th>
+    <th>رقم الفاتورة</th><th>رقم الشحنة</th><th>الشركة</th><th>السعر</th><th>الحالة</th><th>المصدر</th><th>التاريخ</th><th>إجراءات</th>
   </tr></thead><tbody>` +
     sorted.map(inv => `<tr>
       <td class="mono">#${inv.id}</td>
-      <td class="mono">${inv.awb}</td>
-      <td style="color:var(--muted);font-size:12px">${inv.carrier}</td>
+      <td class="mono">${inv.awb||'—'}</td>
+      <td style="color:var(--muted);font-size:12px">${inv.carrier||'—'}</td>
       <td style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)} ر.س</td>
       <td>${statusBadge(inv.status)}</td>
-      <td style="color:var(--muted);font-size:12px">${inv.payment||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${inv.daftra_id ? '📒' : '✏️'}</td>
       <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
       <td><div class="actions">
         <button class="btn btn-ghost btn-sm" onclick="viewInvoice(${inv.id})">👁</button>
@@ -2789,13 +4018,25 @@ function showClientDetail(phone) {
   document.getElementById('client-detail-view').style.display = 'block';
 }
 
+// للاستدعاء من جدول الفواتير عبر الجوال
+function goToClient(phone) {
+  showSection('clients');
+  setTimeout(() => {
+    const search = document.getElementById('client-search');
+    if (search) { search.value = phone; renderClients(); }
+    // افتح ملف العميل مباشرة إذا وُجد
+    if (phone) {
+      const clientInvs = invoices.filter(i => (i.phone||'').trim() === phone.trim());
+      if (clientInvs.length) showClientDetail(phone, '', '');
+    }
+  }, 150);
+}
 function backToClients() {
   document.getElementById('client-detail-view').style.display = 'none';
   document.getElementById('clients-list-view').style.display = 'block';
   renderClients();
 }
 
-// ─── TOAST ───
 function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show' + (type==='warn'?'':' success');
@@ -3893,6 +5134,7 @@ async function sendPaymentLink() {
       if (idx !== -1) {
         invoices[idx].paymentUrl = data.payment_url;
         invoices[idx].paymentRef = data.invoice?.paytabs_token || 'pending';
+        addTimelineEvent(invoices[idx], 'payment_link', { note: 'رابط دفع PayTabs — تم إرساله عبر واتساب' }, true); // skipSave
         saveData();
         currentViewInvoice = invoices[idx];
       }
@@ -3960,6 +5202,7 @@ async function checkPaymentStatus() {
         invoices[idx].status = 'مدفوعة بالكامل';
         invoices[idx].payment = invoices[idx].payment || 'PayTabs';
         invoices[idx].paymentUrl = null;
+        addTimelineEvent(invoices[idx], 'paid', { note: 'تأكيد دفع تلقائي — PayTabs' }, true); // skipSave
         saveData();
         currentViewInvoice = invoices[idx];
         viewInvoice(inv.id);
@@ -3997,6 +5240,7 @@ function startPaymentPolling() {
           invoices[idx].status = 'مدفوعة بالكامل';
           invoices[idx].payment = invoices[idx].payment || 'PayTabs';
           invoices[idx].paymentUrl = null;
+          addTimelineEvent(invoices[idx], 'paid', { note: 'دفع تلقائي — PayTabs polling' }, true); // skipSave
           saveData();
           currentViewInvoice = invoices[idx];
           viewInvoice(currentViewInvoice.id);
@@ -4084,9 +5328,14 @@ async function exportSelectedPDF() {
 
 async function exportClientPDF() {
   const phone = document.getElementById('client-detail-phone').textContent;
-  const clientInvs = invoices.filter(i => i.phone === phone);
+  const name  = document.getElementById('client-detail-name').textContent;
+  let clientInvs;
+  if (phone && phone !== '—') {
+    clientInvs = invoices.filter(i => (i.phone||'').trim() === phone.trim());
+  } else {
+    clientInvs = invoices.filter(i => (i.client||'').trim().toLowerCase() === name.trim().toLowerCase());
+  }
   if (!clientInvs.length) { showToast('لا توجد فواتير لهذا العميل'); return; }
-  const name = document.getElementById('client-detail-name').textContent;
   showToast(`⏳ جاري تصدير ${clientInvs.length} فاتورة للعميل ${name}...`);
   await exportInvoicesPDF(clientInvs);
 }
@@ -4155,6 +5404,22 @@ function buildInvoiceHTML(inv) {
           <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:#64748b">حالة الدفع</span><span style="font-size:12px;font-weight:600;color:${sClass==='paid'?'#10b981':sClass==='partial'?'#f59e0b':'#ef4444'}">${sLabel}</span></div>
         </div>
       </div>
+      ${(inv.shipper?.name || inv.receiver?.name) ? `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+        ${inv.shipper?.name ? `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px">
+          <div style="font-size:10px;color:#16a34a;font-weight:800;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">📤 المرسل — Shipper</div>
+          <div style="font-size:14px;font-weight:700;color:#0f172a">${inv.shipper.name}</div>
+          ${inv.shipper.phone ? `<div style="font-size:12px;color:#64748b;direction:ltr;text-align:right;margin-top:3px">${inv.shipper.phone}</div>` : ''}
+          ${inv.shipper.address ? `<div style="font-size:11px;color:#64748b;margin-top:3px">${inv.shipper.address}</div>` : ''}
+        </div>` : '<div></div>'}
+        ${inv.receiver?.name ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px">
+          <div style="font-size:10px;color:#2563eb;font-weight:800;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">📥 المستلم — Receiver</div>
+          <div style="font-size:14px;font-weight:700;color:#0f172a">${inv.receiver.name}</div>
+          ${inv.receiver.phone ? `<div style="font-size:12px;color:#64748b;direction:ltr;text-align:right;margin-top:3px">${inv.receiver.phone}</div>` : ''}
+          ${inv.receiver.address ? `<div style="font-size:11px;color:#64748b;margin-top:3px">${inv.receiver.address}</div>` : ''}
+          ${inv.receiver.country ? `<div style="font-size:11px;color:#2563eb;margin-top:4px;font-weight:600">🌍 ${inv.receiver.country}</div>` : ''}
+        </div>` : '<div></div>'}
+      </div>` : ''}
       <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
         <thead>
           <tr style="background:#f1f5f9">
@@ -4268,12 +5533,15 @@ async function fetchAllDaftraPages(endpoint, params = {}) {
 
 function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
   let added = 0, updated = 0;
-  const statusMap = {'3':'paid','2':'partial','1':'unpaid','0':'unpaid'};
+
+  // ── Daftra status codes ──
+  // payment_status في الـ API: 0=غير مدفوعة، 1=جزئية، 2=مدفوعة
+  // status في بعض الـ endpoints: 0=unpaid، 1=partial، 2=paid (مختلف!)
+  const statusMap = { '2':'paid', '1':'partial', '0':'unpaid' };
 
   // Build client lookup
   const clientMap = {};
   (daftraClients || []).forEach(c => {
-    // Daftra client fields
     const phone = normalizePhone(c.phone2 || c.phone1 || c.phone || c.mobile || '');
     const name = c.business_name || c.name || c.client_name || c.Name || '';
     if (phone) clientMap[phone] = name;
@@ -4283,41 +5551,48 @@ function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
     }
   });
 
-  // Build lookup of existing invoices by daftra_id
-  const existingMap = {};
-  invoices.forEach((inv, idx) => { if (inv.daftra_id) existingMap[String(inv.daftra_id)] = idx; });
+  // Build lookup of existing invoices by daftra_id — فحص التكرار
+  const existingByDaftraId = {};
+  invoices.forEach((inv, idx) => {
+    if (inv.daftra_id) existingByDaftraId[String(inv.daftra_id)] = idx;
+  });
 
   daftraInvs.forEach(dInv => {
     const dId = String(dInv.id || dInv.invoice_id || '');
     if (!dId) return;
 
-    // Daftra payment_status: 0=unpaid, 1=partial, 2=paid
+    // قراءة حالة الدفع من payment_status أولاً ثم status
     const pst = String(dInv.payment_status ?? dInv.status ?? '0');
-    const statusMap2 = {'2':'paid','1':'partial','0':'unpaid'};
-    const newStatus = statusMap2[pst] || 'unpaid';
+    const newStatus = statusMap[pst] || 'unpaid';
+
     const clientId = String(dInv.client_id || '');
     let clientName = dInv.client_business_name || dInv.client_name || dInv.name || '';
-    if (!clientName && clientId && clientMap['id_' + clientId]) clientName = clientMap['id_' + clientId];
+    if (!clientName && clientId) clientName = clientMap['id_' + clientId] || '';
     if (!clientName) clientName = 'عميل دفترة';
+
     const embeddedClient = dInv._client || {};
-    const phone = normalizePhone(dInv.client_phone || dInv.phone || dInv.mobile || embeddedClient.phone2 || embeddedClient.phone1 || '') || (clientId ? (clientMap['phone_' + clientId] || '') : '');
+    const phone = normalizePhone(
+      dInv.client_phone || dInv.phone || dInv.mobile ||
+      embeddedClient.phone2 || embeddedClient.phone1 || ''
+    ) || (clientId ? (clientMap['phone_' + clientId] || '') : '');
+
     const price = parseFloat(dInv.summary_total || dInv.total || dInv.grand_total || 0);
     const date = (dInv.date || dInv.issue_date || '').substring(0,10) || new Date().toISOString().split('T')[0];
     const awb = dInv.order_number || dInv.po_number || '';
     const details = `#${dInv.no || dId} — مستورد من دفترة`;
 
-    if (dId in existingMap) {
-      // Already exists — update status if changed
-      const idx = existingMap[dId];
+    if (dId in existingByDaftraId) {
+      // موجودة — حدّث الحالة فقط إذا تغيّرت (لا تكسر البيانات اليدوية)
+      const idx = existingByDaftraId[dId];
       const existing = invoices[idx];
       if (existing.status !== newStatus) {
         invoices[idx] = { ...existing, status: newStatus };
         updated++;
       }
     } else {
-      // New invoice — add it
+      // جديدة — أضفها
       invoices.push({
-        id: Date.now() + Math.random(),
+        id: Date.now() + '_d' + dId, // أكثر أماناً من Math.random
         daftra_id: dId,
         client: clientName,
         phone, awb,
@@ -4329,7 +5604,7 @@ function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
         codeType: 'barcode',
         details
       });
-      existingMap[dId] = invoices.length - 1;
+      existingByDaftraId[dId] = invoices.length - 1;
       added++;
     }
   });
@@ -4347,9 +5622,234 @@ function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
   return { added, updated };
 }
 
+// ── ربط الفاتورة الجديدة بدفترة عبر رقم الجوال ──
+// يبحث في فواتير دفترة المخزّنة عن نفس الجوال — إذا وجد يربطهم تحت ملف عميل واحد
+async function linkInvoiceToDaftraByPhone(inv) {
+  if (!inv || !inv.phone) return;
+  const normPhone = normalizePhone(inv.phone);
+  if (!normPhone || normPhone.length < 7) return;
+
+  try {
+    // البحث في الـ cache أولاً لتجنب طلب API زائد
+    const cache = loadDaftraCache();
+    const daftraInvs = cache.invoices || [];
+    const daftraClients = cache.clients || [];
+
+    // بناء خريطة جوال → client_id من clients
+    const phoneToClientId = {};
+    daftraClients.forEach(c => {
+      const p = normalizePhone(c.phone2 || c.phone1 || c.phone || c.mobile || '');
+      if (p && c.id) phoneToClientId[p] = String(c.id);
+    });
+
+    // هل يوجد عميل في دفترة بنفس الجوال؟
+    const matchedClientId = phoneToClientId[normPhone];
+
+    // هل يوجد فواتير دفترة بنفس الجوال؟
+    const relatedDaftraInvs = daftraInvs.filter(d => {
+      const dPhone = normalizePhone(
+        d.client_phone || d.phone || d.mobile ||
+        (d._client?.phone2) || (d._client?.phone1) || ''
+      ) || (d.client_id ? (phoneToClientId['__rev_' + String(d.client_id)] || '') : '');
+      return dPhone === normPhone || (matchedClientId && String(d.client_id) === matchedClientId);
+    });
+
+    if (!relatedDaftraInvs.length && !matchedClientId) return;
+
+    // تحديث الفاتورة الحالية بـ daftra_client_id إذا وُجد
+    const invIdx = invoices.findIndex(i => String(i.id) === String(inv.id));
+    if (invIdx === -1) return;
+
+    let changed = false;
+    if (matchedClientId && !invoices[invIdx].daftra_client_id) {
+      invoices[invIdx].daftra_client_id = matchedClientId;
+      changed = true;
+    }
+
+    // عرض إشعار للموظف
+    if (relatedDaftraInvs.length > 0) {
+      const msg = matchedClientId
+        ? `🔗 العميل موجود في دفترة (${relatedDaftraInvs.length} فاتورة سابقة) — تم ربطهم`
+        : `💡 ${relatedDaftraInvs.length} فاتورة بنفس الجوال في دفترة`;
+      showToast(msg);
+    }
+
+    if (changed) {
+      saveData();
+      saveInvoiceToDB(invoices[invIdx]);
+    }
+  } catch(e) {
+    console.warn('linkInvoiceToDaftraByPhone:', e);
+  }
+}
+
 function normalizePhone(p) {
   if (!p) return '';
   return String(p).replace(/[^0-9+]/g,'');
+}
+
+// ═══════════════════════════════════════════
+// DIAGNOSTICS — أدوات التشخيص والإصلاح
+// ═══════════════════════════════════════════
+
+function runDiagnostics() {
+  const panel = document.getElementById('diag-panel');
+  const body  = document.getElementById('diag-body');
+  if (!panel || !body) return;
+
+  // ── 1. فواتير بـ daftra_id مكررة ──
+  const daftraIdCount = {};
+  invoices.forEach(inv => {
+    if (inv.daftra_id) {
+      const k = String(inv.daftra_id);
+      daftraIdCount[k] = (daftraIdCount[k] || 0) + 1;
+    }
+  });
+  const dupDaftraIds = Object.entries(daftraIdCount).filter(([,c]) => c > 1);
+
+  // ── 2. فواتير مكررة بنفس العميل + السعر + التاريخ (بدون daftra_id) ──
+  const sigMap = {};
+  const dupSig = [];
+  invoices.forEach(inv => {
+    if (inv.daftra_id) return;
+    const sig = `${(inv.client||'').trim()}|${inv.price}|${inv.date}`;
+    if (sigMap[sig]) dupSig.push({ sig, ids: [sigMap[sig], inv.id] });
+    else sigMap[sig] = inv.id;
+  });
+
+  // ── 3. إحصاءات عامة ──
+  const totalDaftra = invoices.filter(i => i.daftra_id).length;
+  const totalManual = invoices.filter(i => !i.daftra_id).length;
+  const unpaidDaftra = invoices.filter(i => i.daftra_id && i.status === 'unpaid').length;
+  const paidDaftra   = invoices.filter(i => i.daftra_id && i.status === 'paid').length;
+
+  // ── 4. عملاء: فرق العدد ──
+  const clientInvCount = {};
+  invoices.forEach(i => {
+    const k = (i.client||'').trim().toLowerCase();
+    if (!k) return;
+    clientInvCount[k] = (clientInvCount[k] || 0) + 1;
+  });
+  const topClients = Object.entries(clientInvCount)
+    .sort((a,b) => b[1]-a[1]).slice(0,5);
+
+  const hasDups = dupDaftraIds.length > 0 || dupSig.length > 0;
+
+  body.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+      <div style="background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.2);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--accent)">${invoices.length}</div>
+        <div style="font-size:11px;color:var(--muted)">إجمالي الفواتير</div>
+      </div>
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--gold)">${totalDaftra}</div>
+        <div style="font-size:11px;color:var(--muted)">من دفترة</div>
+      </div>
+      <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--red-p)">${unpaidDaftra}</div>
+        <div style="font-size:11px;color:var(--muted)">غير مدفوعة (دفترة)</div>
+      </div>
+      <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--green)">${paidDaftra}</div>
+        <div style="font-size:11px;color:var(--muted)">مدفوعة (دفترة)</div>
+      </div>
+    </div>
+
+    ${dupDaftraIds.length ? `
+    <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-weight:700;color:#ef4444;margin-bottom:8px">⚠️ ${dupDaftraIds.length} daftra_id مكررة</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">نفس الفاتورة من دفترة مستوردة أكثر من مرة:</div>
+      ${dupDaftraIds.slice(0,5).map(([id,c])=>`<div style="font-size:12px;padding:3px 0">• daftra_id <b style="color:var(--gold);font-family:var(--mono)">${id}</b> — مكررة <b style="color:#ef4444">${c} مرات</b></div>`).join('')}
+      ${dupDaftraIds.length > 5 ? `<div style="font-size:11px;color:var(--muted)">و ${dupDaftraIds.length-5} أخرى...</div>` : ''}
+      <button onclick="fixDuplicateDaftraIds()" style="margin-top:10px;background:#ef4444;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔧 إصلاح: احتفظ بنسخة واحدة فقط</button>
+    </div>` : '<div style="color:var(--green);font-size:12px;margin-bottom:10px">✅ لا توجد daftra_id مكررة</div>'}
+
+    ${dupSig.length ? `
+    <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-weight:700;color:var(--gold);margin-bottom:8px">⚠️ ${dupSig.length} فاتورة يدوية مشبوهة (نفس العميل + السعر + التاريخ)</div>
+      <div style="font-size:11px;color:var(--muted)">هذه ليست مؤكدة كمكررة — راجعها يدوياً</div>
+    </div>` : ''}
+
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase">أعلى العملاء بعدد الفواتير</div>
+      ${topClients.map(([name,cnt])=>`
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px">
+          <span>${name}</span>
+          <span style="color:var(--gold);font-weight:700">${cnt} فاتورة</span>
+        </div>`).join('')}
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--border)">
+      <button onclick="syncAllStatusFromDaftra()" style="background:rgba(14,165,233,0.1);color:var(--accent);border:1px solid rgba(14,165,233,0.25);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+        🔄 تحديث حالات الدفع من دفترة
+      </button>
+      <button onclick="document.getElementById('diag-panel').style.display='none'" style="background:none;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit">إغلاق</button>
+    </div>
+  `;
+
+  panel.style.display = 'block';
+}
+
+// حذف النسخ المكررة من daftra_id — احتفظ بالأحدث
+function fixDuplicateDaftraIds() {
+  const seen = {};
+  const toRemove = [];
+  // نمر من الأحدث للأقدم — نحتفظ بأول واحد (الأحدث)
+  [...invoices].reverse().forEach((inv, ridx) => {
+    if (!inv.daftra_id) return;
+    const k = String(inv.daftra_id);
+    const realIdx = invoices.length - 1 - ridx;
+    if (seen[k] !== undefined) {
+      toRemove.push(realIdx);
+    } else {
+      seen[k] = realIdx;
+    }
+  });
+  if (!toRemove.length) { showToast('✅ لا توجد مكررات'); return; }
+  // حذف بالترتيب العكسي لتجنب shift
+  toRemove.sort((a,b)=>b-a).forEach(idx => invoices.splice(idx,1));
+  saveData(); renderTable(); updateStats();
+  showToast(`✅ تم حذف ${toRemove.length} نسخة مكررة`);
+  runDiagnostics(); // تحديث نتائج التشخيص
+}
+
+// جلب جميع فواتير دفترة (كل الحالات) وتحديث الحالة في المنصة
+async function syncAllStatusFromDaftra() {
+  const body = document.getElementById('diag-body');
+  if (body) {
+    const btn = body.querySelector('button[onclick="syncAllStatusFromDaftra()"]');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري التحديث...'; }
+  }
+  try {
+    // جلب كل الفواتير بدون فلتر payment_status
+    const allInvs = await fetchAllDaftraPages('invoices');
+    const statusMap = { '2':'paid', '1':'partial', '0':'unpaid' };
+    let updated = 0;
+    const daftraIdMap = {};
+    allInvs.forEach(d => { if (d.id) daftraIdMap[String(d.id)] = d; });
+
+    invoices.forEach((inv, idx) => {
+      if (!inv.daftra_id) return;
+      const d = daftraIdMap[String(inv.daftra_id)];
+      if (!d) return;
+      const pst = String(d.payment_status ?? d.status ?? '0');
+      const newStatus = statusMap[pst] || 'unpaid';
+      if (inv.status !== newStatus) {
+        invoices[idx] = { ...inv, status: newStatus };
+        updated++;
+      }
+    });
+
+    if (updated) {
+      saveData(); renderTable(); updateStats();
+      showToast(`✅ تم تحديث حالة ${updated} فاتورة من دفترة`);
+    } else {
+      showToast('✅ كل الحالات محدَّثة بالفعل');
+    }
+    runDiagnostics();
+  } catch(e) {
+    showToast('❌ فشل التحديث: ' + e.message);
+  }
 }
 
 function deleteNoPhone() {
@@ -4609,6 +6109,9 @@ window.fetchDaftraInvoices = fetchDaftraInvoices;
 window.importSelectedDaftra = importSelectedDaftra;
 window.saveSettings = saveSettings;
 window.runFullDaftraImport = runFullDaftraImport;
+window.runDiagnostics = runDiagnostics;
+window.fixDuplicateDaftraIds = fixDuplicateDaftraIds;
+window.syncAllStatusFromDaftra = syncAllStatusFromDaftra;
 window.toggleZatcaTemplate = toggleZatcaTemplate;
 window.filterDaftraResults = filterDaftraResults;
 window.settingsDirty = settingsDirty;
@@ -4618,6 +6121,38 @@ window.testBackendConnection = testBackendConnection;
 // Aliases for calls inside daftra integration
 window.renderTable = renderTable;
 window.saveData = saveData;
+// WhatsApp workflow
+window.sendWAUnpaid = sendWAUnpaid;
+window.sendWAPaid = sendWAPaid;
+window.sendWAResend = sendWAResend;
+window.generateAWBManual = generateAWBManual;
+window.saveAWBManual = saveAWBManual;
+window.showWALog = showWALog;
+window.updateWAWorkflowBar = updateWAWorkflowBar;
+// Label Center
+window.openAWBModal = openAWBModal;
+window.saveAWB = saveAWB;
+window.copyAWB = copyAWB;
+window.lcCopyAWB = lcCopyAWB;
+window.lcViewPDF = lcViewPDF;
+window.lcDownloadLabel = lcDownloadLabel;
+window.lcPrintLabel = lcPrintLabel;
+window.lcSendWA = lcSendWA;
+window.lcResendWA = lcResendWA;
+window.refreshLabelCenter = refreshLabelCenter;
+window.downloadInvoicePDF = downloadInvoicePDF;
+// Activity Timeline
+window.addTimelineEvent = addTimelineEvent;
+window.switchInvTab = switchInvTab;
+window.renderTimeline = renderTimeline;
+// Smart Suggest + Draft + Shipper
+window.smartSuggest = smartSuggest;
+window.hideSuggest = hideSuggest;
+window.navigateSuggest = navigateSuggest;
+window.focusSuggestItem = focusSuggestItem;
+window.applySuggest = applySuggest;
+window.toggleShipperSame = toggleShipperSame;
+window.saveAsDraft = saveAsDraft;
 </script>
 
 
