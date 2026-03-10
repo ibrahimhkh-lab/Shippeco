@@ -546,6 +546,25 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
   #rec-results .stats-grid-4 { grid-template-columns: repeat(2,1fr) !important; }
 
   .results-header { flex-wrap: wrap; gap: 10px; }
+
+  /* ── التقارير ── */
+  /* بطاقات الإجمالي: عمودين على الجوال */
+  #rep-stats { grid-template-columns: repeat(2,1fr) !important; }
+
+  /* فلاتر الفترة: تلتف */
+  #sec-reports .table-card > div { flex-wrap: wrap; }
+
+  /* أزرار الفترة: أصغر */
+  .rep-period-btn { font-size: 11px !important; padding: 5px 9px !important; }
+
+  /* جدول التقارير: يُخفي أعمدة ثانوية على الجوال */
+  #rep-table-wrap table { min-width: 0 !important; font-size: 11px; }
+  #rep-table-wrap th:nth-child(3),
+  #rep-table-wrap td:nth-child(3),
+  #rep-table-wrap th:nth-child(4),
+  #rep-table-wrap td:nth-child(4),
+  #rep-table-wrap th:nth-child(8),
+  #rep-table-wrap td:nth-child(8) { display: none; }
 }
 
 @media (max-width: 400px) {
@@ -1134,8 +1153,6 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
 
   <!-- بطاقات الإجمالي -->
   <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px" id="rep-stats"></div>
-
-  <!-- مخطط المبيعات -->
   <div class="table-card" style="padding:20px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
       <div style="font-size:14px;font-weight:700;color:var(--text)">📊 مخطط المبيعات</div>
@@ -5594,24 +5611,44 @@ const DAFTRA_WORKER_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
 const DB_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
 
 // Background sync — called on startup and manually
+// ══════════════════════════════════════════════════════════════
+// DAFTRA SYNC — نظام مزامنة مستقر ونهائي
+// ══════════════════════════════════════════════════════════════
+// المنطق:
+//   1. جلب كل الفواتير (بدون فلتر payment_status) — مرة واحدة
+//   2. بناء Map بـ daftra_id → invoice كـ مصدر الحقيقة
+//   3. للكل فاتورة في دفترة:
+//      - إذا موجودة في المنصة: حدّث الحالة + السعر فقط
+//      - إذا غير موجودة: أضفها مرة واحدة فقط
+//   4. حفظ بـ bulkSaveToDB مرة واحدة في النهاية
+// ══════════════════════════════════════════════════════════════
+
+let _syncInProgress = false; // منع التشغيل المتوازي
+
 async function syncDaftraBackground() {
+  if (_syncInProgress) {
+    console.log('Sync already in progress, skipping');
+    return;
+  }
+  _syncInProgress = true;
   setSyncStatus('⏳ جارٍ المزامنة مع دفترة...', 'var(--accent)');
   try {
-    // Fetch clients first so phone lookup is ready when processing invoices
-    const clientResult = await fetchAllDaftraPages('clients');
-    const invResult = await fetchAllDaftraPages('invoices', { payment_status: 0 });
-    const cache = {
-      invoices: invResult,
-      clients: clientResult,
-      lastSync: new Date().toISOString()
-    };
-    saveDaftraCache(cache);
-    mergeFromDaftra(invResult, clientResult);
+    // جلب العملاء أولاً لبناء خريطة الأسماء والجوالات
+    const clients = await fetchAllDaftraPages('clients');
+    // جلب كل الفواتير بدون فلتر (paid + unpaid + partial)
+    const allInvs = await fetchAllDaftraPages('invoices');
+
+    saveDaftraCache({ invoices: allInvs, clients, lastSync: new Date().toISOString() });
+
+    const { added, updated } = mergeFromDaftra(allInvs, clients);
     const t = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
-    setSyncStatus(`📒 دفترة: آخر مزامنة ${t} · ${invResult.length} فاتورة`, 'var(--green)');
+    const total = invoices.filter(i => i.daftra_id).length;
+    setSyncStatus(`📒 دفترة: ${t} · ${total} فاتورة (+${added} جديدة، ~${updated} محدّثة)`, 'var(--green)');
   } catch(e) {
     setSyncStatus('⚠️ دفترة: فشل المزامنة — اضغط للمحاولة', '#f59e0b');
     console.warn('Daftra sync error:', e);
+  } finally {
+    _syncInProgress = false;
   }
 }
 
@@ -5649,101 +5686,113 @@ async function fetchAllDaftraPages(endpoint, params = {}) {
   return all;
 }
 
-function mergeFromDaftra(daftraInvs, daftraClients, forceAll = false) {
-  let added = 0, updated = 0;
-
-  // ── Daftra status codes ──
-  // payment_status في الـ API: 0=غير مدفوعة، 1=جزئية، 2=مدفوعة
-  // status في بعض الـ endpoints: 0=unpaid، 1=partial، 2=paid (مختلف!)
+function mergeFromDaftra(daftraInvs, daftraClients) {
+  // ── خريطة الحالات ──
   const statusMap = { '2':'paid', '1':'partial', '0':'unpaid' };
 
-  // Build client lookup — clients endpoint يُرجع بيانات نظيفة عادةً
+  // ── خريطة العملاء: client_id → {name, phone} ──
   const clientMap = {};
   (daftraClients || []).forEach(c => {
+    const rawName = c.business_name || c.name || c.client_name || '';
+    const name  = /[\u00C0-\u00FF]{3,}/.test(rawName) ? '' : rawName; // تجاهل garbled latin
     const phone = normalizePhone(c.phone2 || c.phone1 || c.phone || c.mobile || '');
-    const rawName = c.business_name || c.name || c.client_name || c.Name || '';
-    const name = /Ø|Ù|Ú|Û/.test(rawName) ? '' : rawName; // تجاهل garbled
-    if (phone) clientMap[phone] = name || phone;
     if (c.id) {
-      if (name) clientMap['id_' + c.id] = name;
-      if (phone) clientMap['phone_' + c.id] = phone;
+      clientMap[String(c.id)] = { name: name || '', phone: phone || '' };
     }
   });
 
-  // Build lookup of existing invoices by daftra_id — فحص التكرار
-  const existingByDaftraId = {};
+  // ── بناء Map الفواتير الموجودة بـ daftra_id ──
+  // هذا هو مصدر الحقيقة لمنع التكرار
+  const byDaftraId = new Map();
   invoices.forEach((inv, idx) => {
-    if (inv.daftra_id) existingByDaftraId[String(inv.daftra_id)] = idx;
+    if (inv.daftra_id) byDaftraId.set(String(inv.daftra_id), idx);
   });
+
+  let added = 0, updated = 0;
+  const toSave = []; // فواتير تحتاج حفظ في DB
 
   daftraInvs.forEach(dInv => {
     const dId = String(dInv.id || dInv.invoice_id || '');
-    if (!dId) return;
+    if (!dId || dId === 'undefined') return;
 
-    // قراءة حالة الدفع من payment_status أولاً ثم status
+    // ── الحالة ──
     const pst = String(dInv.payment_status ?? dInv.status ?? '0');
     const newStatus = statusMap[pst] || 'unpaid';
 
+    // ── الاسم ──
+    const embed = dInv._client || {};
     const clientId = String(dInv.client_id || '');
-    // الاسم: من Client nested أولاً (أنظف)، ثم الحقول المسطّحة
-    const embeddedClient = dInv._client || {};
-    const rawName = embeddedClient.business_name || embeddedClient.first_name ||
-                    dInv.client_business_name || dInv.client_name || dInv.name || '';
-    // فحص encoding: إذا كان الاسم يحتوي على Ø أو Ù (garbled UTF-8) استخدم clientMap
-    const isGarbled = /Ø|Ù|Ú|Û/.test(rawName);
-    let clientName = isGarbled ? '' : rawName;
-    if (!clientName && clientId) clientName = clientMap['id_' + clientId] || '';
+    const rawName =
+      embed.business_name || embed.first_name ||
+      dInv.client_business_name || dInv.client_name || dInv.name || '';
+    const isGarbled = /[\u00C0-\u00FF]{3,}/.test(rawName);
+    let clientName = isGarbled ? '' : rawName.trim();
+    if (!clientName && clientId && clientMap[clientId]) clientName = clientMap[clientId].name;
     if (!clientName) clientName = 'عميل دفترة';
 
-    // الجوال: phone2 أولاً (دفترة يخزن الجوال في phone2 عادةً)
-    const rawPhone = embeddedClient.phone2 || embeddedClient.phone1 ||
-                     dInv.client_phone || dInv.phone || dInv.mobile || '';
-    const phone = normalizePhone(rawPhone) ||
-                  (clientId ? (clientMap['phone_' + clientId] || '') : '');
+    // ── الجوال ──
+    const rawPhone =
+      embed.phone2 || embed.phone1 ||
+      dInv.client_phone || dInv.phone || dInv.mobile || '';
+    let phone = normalizePhone(rawPhone);
+    if (!phone && clientId && clientMap[clientId]) phone = clientMap[clientId].phone || '';
 
-    const price = parseFloat(dInv.summary_total || dInv.total || dInv.grand_total || 0);
-    const date = (dInv.date || dInv.issue_date || '').substring(0,10) || new Date().toISOString().split('T')[0];
-    const awb = dInv.order_number || dInv.po_number || '';
-    const details = `#${dInv.no || dId} — مستورد من دفترة`;
+    // ── بيانات أخرى ──
+    const price  = parseFloat(dInv.summary_total || dInv.total || dInv.grand_total || 0);
+    const date   = (dInv.date || dInv.issue_date || '').substring(0, 10) || new Date().toISOString().split('T')[0];
+    const awb    = dInv.order_number || dInv.po_number || '';
+    const no     = dInv.no || dId;
 
-    if (dId in existingByDaftraId) {
-      // موجودة — حدّث الحالة فقط إذا تغيّرت (لا تكسر البيانات اليدوية)
-      const idx = existingByDaftraId[dId];
+    if (byDaftraId.has(dId)) {
+      // ── موجودة: حدّث الحالة والسعر فقط، لا تكسر البيانات اليدوية ──
+      const idx = byDaftraId.get(dId);
       const existing = invoices[idx];
-      if (existing.status !== newStatus) {
-        invoices[idx] = { ...existing, status: newStatus };
+      const statusChanged = existing.status !== newStatus;
+      const priceChanged  = Math.abs(Number(existing.price||0) - price) > 0.01;
+      if (statusChanged || priceChanged) {
+        invoices[idx] = { ...existing, status: newStatus, price };
+        toSave.push(invoices[idx]);
         updated++;
       }
     } else {
-      // جديدة — أضفها
-      invoices.push({
-        id: Date.now() + '_d' + dId, // أكثر أماناً من Math.random
+      // ── جديدة: أضف مرة واحدة فقط ──
+      const newInv = {
+        id: 'd' + dId, // ID ثابت ومحدد = لا تكرار أبداً
         daftra_id: dId,
+        no,
         client: clientName,
-        phone, awb,
+        phone,
+        awb,
         carrier: 'DHL',
         price,
         date,
         status: newStatus,
         payment: 'دفترة',
         codeType: 'barcode',
-        details
-      });
-      existingByDaftraId[dId] = invoices.length - 1;
+        details: `#${no} — مستورد من دفترة`,
+        weight: parseFloat(dInv.weight || 0) || 0,
+      };
+      invoices.push(newInv);
+      byDaftraId.set(dId, invoices.length - 1);
+      toSave.push(newInv);
       added++;
     }
   });
 
-  if (added > 0 || updated > 0) {
+  if (toSave.length > 0) {
     saveData();
-    const newInvs = invoices.filter(i => i.daftra_id);
-    bulkSaveToDB(newInvs);
-    updateStats();
-    const parts = [];
-    if (added) parts.push(`${added} فاتورة جديدة`);
-    if (updated) parts.push(`${updated} محدَّثة`);
-    showToast(`✅ دفترة: ${parts.join(' و ')}`);
+    bulkSaveToDB(toSave).catch(e => console.warn('bulkSaveToDB error:', e));
+    renderTable && renderTable();
+    updateStats && updateStats();
   }
+
+  if (added || updated) {
+    const parts = [];
+    if (added)   parts.push(`${added} جديدة`);
+    if (updated) parts.push(`${updated} محدَّثة`);
+    showToast(`✅ دفترة: ${parts.join(' + ')}`);
+  }
+
   return { added, updated };
 }
 
@@ -6187,7 +6236,7 @@ async function runFullDaftraImport() {
     const clients = await fetchAllDaftraPages('clients');
 
     if (statusEl) statusEl.textContent = `جاري جلب الفواتير... (${clients.length} عميل جُلب)`;
-    const invs = await fetchAllDaftraPages('invoices', { payment_status: 0 });
+    const invs = await fetchAllDaftraPages('invoices'); // كل الفواتير paid + unpaid
 
     if (statusEl) statusEl.textContent = `جاري الدمج... (${invs.length} فاتورة)`;
     const { added, updated } = mergeFromDaftra(invs, clients);
@@ -6237,7 +6286,7 @@ async function fetchDaftraInvoices() {
   document.getElementById('daftra-error').style.display = 'none';
   document.getElementById('daftra-results').style.display = 'none';
   try {
-    const invs = await fetchAllDaftraPages('invoices', { payment_status: 0 });
+    const invs = await fetchAllDaftraPages('invoices'); // كل الفواتير paid + unpaid
     daftraAllInvoices = invs;
     const cache = loadDaftraCache();
     cache.invoices = invs;
@@ -6623,32 +6672,55 @@ function renderReport() {
     return;
   }
   const sorted = [...filtered].sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
-  wrap.innerHTML = `
-    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:14px;font-weight:700;color:var(--text)">تفاصيل الفواتير (${sorted.length})</div>
-    </div>
-    <div style="overflow-x:auto">
-    <table><thead><tr>
-      <th>رقم</th><th>العميل</th><th>الشركة</th><th>AWB</th>
-      <th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th>موظف</th>
-    </tr></thead><tbody>` +
-    sorted.map(inv => `<tr>
-      <td class="mono" style="cursor:pointer;color:var(--accent)" onclick="viewInvoice(${inv.id})">#${inv.no||inv.id}</td>
-      <td>${inv.client||'—'}</td>
-      <td style="font-size:12px;color:var(--muted)">${inv.carrier||'—'}</td>
-      <td class="mono" style="font-size:12px">${inv.awb||'—'}</td>
-      <td style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)}</td>
-      <td>${statusBadge(inv.status)}</td>
-      <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
-      <td style="font-size:12px;color:var(--muted)">${inv.created_by||'—'}</td>
-    </tr>`).join('') +
-    `</tbody>
-    <tfoot><tr>
-      <td colspan="4" style="text-align:right;font-weight:700;padding:10px 16px;color:var(--text)">الإجمالي</td>
-      <td style="font-weight:700;color:var(--gold);padding:10px 16px">${totalAll.toFixed(2)}</td>
-      <td colspan="3"></td>
-    </tr></tfoot>
-    </table></div>`;
+  const isMobile = window.innerWidth < 768;
+  if (isMobile) {
+    // كاردات للجوال
+    wrap.innerHTML = `
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--text)">
+        تفاصيل الفواتير (${sorted.length}) — إجمالي: ${totalAll.toFixed(0)} ر.س
+      </div>
+      <div style="padding:12px;display:flex;flex-direction:column;gap:10px">` +
+      sorted.map(inv => `
+        <div onclick="viewInvoice(${inv.id})" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:12px;color:var(--accent);font-weight:700">#${inv.no||inv.id}</span>
+            ${statusBadge(inv.status)}
+          </div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">${inv.client||'—'}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;color:var(--muted)">${inv.awb||inv.carrier||'—'} · ${formatDate(inv.date)}</span>
+            <span style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)} ر.س</span>
+          </div>
+        </div>`).join('') +
+      `</div>`;
+  } else {
+    wrap.innerHTML = `
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:14px;font-weight:700;color:var(--text)">تفاصيل الفواتير (${sorted.length})</div>
+      </div>
+      <div style="overflow-x:auto">
+      <table style="min-width:unset"><thead><tr>
+        <th>رقم</th><th>العميل</th><th>الشركة</th><th>AWB</th>
+        <th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th>موظف</th>
+      </tr></thead><tbody>` +
+      sorted.map(inv => `<tr>
+        <td class="mono" style="cursor:pointer;color:var(--accent)" onclick="viewInvoice(${inv.id})">#${inv.no||inv.id}</td>
+        <td>${inv.client||'—'}</td>
+        <td style="font-size:12px;color:var(--muted)">${inv.carrier||'—'}</td>
+        <td class="mono" style="font-size:12px">${inv.awb||'—'}</td>
+        <td style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)}</td>
+        <td>${statusBadge(inv.status)}</td>
+        <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
+        <td style="font-size:12px;color:var(--muted)">${inv.created_by||'—'}</td>
+      </tr>`).join('') +
+      `</tbody>
+      <tfoot><tr>
+        <td colspan="4" style="text-align:right;font-weight:700;padding:10px 16px;color:var(--text)">الإجمالي</td>
+        <td style="font-weight:700;color:var(--gold);padding:10px 16px">${totalAll.toFixed(2)}</td>
+        <td colspan="3"></td>
+      </tr></tfoot>
+      </table></div>`;
+  }
 }
 
 function exportReportPDF() {
