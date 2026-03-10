@@ -5862,17 +5862,8 @@ async function sendCollectionWAForPhone(phone) {
   const unpaid = invoices.filter(i => i.status === 'unpaid' && normalizePhone(i.phone) === p);
   if (!unpaid.length) return;
   const total = unpaid.reduce((s, i) => s + Number(i.price || 0), 0);
-  const lines = unpaid.map(i => `• #${i.no||i.id} — ${Number(i.price||0).toFixed(0)} ر.س (${formatDate(i.date)})`).join('
-');
-  const msg = `السلام عليكم ${unpaid[0].client}،
-
-نود تذكيركم بالفواتير غير المسددة:
-
-${lines}
-
-💰 الإجمالي: ${total.toFixed(2)} ر.س
-
-نرجو السداد في أقرب وقت. شكراً 🙏`;
+  const lines = unpaid.map(i => `• #${i.no||i.id} — ${Number(i.price||0).toFixed(0)} ر.س (${formatDate(i.date)})`).join('\n');
+  const msg = `السلام عليكم ${unpaid[0].client}،\n\nنود تذكيركم بالفواتير غير المسددة:\n\n${lines}\n\n💰 الإجمالي: ${total.toFixed(2)} ر.س\n\nنرجو السداد في أقرب وقت. شكراً 🙏`;
   window.open(`https://wa.me/${p.replace(/^0/, '966')}?text=${encodeURIComponent(msg)}`, '_blank');
   unpaid.forEach(inv => {
     const idx = invoices.findIndex(i => i.id === inv.id);
