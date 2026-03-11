@@ -549,7 +549,7 @@ select { -webkit-appearance:none; appearance:none; background-image:url("data:im
 
   /* ── التقارير ── */
   /* بطاقات الإجمالي: عمودين على الجوال */
-  #rep-stats { grid-template-columns: 1fr !important; }
+  #rep-stats { grid-template-columns: repeat(2,1fr) !important; }
 
   /* فلاتر الفترة: تلتف */
   #sec-reports .table-card > div { flex-wrap: wrap; }
@@ -952,9 +952,9 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
     </div>
     <!-- Stat cards row 2 -->
     <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
-      <div class="stat-card" style="--card-color:var(--red-p);cursor:pointer" onclick="goToReport('unpaid')" title="اضغط لعرض تقرير الغير مدفوعة"><div class="stat-icon">🔴</div><div class="stat-label">غير مدفوعة <span style="font-size:10px;color:var(--accent)">← تقرير</span></div><div class="stat-value" id="dash-unpaid-count" style="color:var(--red-p)">0</div><div class="stat-detail" id="dash-unpaid-amount">0 ر.س</div></div>
-      <div class="stat-card" style="--card-color:var(--gold);cursor:pointer" onclick="goToReport('partial')" title="اضغط لعرض تقرير الجزئية"><div class="stat-icon">🟡</div><div class="stat-label">مدفوعة جزئياً <span style="font-size:10px;color:var(--accent)">← تقرير</span></div><div class="stat-value" id="dash-partial-count" style="color:var(--gold)">0</div><div class="stat-detail" id="dash-partial-amount">0 ر.س</div></div>
-      <div class="stat-card" style="--card-color:var(--red-p);border-color:rgba(239,68,68,0.3);cursor:pointer" onclick="goToReport('unpaid_all')" title="اضغط لعرض تقرير الغير محصّل"><div class="stat-icon">💳</div><div class="stat-label">إجمالي غير المحصّل <span style="font-size:10px;color:var(--accent)">← تقرير</span></div><div class="stat-value" id="dash-remaining" style="color:var(--red-p)">0</div><div class="stat-detail">غير مدفوعة + جزئية</div></div>
+      <div class="stat-card" style="--card-color:var(--red-p);cursor:pointer" onclick="goToReport('unpaid')" title="اضغط لعرض تقرير الغير مدفوعة"><div class="stat-icon">🔴</div><div class="stat-label">غير مدفوعة <span style="font-size:9px;color:var(--accent)">↗ تقرير</span></div><div class="stat-value" id="dash-unpaid-count" style="color:var(--red-p)">0</div><div class="stat-detail" id="dash-unpaid-amount">0 ر.س</div></div>
+      <div class="stat-card" style="--card-color:var(--gold);cursor:pointer" onclick="goToReport('partial')" title="اضغط لعرض تقرير الجزئية"><div class="stat-icon">🟡</div><div class="stat-label">مدفوعة جزئياً <span style="font-size:9px;color:var(--accent)">↗ تقرير</span></div><div class="stat-value" id="dash-partial-count" style="color:var(--gold)">0</div><div class="stat-detail" id="dash-partial-amount">0 ر.س</div></div>
+      <div class="stat-card" style="--card-color:var(--red-p);border-color:rgba(239,68,68,0.3);cursor:pointer" onclick="goToReport('unpaid_all')" title="اضغط لعرض تقرير الغير محصّل"><div class="stat-icon">💳</div><div class="stat-label">إجمالي غير المحصّل <span style="font-size:9px;color:var(--accent)">↗ تقرير</span></div><div class="stat-value" id="dash-remaining" style="color:var(--red-p)">0</div><div class="stat-detail">غير مدفوعة + جزئية</div></div>
     </div>
 
     <!-- Charts row -->
@@ -1152,20 +1152,21 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
     </div>
   </div>
 
+  <!-- بطاقات الإجمالي -->
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px" id="rep-stats"></div>
+
   <!-- فلتر الحالة -->
-  <div class="table-card" style="padding:14px 20px;margin-bottom:16px">
+  <div class="table-card" style="padding:12px 18px;margin-bottom:16px">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <span style="font-size:12px;color:var(--muted);font-weight:700">عرض:</span>
-      <button class="rep-status-btn active" data-st="all"       onclick="setRepStatus('all',this)"       style="padding:6px 14px;border:1px solid var(--accent);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;font-weight:600;background:var(--accent);color:#fff">الكل</button>
-      <button class="rep-status-btn"        data-st="paid"      onclick="setRepStatus('paid',this)"      style="padding:6px 14px;border:1px solid var(--border);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;background:transparent;color:var(--muted)">✅ مدفوعة</button>
-      <button class="rep-status-btn"        data-st="unpaid"    onclick="setRepStatus('unpaid',this)"    style="padding:6px 14px;border:1px solid var(--border);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;background:transparent;color:var(--muted)">🔴 غير مدفوعة</button>
-      <button class="rep-status-btn"        data-st="partial"   onclick="setRepStatus('partial',this)"   style="padding:6px 14px;border:1px solid var(--border);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;background:transparent;color:var(--muted)">🟡 جزئية</button>
-      <button class="rep-status-btn"        data-st="unpaid_all" onclick="setRepStatus('unpaid_all',this)" style="padding:6px 14px;border:1px solid var(--border);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;background:transparent;color:var(--muted)">💳 غير محصّل</button>
+      <span style="font-size:11px;color:var(--muted);font-weight:700">عرض:</span>
+      <button class="rep-status-btn" data-st="all"        onclick="setRepStatus('all')"        style="padding:5px 12px;border:1px solid var(--accent);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;font-weight:600;background:var(--accent);color:#fff">الكل</button>
+      <button class="rep-status-btn" data-st="paid"       onclick="setRepStatus('paid')"       id="rep-status-paid-btn"    style="padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;background:transparent;color:var(--muted)">✅ مدفوعة</button>
+      <button class="rep-status-btn" data-st="unpaid"     onclick="setRepStatus('unpaid')"     id="rep-status-unpaid-btn"  style="padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;background:transparent;color:var(--muted)">🔴 غير مدفوعة</button>
+      <button class="rep-status-btn" data-st="partial"    onclick="setRepStatus('partial')"    id="rep-status-partial-btn" style="padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;background:transparent;color:var(--muted)">🟡 جزئية</button>
+      <button class="rep-status-btn" data-st="unpaid_all" onclick="setRepStatus('unpaid_all')" id="rep-status-due-btn"     style="padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-family:var(--font);font-size:12px;cursor:pointer;background:transparent;color:var(--muted)">💳 غير محصّل</button>
     </div>
   </div>
 
-  <!-- بطاقات الإجمالي -->
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px;align-items:start" id="rep-stats"></div>
   <div class="table-card" style="padding:20px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
       <div style="font-size:14px;font-weight:700;color:var(--text)">📊 مخطط المبيعات</div>
@@ -2158,8 +2159,9 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
       <!-- ── Unpaid warning bar ── -->
       <div id="lc-unpaid-bar" style="display:none;padding:8px 20px 12px;border-top:1px dashed rgba(245,158,11,0.3)">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-size:12px;color:var(--gold)">⚠️ الفاتورة غير مدفوعة — لن تُرسَل البوليصة حتى يتم الدفع</span>
+          <span style="font-size:12px;color:var(--gold)" id="lc-unpaid-bar-msg">⚠️ الفاتورة غير مدفوعة — لن تُرسَل البوليصة حتى يتم الدفع</span>
           <button onclick="sendWAUnpaid()" class="lc-btn lc-btn-wa">📤 إرسال رابط الفاتورة والدفع</button>
+          <button onclick="openPartialPayModal()" class="lc-btn" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.35);color:var(--gold)">💰 تسجيل دفعة جزئية</button>
         </div>
       </div>
     </div>
@@ -2190,6 +2192,44 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
       <button class="btn btn-ghost" id="pay-link-btn" onclick="sendPaymentLink()" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#10b981">💳 رابط الدفع</button>
       <button class="btn btn-ghost" id="check-pay-btn" onclick="checkPaymentStatus()" style="display:none;background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#f59e0b">🔄 تحقق من الدفع</button>
       <button class="btn btn-primary" onclick="downloadInvoicePDF()">⬇ تحميل الفاتورة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Partial Pay Modal -->
+<div class="overlay" id="partial-pay-modal" onclick="if(event.target===this)closeModal('partial-pay-modal')">
+  <div class="modal" style="max-width:400px;width:95%">
+    <div class="modal-header">
+      <h3 style="margin:0;font-size:16px">💰 تسجيل دفعة جزئية</h3>
+      <button class="close-btn" onclick="closeModal('partial-pay-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:24px;display:flex;flex-direction:column;gap:16px">
+      <div style="background:var(--bg);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:var(--muted)">إجمالي الفاتورة:</span>
+          <span id="pp-total" style="font-weight:700;color:var(--text)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:var(--muted)">المبلغ المدفوع سابقاً:</span>
+          <span id="pp-prev" style="font-weight:700;color:var(--green)">—</span>
+        </div>
+        <div style="height:1px;background:var(--border)"></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px">
+          <span style="color:var(--muted)">المتبقي الحالي:</span>
+          <span id="pp-due" style="font-weight:800;color:var(--gold)">—</span>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:13px;color:var(--muted);margin-bottom:6px;display:block">المبلغ المدفوع الآن (إجمالي ما دُفع منذ البداية) *</label>
+        <input type="number" id="pp-amount" placeholder="0.00" min="0" step="0.01" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:15px;box-sizing:border-box" oninput="ppUpdateDue()">
+        <div id="pp-hint" style="font-size:11px;color:var(--muted);margin-top:5px">أدخل إجمالي ما دُفع. إذا دفع كاملاً اضغط "مدفوع بالكامل".</div>
+      </div>
+      <div id="pp-new-due" style="display:none;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--gold)"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('partial-pay-modal')">إلغاء</button>
+      <button class="btn btn-ghost" onclick="saveAsFullyPaid()" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:var(--green)">✅ مدفوع بالكامل</button>
+      <button class="btn btn-primary" onclick="savePartialPay()">💾 حفظ الدفعة</button>
     </div>
   </div>
 </div>
@@ -2508,7 +2548,7 @@ function showSection(id, pushState = true) {
     if (id === 'clients') { try { backToClients(); } catch(e) { console.warn('backToClients:', e); } }
     if (id === 'settings') { try { loadSettings(); } catch(e) { console.warn('loadSettings:', e); } try { renderUsersList(); } catch(e) {} }
     if (id === 'invoice-template') { try { loadInvoiceTemplate(); } catch(e) { console.warn('loadInvoiceTemplate:', e); } }
-    if (id === 'reports') { try { if (!window._repKeepFilter) { _repStatus='all'; document.querySelectorAll('.rep-status-btn').forEach(b=>{const a=b.dataset.st==='all';b.style.background=a?'var(--accent)':'transparent';b.style.color=a?'#fff':'var(--muted)';b.style.borderColor=a?'var(--accent)':'var(--border)';});} window._repKeepFilter=false; initReports(); } catch(e) { console.warn('initReports:', e); } }
+    if (id === 'reports') { try { if (!window._repKeepFilter) { _repStatus='all'; document.querySelectorAll('.rep-status-btn').forEach(b=>{const a=b.dataset.st==='all';b.style.background=a?'var(--accent)':'transparent';b.style.color=a?'#fff':'var(--muted)';b.style.borderColor=a?'var(--accent)':'var(--border)';b.style.fontWeight=a?'700':'400';});} window._repKeepFilter=false; initReports(); } catch(e) { console.warn('initReports:', e); } }
     if (id === 'wa-templates') { try { loadWaTemplatesUI(); } catch(e) { console.warn('loadWaTemplatesUI:', e); } }
     // Browser history — زر الرجوع يعمل (safe for iOS Safari)
     try {
@@ -2712,7 +2752,7 @@ function updateStats() {
   const partialInvs = filtered.filter(i => i.status === 'partial');
   const totalPaid = paidInvs.reduce((s,i) => s + Number(i.price||0), 0);
   const totalUnpaid = unpaidInvs.reduce((s,i) => s + Number(i.price||0), 0);
-  const totalPartial = partialInvs.reduce((s,i) => s + (Number(i.price||0) - Number(i.partialPaid||0)), 0);
+  const totalPartial = partialInvs.reduce((s,i) => s + Math.max(0, Number(i.price||0) - Number(i.partialPaid||0)), 0);
   const remaining = totalUnpaid + totalPartial;
 
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
@@ -2787,7 +2827,7 @@ function renderStatusChart(filtered) {
   if (!ctx || !window.Chart) return;
   const paid = filtered.filter(i => i.status === 'paid').reduce((s,i) => s + Number(i.price||0), 0);
   const unpaid = filtered.filter(i => i.status === 'unpaid').reduce((s,i) => s + Number(i.price||0), 0);
-  const partial = filtered.filter(i => i.status === 'partial').reduce((s,i) => s + (Number(i.price||0) - Number(i.partialPaid||0)), 0);
+  const partial = filtered.filter(i => i.status === 'partial').reduce((s,i) => s + Math.max(0, Number(i.price||0) - Number(i.partialPaid||0)), 0);
   if (_charts.status) _charts.status.destroy();
   _charts.status = new Chart(ctx, {
     type: 'doughnut',
@@ -3046,8 +3086,8 @@ function renderTable() {
       <td><span style="background:rgba(139,92,246,0.12);color:#a78bfa;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${inv.items && inv.items.length > 1 ? inv.items.map(i=>i.type).join(' + ') : (inv.itemType||'شحن دولي')}</span></td>
       <td style="color:var(--muted);font-size:12px">${inv.carrier}</td>
       <td style="color:var(--muted);font-size:12px">${inv.weight ? `<span style="background:rgba(14,165,233,0.1);color:var(--accent);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">${inv.weight} كجم</span>` : '<span style="color:var(--border)">—</span>'}</td>
-      <td style="font-weight:700;color:var(--gold)">${inv.status==='partial' && inv.partialPaid ? `<span title="إجمالي الفاتورة: ${Number(inv.price).toFixed(2)} ر.س">${Number(inv.price).toFixed(2)} ر.س</span>` : (inv.price ? Number(inv.price).toFixed(2) + ' ر.س' : '<span style="color:var(--border);font-weight:400;font-size:11px">—</span>')}</td>
-      <td>${inv.isDraft ? `<span class="badge badge-draft"><span class="badge-dot" style="background:var(--gold)"></span>مسودة</span>` : (inv.status==='partial' ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><span class="badge-dot" style="background:var(--gold)"></span>جزئية — متبقي: ${(Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)} ر.س</span>` : statusBadge(inv.status))}</td>
+      <td style="font-weight:700;color:var(--gold)">${inv.price ? Number(inv.price).toFixed(2) + ' ر.س' : '<span style="color:var(--border);font-weight:400;font-size:11px">—</span>'}</td>
+      <td>${inv.isDraft ? `<span class="badge badge-draft"><span class="badge-dot" style="background:var(--gold)"></span>مسودة</span>` : inv.status==='partial' ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><span class="badge-dot" style="background:var(--gold)"></span>جزئية — متبقي: ${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)} ر.س</span>` : statusBadge(inv.status)}</td>
       <td style="color:var(--muted);font-size:12px">${inv.payment||'—'}</td>
       <td>${inv.created_by ? `<span class="creator-badge">👤 ${inv.created_by}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}</td>
       <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
@@ -3118,8 +3158,8 @@ function openNewInvoice(prefill) {
   document.getElementById('f-weight').value = prefill ? (prefill.weight || '') : '';
   document.getElementById('f-date').valueAsDate = new Date();
   document.getElementById('f-status').value = 'unpaid';
-  const ppEl2 = document.getElementById('f-partial-paid'); if(ppEl2) ppEl2.value='';
-  togglePartialField();
+  const ppReset = document.getElementById('f-partial-paid'); if(ppReset) ppReset.value='';
+  const pgReset = document.getElementById('f-partial-group'); if(pgReset) pgReset.style.display='none';
   document.getElementById('f-payment').value = '';
   document.getElementById('f-code-type').value = 'barcode';
   document.getElementById('barcode-wrap').style.display = 'none';
@@ -3480,6 +3520,7 @@ function saveAsDraft() {
   saveData();
   const savedDraft = editingId ? invoices.find(i=>String(i.id)===String(editingId)) : invoices[invoices.length-1];
   if (savedDraft) saveInvoiceToDB(savedDraft);
+  window._invPage = 1; // الفاتورة الجديدة تظهر في أول صفحة (الأحدث أولاً)
   renderTable(); updateStats(); closeModal('form-modal');
 }
 
@@ -3497,7 +3538,7 @@ function awbPreflightCheck(inv) {
   return errors;
 }
 
-// ─── TOGGLE PARTIAL FIELD ───
+// ─── SAVE INVOICE ───
 function togglePartialField() {
   const st = document.getElementById('f-status') ? document.getElementById('f-status').value : '';
   const grp = document.getElementById('f-partial-group');
@@ -3505,7 +3546,6 @@ function togglePartialField() {
   if (st !== 'partial') { const el = document.getElementById('f-partial-paid'); if(el) el.value=''; }
 }
 
-// ─── SAVE INVOICE ───
 function saveInvoice() {
   const client = document.getElementById('f-client').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
@@ -3518,14 +3558,12 @@ function saveInvoice() {
   const status = document.getElementById('f-status').value;
   const payment = document.getElementById('f-payment').value;
   const details = document.getElementById('f-details').value.trim();
+  const partialPaid = status === 'partial' ? (parseFloat(document.getElementById('f-partial-paid')?.value)||0) : 0;
   const codeType = document.getElementById('f-code-type').value;
   const shipper = readShipper();
   const receiver = readReceiver();
-  const partialPaid = status === 'partial' ? (parseFloat(document.getElementById('f-partial-paid').value)||0) : 0;
-  if (status === 'partial' && (!partialPaid || partialPaid >= parseFloat(price||0))) {
-    showToast('⚠️ أدخل المبلغ المدفوع جزئياً، ويجب أن يكون أقل من إجمالي الفاتورة'); return;
-  }
   if (!client||!phone||!carrier||!awb||!price) { showToast('⚠️ يرجى ملء جميع الحقول المطلوبة'); return; }
+  if (status === 'partial' && (!partialPaid || partialPaid >= parseFloat(price))) { showToast('⚠️ أدخل المبلغ المدفوع جزئياً (يجب أن يكون أقل من إجمالي الفاتورة)'); return; }
   if (editingId) {
     const idx = invoices.findIndex(i => String(i.id)===String(editingId));
     const prev = invoices[idx];
@@ -3582,9 +3620,8 @@ function editInvoice(id) {
   document.getElementById('f-payment').value = inv.payment||'';
   document.getElementById('f-details').value = inv.details||'';
   document.getElementById('f-code-type').value = inv.codeType||'barcode';
-  // تعبئة حقل الجزئي
-  const ppEl = document.getElementById('f-partial-paid');
-  if (ppEl) ppEl.value = inv.partialPaid||'';
+  // تعبئة حقل المدفوع جزئياً
+  const ppEl = document.getElementById('f-partial-paid'); if(ppEl) ppEl.value = inv.partialPaid||'';
   togglePartialField();
   // Draft banner
   const draftBanner = document.getElementById('draft-banner');
@@ -3886,7 +3923,11 @@ function refreshLabelCenter(inv) {
   if (!hasAWB) {
     if (noAwbEl)  noAwbEl.style.display  = 'flex';
     if (hasAwbEl) hasAwbEl.style.display = 'none';
-    if (unpaidBar) unpaidBar.style.display = (inv && inv.status !== 'paid') ? 'block' : 'none';
+    if (unpaidBar) {
+      unpaidBar.style.display = (inv && inv.status !== 'paid') ? 'block' : 'none';
+      const bm = document.getElementById('lc-unpaid-bar-msg');
+      if (bm && inv) { if (inv.status==='partial') { const due=Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)); bm.innerHTML=`💰 مدفوعة جزئياً — المدفوع: <b style="color:var(--green)">${Number(inv.partialPaid||0).toFixed(2)} ر.س</b> · المتبقي: <b style="color:var(--gold)">${due.toFixed(2)} ر.س</b>`; } else { bm.innerHTML='⚠️ الفاتورة غير مدفوعة — لن تُرسَل البوليصة حتى يتم الدفع'; } }
+    }
     return;
   }
 
@@ -3916,7 +3957,11 @@ function refreshLabelCenter(inv) {
     }
   }
 
-  if (unpaidBar) unpaidBar.style.display = (inv.status !== 'paid') ? 'block' : 'none';
+  if (unpaidBar) {
+    unpaidBar.style.display = (inv.status !== 'paid') ? 'block' : 'none';
+    const bm2 = document.getElementById('lc-unpaid-bar-msg');
+    if (bm2) { if (inv.status==='partial') { const due=Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)); bm2.innerHTML=`💰 مدفوعة جزئياً — المدفوع: <b style="color:var(--green)">${Number(inv.partialPaid||0).toFixed(2)} ر.س</b> · المتبقي: <b style="color:var(--gold)">${due.toFixed(2)} ر.س</b>`; } else { bm2.innerHTML='⚠️ الفاتورة غير مدفوعة — لن تُرسَل البوليصة حتى يتم الدفع'; } }
+  }
   refreshWALogBadge();
   // Update timeline count badge
   const tlBadge = document.getElementById('tl-count-badge');
@@ -4212,14 +4257,17 @@ function sendCollectionWA() {
     normalizePhone(i.phone||'') === phone && i.status !== 'paid' && !i.isDraft
   ).sort((a,b) => new Date(a.date||0) - new Date(b.date||0));
   if (!unpaid.length) return showToast('✅ لا توجد فواتير مستحقة لهذا العميل');
-  const total = unpaid.reduce((s,i) => i.status==='partial' ? s+(Number(i.price||0)-Number(i.partialPaid||0)) : s+Number(i.price||0), 0);
+  const dueAmt = i => i.status==='partial' ? Math.max(0,Number(i.price||0)-Number(i.partialPaid||0)) : Number(i.price||0);
+  const total = unpaid.reduce((s,i) => s + dueAmt(i), 0);
   let msg = `مرحباً ${name} 👋\n\n`;
   msg += `نود تذكيرك بالفواتير المستحقة لدى شيب بيك 🧾\n\n`;
   msg += `━━━━━━━━━━━━━━━━\n`;
   unpaid.forEach((inv, idx) => {
     const awbPart = inv.awb ? ` — ${inv.awb}` : '';
-    msg += `${idx+1}. #${inv.no||inv.id}${awbPart}\n`;
-    msg += `   💵 ${Number(inv.price||0).toFixed(2)} ر.س | 📅 ${formatDate(inv.date)}\n`;
+    const due = dueAmt(inv);
+    const partLabel = inv.status==='partial' ? ` (جزئية — متبقي)` : '';
+    msg += `${idx+1}. #${inv.no||inv.id}${awbPart}${partLabel}\n`;
+    msg += `   💵 ${due.toFixed(2)} ر.س | 📅 ${formatDate(inv.date)}\n`;
   });
   msg += `━━━━━━━━━━━━━━━━\n`;
   msg += `📊 *إجمالي المستحق: ${total.toFixed(2)} ر.س*\n`;
@@ -4360,7 +4408,7 @@ function showClientDetail(phone, name, idsStr) {
   // stats
   const total  = clientInvs.reduce((s,i) => s + Number(i.price||0), 0);
   const paid   = clientInvs.filter(i=>i.status==='paid').reduce((s,i)=>s+Number(i.price||0),0);
-  const unpaid = clientInvs.filter(i=>i.status==='unpaid').reduce((s,i)=>s+Number(i.price||0),0) + clientInvs.filter(i=>i.status==='partial').reduce((s,i)=>s+(Number(i.price||0)-Number(i.partialPaid||0)),0);
+  const unpaid = clientInvs.filter(i=>i.status==='unpaid').reduce((s,i)=>s+Number(i.price||0),0) + clientInvs.filter(i=>i.status==='partial').reduce((s,i)=>s+Math.max(0,Number(i.price||0)-Number(i.partialPaid||0)),0);
   document.getElementById('client-stats-row').innerHTML = `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
       <div style="font-size:22px;font-weight:700;color:var(--accent)">${clientInvs.length}</div>
@@ -5993,7 +6041,7 @@ function openCollections() {
     if (!p) return;
     if (!unpaidByPhone[p]) unpaidByPhone[p] = { client: inv.client, phone: p, invoices: [], total: 0 };
     unpaidByPhone[p].invoices.push(inv);
-    unpaidByPhone[p].total += inv.status==='partial' ? Math.max(0, Number(inv.price||0) - Number(inv.partialPaid||0)) : Number(inv.price||0);
+    unpaidByPhone[p].total += Number(inv.price || 0);
   });
   const clients = Object.values(unpaidByPhone).filter(c => c.invoices.length > 0);
   clients.sort((a, b) => b.total - a.total);
@@ -6030,8 +6078,9 @@ async function sendCollectionWAForPhone(phone) {
   const p = normalizePhone(phone);
   const unpaid = invoices.filter(i => (i.status === 'unpaid' || i.status === 'partial') && normalizePhone(i.phone) === p);
   if (!unpaid.length) return;
-  const total = unpaid.reduce((s, i) => i.status==='partial' ? s+Math.max(0,Number(i.price||0)-Number(i.partialPaid||0)) : s+Number(i.price||0), 0);
-  const lines = unpaid.map(i => { const due = i.status==='partial' ? Math.max(0,Number(i.price||0)-Number(i.partialPaid||0)) : Number(i.price||0); return `• #${i.no||i.id} — ${due.toFixed(0)} ر.س${i.status==='partial'?' (جزئية)':''} (${formatDate(i.date)})`; }).join('\n');
+  const dueAmt2 = i => i.status==='partial' ? Math.max(0,Number(i.price||0)-Number(i.partialPaid||0)) : Number(i.price||0);
+  const total = unpaid.reduce((s, i) => s + dueAmt2(i), 0);
+  const lines = unpaid.map(i => { const due=dueAmt2(i); return `• #${i.no||i.id}${i.status==='partial'?' (جزئية)':''} — ${due.toFixed(0)} ر.س (${formatDate(i.date)})`; }).join('\n');
   const msg = `السلام عليكم ${unpaid[0].client}،\n\nنود تذكيركم بالفواتير غير المسددة:\n\n${lines}\n\n💰 الإجمالي: ${total.toFixed(2)} ر.س\n\nنرجو السداد في أقرب وقت. شكراً 🙏`;
   window.open(`https://wa.me/${p.replace(/^0/, '966')}?text=${encodeURIComponent(msg)}`, '_blank');
   unpaid.forEach(inv => {
@@ -6133,6 +6182,7 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
     if (!phone && clientId && clientMap[clientId]) phone = clientMap[clientId].phone || '';
 
     const price  = parseFloat(dInv.summary_total || dInv.total || dInv.grand_total || 0);
+    const daftraPaid = parseFloat(dInv.summary_paid || dInv.paid_amount || dInv.amount_paid || 0);
     const date   = (dInv.date || dInv.issue_date || '').substring(0, 10) || new Date().toISOString().split('T')[0];
     const awb    = dInv.order_number || dInv.po_number || '';
     const no     = dInv.no || dId;
@@ -6144,7 +6194,8 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
       const statusChanged = existing.status !== newStatus;
       const priceChanged  = Math.abs(Number(existing.price||0) - price) > 0.01;
       if (statusChanged || priceChanged) {
-        invoices[idx] = { ...existing, status: newStatus, price };
+        const updatedPartialPaid = newStatus==='partial' ? (daftraPaid>0 ? daftraPaid : (existing.partialPaid||0)) : (newStatus==='paid' ? price : 0);
+        invoices[idx] = { ...existing, status: newStatus, price, partialPaid: updatedPartialPaid };
         toSave.push(invoices[idx]);
         updated++;
       }
@@ -6153,6 +6204,7 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
       const newId = 'd' + dId;
       if (existingIds.has(newId)) return; // موجودة بالـ id — تخطى
 
+      const newPartialPaid = newStatus==='partial' ? (daftraPaid>0 ? daftraPaid : 0) : (newStatus==='paid' ? price : 0);
       const newInv = {
         id: newId,
         daftra_id: dId,
@@ -6164,6 +6216,7 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
         price,
         date,
         status: newStatus,
+        partialPaid: newPartialPaid,
         payment: 'دفترة',
         codeType: 'barcode',
         details: `#${no} — مستورد من دفترة`,
@@ -6883,46 +6936,57 @@ function recExportExcel() {
 // REPORTS ENGINE — محرك التقارير
 // ═══════════════════════════════════════════════════════════
 
-let _repPeriod     = 'daily';   // daily | weekly | monthly | yearly | custom
-let _repOffset     = 0;
-let _repChartType  = 'bar';
-let _repChartInst  = null;
-let _repStatus     = 'all';     // all | paid | unpaid | partial | unpaid_all
+let _repPeriod  = 'daily';   // daily | weekly | monthly | yearly | custom
+let _repOffset  = 0;         // تنقل للأمام/الخلف
+let _repChartType = 'bar';
+let _repChartInst = null;
+
+let _repStatus = 'all'; // all | paid | unpaid | partial | unpaid_all
 
 function initReports(statusFilter) {
   _repOffset = 0;
   if (statusFilter) {
     _repStatus = statusFilter;
-    // تحديث أزرار الفلتر
     document.querySelectorAll('.rep-status-btn').forEach(b => {
       const active = b.dataset.st === statusFilter;
-      b.style.background = active ? 'var(--accent)' : 'transparent';
-      b.style.color = active ? '#fff' : 'var(--muted)';
+      b.style.background  = active ? 'var(--accent)' : 'transparent';
+      b.style.color       = active ? '#fff' : 'var(--muted)';
       b.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+      b.style.fontWeight  = active ? '700' : '400';
     });
   }
   renderReport();
 }
 
-// ── الانتقال من لوحة التحكم إلى التقارير مع فلتر ──
+function setRepStatus(st) {
+  _repStatus = st;
+  document.querySelectorAll('.rep-status-btn').forEach(b => {
+    const active = b.dataset.st === st;
+    b.style.background  = active ? 'var(--accent)' : 'transparent';
+    b.style.color       = active ? '#fff' : 'var(--muted)';
+    b.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+    b.style.fontWeight  = active ? '700' : '400';
+  });
+  renderReport();
+}
+
+// ── الانتقال من لوحة التحكم إلى التقارير مع فلتر مباشر ──
 function goToReport(statusFilter) {
-  // ضبط الفترة على "الكل" (custom: من البداية حتى اليوم)
+  _repStatus = statusFilter || 'all';
   _repPeriod = 'custom';
   _repOffset = 0;
-  _repStatus = statusFilter || 'all'; // ضبط الفلتر مباشرة قبل showSection
-  window._repKeepFilter = true; // منع showSection من إعادة تعيين الفلتر
-  // ضبط تواريخ لتشمل كل الفترات
+  window._repKeepFilter = true;
+  showSection('reports');
   setTimeout(() => {
     const fromEl = document.getElementById('rep-from');
     const toEl   = document.getElementById('rep-to');
     if (fromEl) fromEl.value = '2020-01-01';
     if (toEl)   toEl.value   = new Date().toISOString().split('T')[0];
-    // تفعيل زر custom
     document.querySelectorAll('.rep-period-btn').forEach(b => {
-      const isCustom = b.dataset.p === 'custom';
-      b.style.background   = isCustom ? 'var(--accent)' : 'transparent';
-      b.style.color        = isCustom ? '#fff' : 'var(--muted)';
-      b.style.fontWeight   = isCustom ? '600' : '400';
+      const active = b.dataset.p === 'custom';
+      b.style.background = active ? 'var(--accent)' : 'transparent';
+      b.style.color      = active ? '#fff' : 'var(--muted)';
+      b.style.fontWeight = active ? '600' : '400';
     });
     const customDiv = document.getElementById('rep-custom-range');
     const navDiv    = document.getElementById('rep-nav');
@@ -6930,18 +6994,6 @@ function goToReport(statusFilter) {
     if (navDiv)    navDiv.style.display    = 'none';
     initReports(statusFilter);
   }, 80);
-  showSection('reports');
-}
-
-function setRepStatus(st, btn) {
-  _repStatus = st;
-  document.querySelectorAll('.rep-status-btn').forEach(b => {
-    const active = b.dataset.st === st;
-    b.style.background  = active ? 'var(--accent)' : 'transparent';
-    b.style.color       = active ? '#fff' : 'var(--muted)';
-    b.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
-  });
-  renderReport();
 }
 
 function setRepPeriod(p, btn) {
@@ -7025,8 +7077,8 @@ function getRepRange() {
     from = new Date(f);
     to   = new Date(t); to.setDate(to.getDate() + 1);
     const diffDays = (to - from) / 86400000;
-    groupBy = diffDays <= 2 ? 'hour' : diffDays <= 60 ? 'day' : diffDays <= 400 ? 'month' : 'month';
-    label = `من ${f} إلى ${t}`;
+    groupBy = diffDays <= 2 ? 'hour' : diffDays <= 60 ? 'day' : 'month';
+    label = `${f} — ${t}`;
   }
   return { from, to, label, groupBy };
 }
@@ -7059,22 +7111,24 @@ function buildRepGroups(from, to, groupBy) {
 function renderReport() {
   const range = getRepRange();
   if (!range) return;
+  const dueAmount = inv => inv.status === 'partial' ? Math.max(0, Number(inv.price||0) - Number(inv.partialPaid||0)) : Number(inv.price||0);
 
+  // تحديث label التنقل
   const navLabel = document.getElementById('rep-nav-label');
   if (navLabel) navLabel.textContent = range.label;
   const subtitle = document.getElementById('rep-subtitle');
   if (subtitle) subtitle.textContent = range.label;
 
-  // ── فلترة بالفترة الزمنية ──
+  // فلترة الفواتير بالفترة
   const byDate = invoices.filter(inv => {
     if (inv.isDraft) return false;
     const d = new Date(inv.date || 0);
     return d >= range.from && d < range.to;
   });
 
-  // ── فلترة بالحالة ──
+  // فلترة بالحالة
   const filtered = byDate.filter(inv => {
-    if (_repStatus === 'all')        return true;
+    if (!_repStatus || _repStatus === 'all') return true;
     if (_repStatus === 'paid')       return inv.status === 'paid';
     if (_repStatus === 'unpaid')     return inv.status === 'unpaid';
     if (_repStatus === 'partial')    return inv.status === 'partial';
@@ -7082,79 +7136,91 @@ function renderReport() {
     return true;
   });
 
-  // ── مساعد: المبلغ المستحق الفعلي للفاتورة ──
-  const dueAmount = inv => inv.status === 'partial'
-    ? Math.max(0, Number(inv.price||0) - Number(inv.partialPaid||0))
-    : Number(inv.price||0);
-
-  // ── إجماليات كاملة (بغض النظر عن فلتر الحالة) لحساب النسبة ──
-  const totalPaid    = byDate.filter(i=>i.status==='paid').reduce((s,i)=>s+Number(i.price||0),0);
-  const totalUnpaid  = byDate.filter(i=>i.status==='unpaid').reduce((s,i)=>s+Number(i.price||0),0);
-  const totalPartial = byDate.filter(i=>i.status==='partial').reduce((s,i)=>s+dueAmount(i),0);
-  const totalDue     = totalUnpaid + totalPartial;  // غير محصّل فعلي
+  // الإجماليات تُحسب دائماً من byDate (كل الفترة) بغض النظر عن فلتر الحالة
+  const allPaid     = byDate.filter(i=>i.status==='paid');
+  const allPartial  = byDate.filter(i=>i.status==='partial');
+  const allUnpaid   = byDate.filter(i=>i.status==='unpaid');
+  const totalPaid    = allPaid.reduce((s,i)=>s+Number(i.price||0),0);
+  const totalPartial = allPartial.reduce((s,i)=>s+Math.max(0,Number(i.price||0)-Number(i.partialPaid||0)),0);
+  const totalUnpaid  = allUnpaid.reduce((s,i)=>s+Number(i.price||0),0);
+  const totalDue     = totalUnpaid + totalPartial;
+  const totalPartialPaid = allPartial.reduce((s,i)=>s+Number(i.partialPaid||0),0);
   const totalAll     = byDate.reduce((s,i)=>s+Number(i.price||0),0);
-  const countPaid    = byDate.filter(i=>i.status==='paid').length;
-  const countUnpaid  = byDate.filter(i=>i.status==='unpaid').length;
-  const countPartial = byDate.filter(i=>i.status==='partial').length;
+  const countAll     = byDate.length;
+  const countPaid    = allPaid.length;
+  const countUnpaid  = allUnpaid.length;
+  const countPartial = allPartial.length;
+  // للجدول — يستخدم filtered (مصفّى بالحالة)
+  const partialInvs  = filtered.filter(i=>i.status==='partial');
+  const unpaidInvs   = filtered.filter(i=>i.status==='unpaid');
 
-  // ── بطاقات الإجمالي (تعرض دائماً الأرقام الكاملة) ──
-  const collectRate = totalAll > 0 ? ((totalPaid / totalAll) * 100).toFixed(1) : 0;
-  const totalPaidPart = byDate.filter(i=>i.status==='partial').reduce((s,i)=>s+Number(i.partialPaid||0),0); // ما دُفع فعلاً من الجزئية
-  const totalCollected = totalPaid + totalPaidPart; // إجمالي ما تم تحصيله فعلاً
+  // بطاقات الإجمالي
+  const totalCollected = totalPaid + totalPartialPaid;
+  const collectRate = totalAll > 0 ? ((totalCollected / totalAll) * 100).toFixed(1) : 0;
   const stats = document.getElementById('rep-stats');
   if (stats) stats.innerHTML = `
-    <!-- صف 1: بطاقات رئيسية قابلة للضغط -->
-    <div onclick="setRepStatus('all', document.querySelector('.rep-status-btn[data-st=all]'))" style="cursor:pointer;grid-column:1/-1;background:linear-gradient(135deg,rgba(14,165,233,0.08),rgba(6,182,212,0.05));border:1px solid rgba(14,165,233,0.2);border-radius:14px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
-      <div>
-        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">📊 إجمالي المبيعات في الفترة</div>
-        <div style="font-size:32px;font-weight:900;color:var(--accent)">${totalAll.toFixed(2)} <span style="font-size:14px;font-weight:600">ر.س</span></div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px">${byDate.length} فاتورة · نسبة التحصيل: <b style="color:var(--green)">${collectRate}%</b></div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div style="background:var(--bg);border-radius:10px;padding:10px 16px;text-align:center;min-width:80px">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">فعلياً محصّل</div>
-          <div style="font-size:18px;font-weight:800;color:var(--green)">${totalCollected.toFixed(0)}</div>
+    <div style="grid-column:1/-1;background:linear-gradient(135deg,rgba(14,165,233,0.08),rgba(6,182,212,0.04));border:1px solid rgba(14,165,233,0.2);border-radius:14px;padding:20px 24px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center">
+        <div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">📊 إجمالي المبيعات</div>
+          <div style="font-size:28px;font-weight:900;color:var(--text)">${totalAll.toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">${countAll} فاتورة · ر.س</div>
         </div>
-        <div style="background:var(--bg);border-radius:10px;padding:10px 16px;text-align:center;min-width:80px">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">غير محصّل</div>
-          <div style="font-size:18px;font-weight:800;color:var(--red-p)">${totalDue.toFixed(0)}</div>
+        <div>
+          <div style="font-size:10px;color:var(--green);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">✅ فعلياً محصّل</div>
+          <div style="font-size:28px;font-weight:900;color:var(--green)">${totalCollected.toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">مدفوع كامل + جزئي · ر.س</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--red-p);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">💳 إجمالي المستحق</div>
+          <div style="font-size:28px;font-weight:900;color:var(--red-p)">${totalDue.toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">غير مدفوعة + متبقي جزئية · ر.س</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="background:rgba(14,165,233,0.06);border-radius:8px;height:8px;overflow:hidden">
+          <div style="background:var(--green);height:100%;width:${collectRate}%;transition:width 0.5s;border-radius:8px"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)">
+          <span>نسبة التحصيل</span>
+          <b style="color:var(--green)">${collectRate}%</b>
         </div>
       </div>
     </div>
-    <!-- صف 2: بطاقات فرعية قابلة للضغط للفلترة -->
-    <div onclick="setRepStatus('paid', document.querySelector('.rep-status-btn[data-st=paid]'))" style="cursor:pointer;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:16px 18px;transition:border-color 0.15s" onmouseover="this.style.borderColor='rgba(16,185,129,0.5)'" onmouseout="this.style.borderColor='rgba(16,185,129,0.2)'">
-      <div style="font-size:10px;color:var(--green);font-weight:700;margin-bottom:8px">✅ مدفوعة بالكامل <span style="font-size:9px;opacity:0.7">← اضغط للفلترة</span></div>
-      <div style="font-size:24px;font-weight:800;color:var(--green)">${totalPaid.toFixed(2)}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">${countPaid} فاتورة · ر.س</div>
+    <div style="background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:16px 18px;cursor:pointer" onclick="document.getElementById('rep-status-paid-btn').click()">
+      <div style="font-size:10px;color:var(--green);font-weight:700;margin-bottom:8px">✅ مدفوعة بالكامل</div>
+      <div style="font-size:22px;font-weight:800;color:var(--green)">${totalPaid.toFixed(2)} <span style="font-size:12px;font-weight:400">ر.س</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${countPaid} فاتورة · اضغط للفلترة</div>
     </div>
-    <div onclick="setRepStatus('unpaid', document.querySelector('.rep-status-btn[data-st=unpaid]'))" style="cursor:pointer;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px 18px;transition:border-color 0.15s" onmouseover="this.style.borderColor='rgba(239,68,68,0.5)'" onmouseout="this.style.borderColor='rgba(239,68,68,0.2)'">
-      <div style="font-size:10px;color:var(--red-p);font-weight:700;margin-bottom:8px">🔴 غير مدفوعة <span style="font-size:9px;opacity:0.7">← اضغط للفلترة</span></div>
-      <div style="font-size:24px;font-weight:800;color:var(--red-p)">${totalUnpaid.toFixed(2)}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">${countUnpaid} فاتورة · ر.س</div>
+    <div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px 18px;cursor:pointer" onclick="document.getElementById('rep-status-unpaid-btn').click()">
+      <div style="font-size:10px;color:var(--red-p);font-weight:700;margin-bottom:8px">🔴 غير مدفوعة</div>
+      <div style="font-size:22px;font-weight:800;color:var(--red-p)">${totalUnpaid.toFixed(2)} <span style="font-size:12px;font-weight:400">ر.س</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${countUnpaid} فاتورة · اضغط للفلترة</div>
     </div>
-    <div onclick="setRepStatus('partial', document.querySelector('.rep-status-btn[data-st=partial]'))" style="cursor:pointer;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:16px 18px;transition:border-color 0.15s" onmouseover="this.style.borderColor='rgba(245,158,11,0.5)'" onmouseout="this.style.borderColor='rgba(245,158,11,0.2)'">
-      <div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:8px">🟡 جزئية — المتبقي <span style="font-size:9px;opacity:0.7">← اضغط للفلترة</span></div>
-      <div style="font-size:24px;font-weight:800;color:var(--gold)">${totalPartial.toFixed(2)}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">${countPartial} فاتورة · مدفوع منها: ${totalPaidPart.toFixed(0)} ر.س</div>
+    <div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:16px 18px;cursor:pointer" onclick="document.getElementById('rep-status-partial-btn').click()">
+      <div style="font-size:10px;color:var(--gold);font-weight:700;margin-bottom:8px">🟡 جزئية — المتبقي فقط</div>
+      <div style="font-size:22px;font-weight:800;color:var(--gold)">${totalPartial.toFixed(2)} <span style="font-size:12px;font-weight:400">ر.س</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${countPartial} فاتورة · مدفوع منها: ${totalPartialPaid.toFixed(0)} ر.س</div>
     </div>
-    <div onclick="setRepStatus('unpaid_all', document.querySelector('.rep-status-btn[data-st=unpaid_all]'))" style="cursor:pointer;background:rgba(239,68,68,0.05);border:1px dashed rgba(239,68,68,0.3);border-radius:12px;padding:16px 18px;transition:border-color 0.15s" onmouseover="this.style.borderColor='rgba(239,68,68,0.6)'" onmouseout="this.style.borderColor='rgba(239,68,68,0.3)'">
-      <div style="font-size:10px;color:var(--red-p);font-weight:700;margin-bottom:8px">💳 إجمالي غير المحصّل <span style="font-size:9px;opacity:0.7">← اضغط للفلترة</span></div>
-      <div style="font-size:24px;font-weight:800;color:var(--red-p)">${totalDue.toFixed(2)}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">غير مدفوعة + متبقي جزئية · ر.س</div>
+    <div style="background:rgba(239,68,68,0.04);border:1px dashed rgba(239,68,68,0.35);border-radius:12px;padding:16px 18px;cursor:pointer" onclick="document.getElementById('rep-status-due-btn').click()">
+      <div style="font-size:10px;color:var(--red-p);font-weight:700;margin-bottom:8px">💳 إجمالي غير المحصّل</div>
+      <div style="font-size:22px;font-weight:800;color:var(--red-p)">${totalDue.toFixed(2)} <span style="font-size:12px;font-weight:400">ر.س</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">غير مدفوعة + متبقي جزئية</div>
     </div>`;
 
-  // ── بناء مجموعات الرسم البياني (بناءً على byDate كامل) ──
+  // بناء مجموعات الرسم البياني
   const groups = buildRepGroups(range.from, range.to, range.groupBy);
-  byDate.forEach(inv => {
+  filtered.forEach(inv => {
     const d = new Date(inv.date || 0);
     const g = groups.find(g => d >= g.from && d < g.to);
     if (!g) return;
     g.count++;
-    if (inv.status === 'paid')    g.paid   += Number(inv.price||0);
-    else if (inv.status==='partial') g.unpaid += dueAmount(inv);
-    else                          g.unpaid += Number(inv.price||0);
+    if (inv.status === 'paid') g.paid += Number(inv.price||0);
+    else if (inv.status === 'partial') g.unpaid += Math.max(0, Number(inv.price||0) - Number(inv.partialPaid||0));
+    else g.unpaid += Number(inv.price||0);
   });
 
+  // رسم المخطط
   const ctx = document.getElementById('rep-chart');
   if (ctx && window.Chart) {
     if (_repChartInst) { _repChartInst.destroy(); _repChartInst = null; }
@@ -7163,10 +7229,10 @@ function renderReport() {
       data: {
         labels: groups.map(g => g.label),
         datasets: [
-          { label: 'محصّل', data: groups.map(g => g.paid),
-            backgroundColor: _repChartType==='bar' ? 'rgba(16,185,129,0.75)' : 'rgba(16,185,129,0.12)',
+          { label: 'مدفوعة', data: groups.map(g => g.paid),
+            backgroundColor: _repChartType==='bar' ? 'rgba(16,185,129,0.7)' : 'rgba(16,185,129,0.1)',
             borderColor: '#10b981', borderWidth: 2, fill: _repChartType==='line', tension: 0.3 },
-          { label: 'غير محصّل', data: groups.map(g => g.unpaid),
+          { label: 'غير مدفوعة', data: groups.map(g => g.unpaid),
             backgroundColor: _repChartType==='bar' ? 'rgba(239,68,68,0.7)' : 'rgba(239,68,68,0.1)',
             borderColor: '#ef4444', borderWidth: 2, fill: _repChartType==='line', tension: 0.3 },
         ]
@@ -7182,74 +7248,70 @@ function renderReport() {
     });
   }
 
-  // ── جدول التفاصيل (يعتمد على filtered المصفاة بالحالة) ──
+  // جدول التفاصيل
   const wrap = document.getElementById('rep-table-wrap');
   if (!wrap) return;
-
-  const statusLabels = { all:'الكل', paid:'مدفوعة', unpaid:'غير مدفوعة', partial:'جزئية', unpaid_all:'غير محصّل' };
-  const filtLabel = statusLabels[_repStatus] || '';
-
   if (!filtered.length) {
-    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">لا توجد فواتير (${filtLabel})</div></div>`;
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">لا توجد فواتير في هذه الفترة</div></div>`;
     return;
   }
-
   const sorted = [...filtered].sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
-  const filtTotal = filtered.reduce((s,i) => s + dueAmount(i), 0);
   const isMobile = window.innerWidth < 768;
-
   if (isMobile) {
+    // كاردات للجوال
     wrap.innerHTML = `
       <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--text)">
-        ${filtLabel ? filtLabel + ' — ' : ''}${sorted.length} فاتورة — ${filtTotal.toFixed(2)} ر.س
+        تفاصيل الفواتير (${sorted.length}) — إجمالي: ${totalAll.toFixed(0)} ر.س
       </div>
       <div style="padding:12px;display:flex;flex-direction:column;gap:10px">` +
       sorted.map(inv => `
         <div onclick="viewInvoice(${inv.id})" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <span style="font-size:12px;color:var(--accent);font-weight:700">#${inv.no||inv.id}</span>
-            ${inv.status==='partial' ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><span class="badge-dot" style="background:var(--gold)"></span>جزئية — متبقي: ${dueAmount(inv).toFixed(2)} ر.س</span>` : statusBadge(inv.status)}
+            ${statusBadge(inv.status)}
           </div>
           <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">${inv.client||'—'}</div>
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="font-size:12px;color:var(--muted)">${inv.awb||inv.carrier||'—'} · ${formatDate(inv.date)}</span>
-            <span style="font-weight:700;color:var(--gold)">${inv.status==='partial'?dueAmount(inv).toFixed(2):Number(inv.price||0).toFixed(2)} ر.س</span>
+            <span style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)} ر.س</span>
           </div>
         </div>`).join('') +
       `</div>`;
   } else {
     wrap.innerHTML = `
-      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <div style="font-size:14px;font-weight:700;color:var(--text)">${filtLabel ? filtLabel + ' — ' : ''}تفاصيل الفواتير (${sorted.length})</div>
-        <div style="font-size:13px;color:var(--gold);font-weight:700">إجمالي المعروض: ${filtTotal.toFixed(2)} ر.س</div>
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:14px;font-weight:700;color:var(--text)">تفاصيل الفواتير (${sorted.length})</div>
       </div>
       <div style="overflow-x:auto">
       <table style="min-width:unset"><thead><tr>
         <th>رقم</th><th>العميل</th><th>الشركة</th><th>AWB</th>
-        <th>المبلغ الكلي</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th><th>التاريخ</th><th>موظف</th>
+        <th>إجمالي الفاتورة</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th><th>التاريخ</th><th>موظف</th>
       </tr></thead><tbody>` +
       sorted.map(inv => {
-        const partialP = Number(inv.partialPaid||0);
-        const due = dueAmount(inv);
+        const pp = Number(inv.partialPaid||0);
+        const due = inv.status==='paid' ? 0 : inv.status==='partial' ? Math.max(0,Number(inv.price||0)-pp) : Number(inv.price||0);
+        const paidAmt = inv.status==='paid' ? Number(inv.price||0) : inv.status==='partial' ? pp : 0;
+        const statusCell = inv.status==='partial'
+          ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><span class="badge-dot" style="background:var(--gold)"></span>جزئية</span>`
+          : statusBadge(inv.status);
         return `<tr>
-          <td class="mono" style="cursor:pointer;color:var(--accent)" onclick="viewInvoice(${inv.id})">#${inv.no||inv.id}</td>
-          <td>${inv.client||'—'}</td>
-          <td style="font-size:12px;color:var(--muted)">${inv.carrier||'—'}</td>
-          <td class="mono" style="font-size:12px">${inv.awb||'—'}</td>
-          <td style="font-weight:700;color:var(--text)">${Number(inv.price||0).toFixed(2)}</td>
-          <td style="color:var(--green);font-weight:600">${inv.status==='paid' ? Number(inv.price||0).toFixed(2) : inv.status==='partial' ? partialP.toFixed(2) : '0.00'}</td>
-          <td style="color:${due>0?'var(--red-p)':'var(--green)'};font-weight:700">${due.toFixed(2)}</td>
-          <td>${inv.status==='partial' ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><span class="badge-dot" style="background:var(--gold)"></span>جزئية</span>` : statusBadge(inv.status)}</td>
-          <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
-          <td style="font-size:12px;color:var(--muted)">${inv.created_by||'—'}</td>
-        </tr>`;
-      }).join('') +
+        <td class="mono" style="cursor:pointer;color:var(--accent)" onclick="viewInvoice(${inv.id})">#${inv.no||inv.id}</td>
+        <td>${inv.client||'—'}</td>
+        <td style="font-size:12px;color:var(--muted)">${inv.carrier||'—'}</td>
+        <td class="mono" style="font-size:12px">${inv.awb||'—'}</td>
+        <td style="font-weight:700;color:var(--text)">${Number(inv.price||0).toFixed(2)}</td>
+        <td style="color:var(--green);font-weight:600">${paidAmt.toFixed(2)}</td>
+        <td style="color:${due>0?'var(--red-p)':'var(--green)'};font-weight:700">${due.toFixed(2)}</td>
+        <td>${statusCell}</td>
+        <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
+        <td style="font-size:12px;color:var(--muted)">${inv.created_by||'—'}</td>
+      </tr>`;}).join('') +
       `</tbody>
       <tfoot><tr>
-        <td colspan="4" style="text-align:right;font-weight:700;padding:10px 16px;color:var(--text)">الإجمالي (${sorted.length} فاتورة)</td>
-        <td style="font-weight:700;color:var(--text);padding:10px 16px">${filtered.reduce((s,i)=>s+Number(i.price||0),0).toFixed(2)}</td>
-        <td style="font-weight:700;color:var(--green);padding:10px 16px">${filtered.reduce((s,i)=>s+(inv=>inv.status==='paid'?Number(inv.price||0):inv.status==='partial'?Number(inv.partialPaid||0):0)(i),0).toFixed(2)}</td>
-        <td style="font-weight:700;color:var(--red-p);padding:10px 16px">${filtTotal.toFixed(2)}</td>
+        <td colspan="4" style="text-align:right;font-weight:700;padding:10px 16px;color:var(--text)">الإجمالي (${sorted.length})</td>
+        <td style="font-weight:700;color:var(--text);padding:10px 16px">${totalAll.toFixed(2)}</td>
+        <td style="font-weight:700;color:var(--green);padding:10px 16px">${(totalPaid+totalPartialPaid).toFixed(2)}</td>
+        <td style="font-weight:700;color:var(--red-p);padding:10px 16px">${totalDue.toFixed(2)}</td>
         <td colspan="3"></td>
       </tr></tfoot>
       </table></div>`;
@@ -7276,13 +7338,83 @@ function exportReportPDF() {
   });
 }
 
-window.initReports      = initReports;
+// ══ PARTIAL PAY QUICK MODAL ══
+function openPartialPayModal() {
+  const inv = currentViewInvoice; if (!inv) return;
+  const total = Number(inv.price||0);
+  const prev  = Number(inv.partialPaid||0);
+  const due   = Math.max(0, total - prev);
+  document.getElementById('pp-total').textContent = total.toFixed(2) + ' ر.س';
+  document.getElementById('pp-prev').textContent  = prev.toFixed(2)  + ' ر.س';
+  document.getElementById('pp-due').textContent   = due.toFixed(2)   + ' ر.س';
+  const inp = document.getElementById('pp-amount');
+  inp.value = prev > 0 ? prev : '';
+  inp.max   = total;
+  document.getElementById('pp-new-due').style.display = 'none';
+  openModal('partial-pay-modal');
+}
+function ppUpdateDue() {
+  const inv = currentViewInvoice; if (!inv) return;
+  const total = Number(inv.price||0);
+  const paid  = parseFloat(document.getElementById('pp-amount').value) || 0;
+  const nd = document.getElementById('pp-new-due');
+  if (paid > 0 && paid < total) {
+    nd.style.display = 'block';
+    nd.innerHTML = `سيصبح المتبقي: <b>${(total-paid).toFixed(2)} ر.س</b>`;
+  } else if (paid >= total) {
+    nd.style.display = 'block';
+    nd.innerHTML = `<span style="color:var(--green)">✅ يغطي الفاتورة كاملاً — ستُحوَّل إلى مدفوعة</span>`;
+  } else { nd.style.display = 'none'; }
+}
+function savePartialPay() {
+  const inv = currentViewInvoice; if (!inv) return;
+  const total = Number(inv.price||0);
+  const paid  = parseFloat(document.getElementById('pp-amount').value) || 0;
+  if (!paid || paid <= 0) { showToast('⚠️ أدخل المبلغ المدفوع'); return; }
+  if (paid > total) { showToast('⚠️ المبلغ أكبر من إجمالي الفاتورة'); return; }
+  const idx = invoices.findIndex(i=>String(i.id)===String(inv.id));
+  if (idx < 0) return;
+  if (paid >= total) {
+    invoices[idx].status = 'paid';
+    invoices[idx].partialPaid = total;
+    showToast('✅ تم تحديث الفاتورة إلى مدفوعة بالكامل');
+  } else {
+    invoices[idx].status = 'partial';
+    invoices[idx].partialPaid = paid;
+    showToast(`✅ تم تسجيل الدفعة — المتبقي: ${(total-paid).toFixed(2)} ر.س`);
+  }
+  if (typeof addTimelineEvent === 'function') addTimelineEvent(invoices[idx], 'paid', { note: `دفعة: ${paid.toFixed(2)} ر.س — متبقي: ${Math.max(0,total-paid).toFixed(2)} ر.س` }, true);
+  saveData(); if(typeof saveInvoiceToDB==='function') saveInvoiceToDB(invoices[idx]);
+  renderTable(); updateStats();
+  closeModal('partial-pay-modal');
+  viewInvoice(inv.id);
+}
+function saveAsFullyPaid() {
+  const inv = currentViewInvoice; if (!inv) return;
+  const idx = invoices.findIndex(i=>String(i.id)===String(inv.id));
+  if (idx < 0) return;
+  invoices[idx].status = 'paid';
+  invoices[idx].partialPaid = Number(inv.price||0);
+  if (typeof addTimelineEvent === 'function') addTimelineEvent(invoices[idx], 'paid', { note: 'مدفوعة بالكامل' }, true);
+  saveData(); if(typeof saveInvoiceToDB==='function') saveInvoiceToDB(invoices[idx]);
+  renderTable(); updateStats();
+  closeModal('partial-pay-modal');
+  showToast('✅ تم تحديث الفاتورة إلى مدفوعة بالكامل');
+  viewInvoice(inv.id);
+}
+window.openPartialPayModal = openPartialPayModal;
+window.ppUpdateDue         = ppUpdateDue;
+window.savePartialPay      = savePartialPay;
+window.saveAsFullyPaid     = saveAsFullyPaid;
+
+window.initReports       = initReports;
+window.setRepStatus      = setRepStatus;
+window.goToReport        = goToReport;
+window.togglePartialField = togglePartialField;
 window.setRepPeriod     = setRepPeriod;
 window.setRepChart      = setRepChart;
 window.repNavigate      = repNavigate;
 window.renderReport     = renderReport;
-window.setRepStatus     = setRepStatus;
-window.goToReport       = goToReport;
 window.exportReportPDF  = exportReportPDF;
 
 
@@ -7311,7 +7443,6 @@ window.updateExportBtn = updateExportBtn;
 window.testBackendConnection = testBackendConnection;
 // Aliases for calls inside daftra integration
 window.renderTable = renderTable;
-window.togglePartialField = togglePartialField;
 window.saveData = saveData;
 // WhatsApp workflow
 window.sendWAUnpaid = sendWAUnpaid;
