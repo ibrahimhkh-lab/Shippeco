@@ -2836,7 +2836,7 @@ async function loadFromDB() {
       // Merge DB invoices with local — DB wins for shared IDs
       const dbIds = new Set(data.map(i => String(i.id)));
       const localOnly = invoices.filter(i => !dbIds.has(String(i.id)));
-      invoices = [...data.map(i => ({...i, codeType: i.code_type || 'barcode'})), ...localOnly];
+      invoices = [...data.map(i => normalizeInvoice({...i, codeType: i.code_type || 'barcode', partialPaid: parseFloat(i.partialPaid || i.partial_paid || 0)})), ...localOnly];
 
       // ── إزالة المكررات بعد الدمج ──
       // بالـ id أولاً
@@ -2857,6 +2857,8 @@ async function loadFromDB() {
         return true;
       });
 
+      // ── تطبيع كل الفواتير بعد التحميل (يصلح partialPaid القديم) ──
+      runNormalizeAll();
       try { localStorage.setItem('shipco_invoices', JSON.stringify(invoices)); } catch(e) {}
       renderTable && renderTable();
       updateStats && updateStats();
@@ -2973,7 +2975,10 @@ document.addEventListener('DOMContentLoaded', () => {
       history.replaceState({ section: 'dashboard' }, '', location.pathname);
     }
   } catch(e) {}
-  setTimeout(() => { try { loadFromDB(); } catch(e){ console.warn('loadFromDB:', e); } }, 500);
+  setTimeout(() => { try {
+    runNormalizeAll(); // إصلاح فوري للبيانات من localStorage قبل عرضها
+    loadFromDB();
+  } catch(e){ console.warn('loadFromDB:', e); } }, 500);
   setTimeout(() => { try { syncUsersFromDB(); } catch(e){ console.warn('syncUsers:', e); } }, 800);
   setTimeout(() => { try { syncDaftraBackground(); } catch(e){ console.warn('syncDaftra:', e); } }, 2000);
 });
@@ -3028,8 +3033,9 @@ function saveData() {
   try {
     // حذف labelBase64 قبل الحفظ — يوفر مساحة localStorage (base64 ضخم)
     const slim = invoices.map(inv => {
-      if (!inv.labelBase64) return inv;
-      const { labelBase64, ...rest } = inv;
+      const normInv = normalizeInvoice(inv);
+      if (!normInv.labelBase64) return normInv;
+      const { labelBase64, ...rest } = normInv;
       return rest;
     });
     localStorage.setItem('shipco_invoices', JSON.stringify(slim));
@@ -3097,6 +3103,98 @@ function dashFilterInvoices(list, period) {
 
 // Chart instances
 const _charts = {};
+
+
+// ════════════════════════════════════════════════════════════════
+// FINANCIAL CORE — Single Source of Truth للفواتير
+// القاعدة: invoice_total - paid_amount = remaining_amount
+// ════════════════════════════════════════════════════════════════
+
+/**
+ * normalizeInvoice — يضمن أن كل فاتورة لها الحقول المالية الصحيحة
+ * يُطبَّق عند: التحميل من DB، الاستيراد من دفترة، الحفظ، العرض
+ */
+function normalizeInvoice(inv) {
+  if (!inv) return inv;
+  const total   = Math.max(0, parseFloat(inv.price || 0));
+  const paid    = Math.max(0, parseFloat(inv.partialPaid || 0));
+  const status  = inv.status || 'unpaid';
+
+  let normalizedPaid   = paid;
+  let normalizedStatus = status;
+
+  // تطبيع الحالة بناءً على المبالغ الفعلية
+  if (status === 'paid')    normalizedPaid = total;   // مدفوعة كاملاً
+  if (status === 'unpaid')  normalizedPaid = 0;       // غير مدفوعة
+
+  // حماية من القيم المنطقية الخاطئة
+  if (normalizedPaid >= total && total > 0) normalizedStatus = 'paid';
+  if (normalizedPaid <= 0 && status === 'partial') {
+    // partial بدون partialPaid → نُعيد لـ unpaid (بيانات تالفة)
+    normalizedStatus = 'unpaid';
+    normalizedPaid = 0;
+  }
+
+  return {
+    ...inv,
+    price:        total,
+    partialPaid:  normalizedPaid,
+    status:       normalizedStatus,
+  };
+}
+
+/**
+ * dueAmt — المبلغ المستحق الفعلي
+ * partial: remaining فقط | paid: 0 | unpaid: الكامل
+ */
+function dueAmt(inv) {
+  const total  = Math.max(0, parseFloat(inv.price || 0));
+  const paid   = Math.max(0, parseFloat(inv.partialPaid || 0));
+  const status = inv.status || 'unpaid';
+  if (status === 'paid')    return 0;
+  if (status === 'partial') return Math.max(0, total - paid);
+  return total; // unpaid
+}
+
+/**
+ * saleAmt — إجمالي الفاتورة الأصلي (للمبيعات والإيرادات)
+ */
+function saleAmt(inv) { return Math.max(0, parseFloat(inv.price || 0)); }
+
+/**
+ * paidAmt — المبلغ المدفوع فعلياً
+ */
+function paidAmt(inv) {
+  if (inv.status === 'paid')    return Math.max(0, parseFloat(inv.price || 0));
+  if (inv.status === 'partial') return Math.max(0, parseFloat(inv.partialPaid || 0));
+  return 0;
+}
+
+window.normalizeInvoice = normalizeInvoice;
+// ════════════════════════════════════════════════════════════════
+// NORMALIZE ALL — تطبيع كل الفواتير المحملة في الذاكرة
+// يُصحح البيانات القديمة التي تحمل partialPaid = 0 مع status = partial
+// يُستدعى مرة واحدة عند بدء التطبيق وبعد كل تحميل من DB
+// ════════════════════════════════════════════════════════════════
+function runNormalizeAll() {
+  let fixed = 0;
+  invoices = invoices.map(inv => {
+    const normalized = normalizeInvoice(inv);
+    // فحص إذا تغير شيء مهم
+    if (normalized.partialPaid !== inv.partialPaid || normalized.status !== inv.status) fixed++;
+    return normalized;
+  });
+  if (fixed > 0) {
+    saveData();
+    console.log('[ShipBeak] normalizeAll: fixed', fixed, 'invoices');
+  }
+  return fixed;
+}
+window.runNormalizeAll = runNormalizeAll;
+
+window.dueAmt           = dueAmt;
+window.saleAmt          = saleAmt;
+window.paidAmt          = paidAmt;
 
 function updateStats() {
   const filtered = dashFilterInvoices(invoices, dashPeriod);
@@ -3861,13 +3959,13 @@ function saveAsDraft() {
     // تحديث مسودة موجودة
     const idx = invoices.findIndex(i => String(i.id)===String(editingId));
     if (idx !== -1) {
-      invoices[idx] = { ...invoices[idx], client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver, isDraft: true };
+      invoices[idx] = normalizeInvoice({ ...invoices[idx], client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver, isDraft: true });
       addTimelineEvent(invoices[idx], 'edit', { note: 'تحديث المسودة' }, true); // skipSave — saveData below
       showToast('📋 تم تحديث المسودة');
     }
   } else {
     const newId = String(invoices.length ? Math.max(...invoices.map(i=>Number(i.id)||0))+1 : 1001);
-    invoices.push({ id:newId, client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver,
+    invoices.push(normalizeInvoice({ id:newId, client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver,
       isDraft: true, created_by: actor,
       timeline: [{ type:'create', at:new Date().toISOString(), actor, note:`مسودة — ${carrier||'غير محدد'} — ${client||'غير محدد'}` }]
     });
@@ -3925,7 +4023,7 @@ function saveInvoice() {
     const idx = invoices.findIndex(i => String(i.id)===String(editingId));
     const prev = invoices[idx];
     const wasDraft = prev.isDraft;
-    invoices[idx] = {...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,isDraft:false};
+    invoices[idx] = normalizeInvoice({...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,isDraft:false});
     // Timeline — skipSave=true لتجنب حفظات متعددة (saveData يُستدعى مرة واحدة أدناه)
     addTimelineEvent(invoices[idx], 'edit', { note: wasDraft ? `إكمال المسودة — ${carrier}` : `تعديل البيانات — ${carrier}` }, true);
     if (wasDraft) addTimelineEvent(invoices[idx], 'invoice', { note: `${Number(price).toFixed(2)} ر.س` }, true);
@@ -3941,7 +4039,7 @@ function saveInvoice() {
     const newId = String(invoices.length ? Math.max(...invoices.map(i=>Number(i.id)||0))+1 : 1001);
     const curUser = getCurrentUser();
     const actor = curUser?.name || curUser?.username || '—';
-    invoices.push({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,
+    invoices.push(normalizeInvoice({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,
       isDraft: false,
       created_by: actor,
       timeline: [
@@ -6317,6 +6415,25 @@ async function syncDaftraBackground() {
     saveDaftraCache({ invoices: allInvs, clients, lastSync: new Date().toISOString() });
 
     const { added, updated } = mergeFromDaftra(allInvs, clients);
+
+    // ── تحديث partialPaid تلقائياً لكل الفواتير الجزئية عند كل مزامنة ──
+    const daftraById = {};
+    allInvs.forEach(d => { const dId = String(d.id || d.invoice_id || ''); if (dId) daftraById[dId] = d; });
+    let partialFixed = 0;
+    invoices.forEach((inv, idx) => {
+      if (inv.status !== 'partial' || !inv.daftra_id) return;
+      const d = daftraById[String(inv.daftra_id)];
+      if (!d) return;
+      const dPaid = parseFloat(d.summary_paid || d.paid_amount || d.amount_paid || 0);
+      if (dPaid > 0 && Math.abs((inv.partialPaid || 0) - dPaid) > 0.01) {
+        invoices[idx] = normalizeInvoice({ ...inv, partialPaid: dPaid });
+        partialFixed++;
+      }
+    });
+    if (partialFixed > 0) { saveData(); renderTable(); updateStats(); }
+    // ── تطبيع شامل بعد كل مزامنة ──
+    runNormalizeAll();
+
     const t = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
     const total = invoices.filter(i => i.daftra_id).length;
     setSyncStatus(`📒 دفترة: ${t} · ${total} فاتورة (+${added} جديدة، ~${updated} محدّثة)`, 'var(--green)');
@@ -6556,10 +6673,15 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
       const statusChanged   = existing.status !== newStatus;
       const priceChanged    = Math.abs(Number(existing.price||0) - price) > 0.01;
       // دائماً نحدّث partialPaid للجزئية إذا دفترة أرسل قيمة جديدة
-      const newPartialPaidVal = newStatus==='partial' ? (daftraPaid>0 ? daftraPaid : (existing.partialPaid||0)) : (newStatus==='paid' ? price : 0);
+      const newPartialPaidVal = newStatus==='partial'
+        ? (daftraPaid > 0 ? daftraPaid : (existing.partialPaid || 0))
+        : (newStatus==='paid' ? price : 0);
+      // نحدّث إذا: تغيرت الحالة، تغير السعر، أو كانت partial وpartialPaid مختلف (حتى لو صفر → قيمة)
       const partialPaidChanged = newStatus==='partial' && Math.abs((existing.partialPaid||0) - newPartialPaidVal) > 0.01;
-      if (statusChanged || priceChanged || partialPaidChanged) {
-        invoices[idx] = { ...existing, status: newStatus, price, partialPaid: newPartialPaidVal };
+      // أيضاً: إذا كانت partial وعند دفترة summary_paid > 0 لكن عندنا 0 → حدّث حتماً
+      const forcePartialUpdate = newStatus==='partial' && daftraPaid > 0 && !(existing.partialPaid > 0);
+      if (statusChanged || priceChanged || partialPaidChanged || forcePartialUpdate) {
+        invoices[idx] = normalizeInvoice({ ...existing, status: newStatus, price, partialPaid: newPartialPaidVal });
         toSave.push(invoices[idx]);
         updated++;
       }
@@ -6586,7 +6708,7 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
         details: `#${no} — مستورد من دفترة`,
         weight: parseFloat(dInv.weight || 0) || 0,
       };
-      invoices.push(newInv);
+      invoices.push(normalizeInvoice(newInv));
       byDaftraId.set(dId, invoices.length - 1);
       existingIds.add(newId);
       toSave.push(newInv);
@@ -6784,6 +6906,7 @@ function runDiagnostics() {
       <button onclick="syncAllStatusFromDaftra()" style="background:rgba(14,165,233,0.1);color:var(--accent);border:1px solid rgba(14,165,233,0.25);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
         🔄 تحديث حالات الدفع من دفترة
       </button>
+      <button id="fix-partial-btn" onclick="fixPartialInvoices()" style="background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;width:100%">🔧 إصلاح الفواتير الجزئية (تحديث partialPaid من دفترة)</button>
       <button onclick="document.getElementById('diag-panel').style.display='none'" style="background:none;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit">إغلاق</button>
     </div>
   `;
@@ -6860,8 +6983,14 @@ async function syncAllStatusFromDaftra() {
       if (!d) return;
       const pst = String(d.payment_status ?? d.status ?? '0');
       const newStatus = statusMap[pst] || 'unpaid';
-      if (inv.status !== newStatus) {
-        invoices[idx] = { ...inv, status: newStatus };
+      const daftraPaidSync = parseFloat(d.summary_paid || d.paid_amount || d.amount_paid || 0);
+      const newPartialSync = newStatus==='partial'
+        ? (daftraPaidSync > 0 ? daftraPaidSync : (inv.partialPaid || 0))
+        : (newStatus==='paid' ? Number(inv.price||0) : 0);
+      const statusChanged2   = inv.status !== newStatus;
+      const partialChanged2  = newStatus==='partial' && Math.abs((inv.partialPaid||0) - newPartialSync) > 0.01;
+      if (statusChanged2 || partialChanged2) {
+        invoices[idx] = normalizeInvoice({ ...inv, status: newStatus, partialPaid: newPartialSync });
         updated++;
       }
     });
@@ -7475,7 +7604,7 @@ function buildRepGroups(from, to, groupBy) {
 function renderReport() {
   const range = getRepRange();
   if (!range) return;
-  const dueAmount = inv => inv.status === 'partial' ? Math.max(0, Number(inv.price||0) - Number(inv.partialPaid||0)) : Number(inv.price||0);
+  cons  const dueAmount = inv => dueAmt(inv); // ← centralised
 
   // تحديث label التنقل
   const navLabel = document.getElementById('rep-nav-label');
@@ -8843,6 +8972,88 @@ function addExcelButtonToInvoices() {
 }
 
 // ── window exports ──
+
+// ═══════════════════════════════════════════════════════════════
+// FIX PARTIAL INVOICES — إصلاح الفواتير الجزئية بدون partialPaid
+// ═══════════════════════════════════════════════════════════════
+
+async function fixPartialInvoices() {
+  const btn = document.getElementById('fix-partial-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإصلاح...'; }
+
+  try {
+    // 1. جلب كل الفواتير الجزئية من دفترة
+    showToast('⏳ جاري جلب الفواتير الجزئية من دفترة...');
+    const partialInvs = await _fetchAllPages('invoices', { payment_status: 1 });
+
+    if (!partialInvs.length) {
+      showToast('✅ لا توجد فواتير جزئية في دفترة');
+      if (btn) { btn.disabled = false; btn.textContent = '🔧 إصلاح الجزئية'; }
+      return;
+    }
+
+    // 2. بناء map: daftra_id → summary_paid
+    const daftraPartialMap = {};
+    partialInvs.forEach(d => {
+      const dId = String(d.id || d.invoice_id || '');
+      const paid = parseFloat(d.summary_paid || d.paid_amount || d.amount_paid || 0);
+      if (dId && paid > 0) daftraPartialMap[dId] = { paid, price: parseFloat(d.summary_total || d.total || 0) };
+    });
+
+    // 3. تحديث الفواتير المحلية
+    let fixed = 0;
+    invoices.forEach((inv, idx) => {
+      if (!inv.daftra_id) return;
+      const dId = String(inv.daftra_id);
+      const dData = daftraPartialMap[dId];
+      if (!dData) return;
+
+      // إذا كانت partial وpartialPaid مختلف عما في دفترة
+      const currentPartial = Number(inv.partialPaid || 0);
+      if (inv.status === 'partial' && Math.abs(currentPartial - dData.paid) > 0.01) {
+        invoices[idx] = { ...inv, partialPaid: dData.paid };
+        fixed++;
+      }
+      // إذا كانت partial وعندنا partialPaid = 0 بينما دفترة عنده paid > 0
+      if (inv.status === 'partial' && currentPartial === 0 && dData.paid > 0) {
+        invoices[idx] = { ...inv, partialPaid: dData.paid };
+        fixed++;
+      }
+      // إذا لم تكن محدّثة بشكل صحيح
+      if (inv.status !== 'partial' && dData) {
+        // تحقق إذا يجب أن تكون partial
+        const pst = partialInvs.find(d => String(d.id || d.invoice_id) === dId);
+        if (pst && String(pst.payment_status) === '1') {
+          invoices[idx] = { ...inv, status: 'partial', partialPaid: dData.paid };
+          fixed++;
+        }
+      }
+    });
+
+    if (fixed > 0) {
+      // Remove duplicates in fixed count
+      const uniqueFixed = [...new Set(invoices.filter((inv,idx) => {
+        return invoices.findIndex(i2 => String(i2.id) === String(inv.id)) === idx;
+      }))];
+      saveData();
+      await bulkSaveToDB(invoices.filter(i => i.daftra_id && partialInvs.some(d => String(d.id||d.invoice_id) === String(i.daftra_id))));
+      renderTable();
+      updateStats();
+      showToast(`✅ تم إصلاح ${fixed} فاتورة جزئية`);
+      auditEntry('sync', { note: `إصلاح ${fixed} فاتورة جزئية من دفترة` });
+    } else {
+      showToast('✅ كل الفواتير الجزئية محدّثة بالفعل');
+    }
+  } catch(e) {
+    showToast('❌ فشل الإصلاح: ' + e.message);
+    console.error('fixPartialInvoices:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔧 إصلاح الجزئية'; }
+  }
+}
+
+window.fixPartialInvoices = fixPartialInvoices;
+
 window.setProfitPeriod   = setProfitPeriod;
 window.setProfitTab      = setProfitTab;
 window.renderProfitReport= renderProfitReport;
