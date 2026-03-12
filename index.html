@@ -2724,39 +2724,53 @@ async function syncUsersFromDB() {
   }
 }
 
-var _sessionMem = null;
+var _sessMem = null; // in-memory session — works on ALL browsers including iOS Private
+
 function getCurrentUser() {
-  if (_sessionMem) return _sessionMem;
-  try { var s = sessionStorage.getItem(SESSION_KEY); if (s) { _sessionMem = JSON.parse(s); return _sessionMem; } } catch(e) {}
-  try { var s2 = localStorage.getItem(SESSION_KEY+'_b'); if (s2) { _sessionMem = JSON.parse(s2); return _sessionMem; } } catch(e) {}
+  // 1. memory (fastest, always works)
+  if (_sessMem) return _sessMem;
+  // 2. sessionStorage
+  try { var a = sessionStorage.getItem(SESSION_KEY); if (a) { _sessMem = JSON.parse(a); return _sessMem; } } catch(e) {}
+  // 3. localStorage fallback (iOS Safari Private Mode)
+  try { var b = localStorage.getItem(SESSION_KEY + '_fb'); if (b) { _sessMem = JSON.parse(b); return _sessMem; } } catch(e) {}
   return null;
 }
+
 function setCurrentUser(user) {
-  _sessionMem = user;
+  _sessMem = user;
   try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e) {}
-  try { localStorage.setItem(SESSION_KEY+'_b', JSON.stringify(user)); } catch(e) {}
+  try { localStorage.setItem(SESSION_KEY + '_fb', JSON.stringify(user)); } catch(e) {}
 }
 
 function doLogin() {
-  try { document.activeElement && document.activeElement.blur(); } catch(e) {}
-  const username = (document.getElementById('login-username').value || '').trim();
-  const password = document.getElementById('login-password').value || '';
-  const errEl = document.getElementById('login-error');
+  try { if (document.activeElement) document.activeElement.blur(); } catch(e) {}
+  var username = (document.getElementById('login-username').value || '').trim();
+  var password = (document.getElementById('login-password').value || '');
+  var errEl = document.getElementById('login-error');
   errEl.textContent = '';
   if (!username || !password) { errEl.textContent = 'أدخل اسم المستخدم وكلمة المرور'; return; }
-  const users = getUsers();
-  const user = users.find(function(u) { return u.username === username && u.password === password; });
+  var users = getUsers();
+  // ضمان وجود admin دائماً حتى لو فشل التحميل من الشبكة
+  var hasAdmin = users.some(function(u) { return u.username === 'admin'; });
+  if (!hasAdmin) users = users.concat(DEFAULT_USERS);
+  var user = null;
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].username === username && users[i].password === password) { user = users[i]; break; }
+  }
   if (!user) { errEl.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة ❌'; return; }
   setCurrentUser({ username: user.username, name: user.name, role: user.role });
   document.getElementById('login-screen').classList.add('hidden');
   try { updateUserBadges(); } catch(e) {}
-  setTimeout(function() { try { auditEntry('login', { note: 'login ' + navigator.userAgent.substring(0,40) }); } catch(e) {} }, 600);
+  // ERP audit log
+  setTimeout(function() {
+    try { auditEntry('login', { note: 'login ' + (navigator.userAgent || '').substring(0, 40) }); } catch(e) {}
+  }, 600);
 }
 
 function doLogout() {
-  _sessionMem = null;
+  _sessMem = null;
   try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
-  try { localStorage.removeItem(SESSION_KEY+'_b'); } catch(e) {}
+  try { localStorage.removeItem(SESSION_KEY + '_fb'); } catch(e) {}
   document.getElementById('login-username').value = '';
   document.getElementById('login-password').value = '';
   document.getElementById('login-error').textContent = '';
@@ -8073,7 +8087,7 @@ window.closeSidebar = typeof closeSidebar !== 'undefined' ? closeSidebar : funct
 window.dashSetPeriod = typeof dashSetPeriod !== 'undefined' ? dashSetPeriod : function(){};
 window.deleteNoPhone = typeof deleteNoPhone !== 'undefined' ? deleteNoPhone : function(){};
 window.deleteUser = typeof deleteUser !== 'undefined' ? deleteUser : function(){};
-// doLogin defined at line ~2738, audit wrapper below
+// doLogin: defined above, wrapper at end of file
 window.openCollections = typeof openCollections !== 'undefined' ? openCollections : function(){};
 window.openNewInvoice = typeof openNewInvoice !== 'undefined' ? openNewInvoice : function(){};
 window.openSidebar = typeof openSidebar !== 'undefined' ? openSidebar : function(){};
@@ -9057,7 +9071,7 @@ function updateUserBadge(avatarId, nameId) {
   if (nameEl)   nameEl.textContent   = cur.name || cur.username || '—';
 }
 
-// audit login: integrated into doLogin() directly
+// audit login: مدمج مباشرة في doLogin أعلاه
 
 // ═══════════════════════════════════════════════════════════════
 // ERP MODULE 7: INIT ERP
