@@ -37,6 +37,170 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; direction: rtl; }
 
+
+/* ═══════════════════════════════════════════
+   ERP MODULES — ADDED CSS
+═══════════════════════════════════════════ */
+
+/* ── Role badges expanded ── */
+.role-admin     { background:rgba(245,158,11,0.15);  color:var(--gold);   border:1px solid rgba(245,158,11,0.3);  padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+.role-accountant{ background:rgba(14,165,233,0.15);  color:var(--accent); border:1px solid rgba(14,165,233,0.3);  padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+.role-employee  { background:rgba(100,116,139,0.15); color:var(--muted);  border:1px solid rgba(100,116,139,0.3); padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+.role-viewer    { background:rgba(16,185,129,0.12);  color:#10b981;       border:1px solid rgba(16,185,129,0.25); padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+
+/* ── Profit card colors ── */
+.stat-card.profit  { --card-color:#10b981; }
+.stat-card.loss    { --card-color:#ef4444; }
+.profit-positive   { color:#10b981; font-weight:700; }
+.profit-negative   { color:#ef4444; font-weight:700; }
+.profit-neutral    { color:var(--muted); }
+
+/* ── ERP section: Profit Report ── */
+.erp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.erp-kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.erp-kpi-card:hover { border-color: var(--accent); }
+.erp-kpi-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.erp-kpi-value { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1; }
+.erp-kpi-sub   { font-size: 11px; color: var(--muted); margin-top: 5px; }
+.erp-kpi-icon  { position:absolute; bottom:12px; left:14px; font-size:28px; opacity:0.12; }
+
+/* ── Profit table ── */
+.profit-table-wrap table td.profit-cell { font-weight:700; }
+.profit-bar {
+  height: 6px; border-radius: 3px;
+  background: rgba(16,185,129,0.2);
+  margin-top: 4px; overflow: hidden;
+}
+.profit-bar-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+  transition: width 0.4s;
+}
+
+/* ── Audit Log ── */
+.audit-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.audit-row:last-child { border-bottom: none; }
+.audit-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+  background: rgba(14,165,233,0.12);
+}
+.audit-time { font-size: 11px; color: var(--muted); }
+.audit-actor{ font-size: 11px; color: var(--accent); font-weight: 600; }
+
+/* ── Notifications badge ── */
+.notif-badge {
+  position: absolute;
+  top: -4px; left: -4px;
+  background: var(--red-p);
+  color: #fff;
+  border-radius: 50%;
+  width: 17px; height: 17px;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.notif-btn { position: relative; display: inline-flex; }
+.notif-panel {
+  position: fixed;
+  top: 60px; left: 20px;
+  width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  z-index: 900;
+  display: none;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.notif-panel.show { display: block; }
+.notif-item {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.notif-item:hover { background: rgba(14,165,233,0.06); }
+.notif-item.unread { border-right: 3px solid var(--accent); }
+.notif-item-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.notif-item-body  { font-size: 12px; color: var(--muted); }
+.notif-item-time  { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+/* ── dhlCost field in form ── */
+.dhl-cost-row {
+  background: rgba(212,5,17,0.06);
+  border: 1px solid rgba(212,5,17,0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.dhl-cost-row label { font-size: 12px; color: var(--muted); min-width: 90px; }
+
+/* ── ERP section tabs ── */
+.erp-tabs {
+  display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap;
+}
+.erp-tab {
+  padding: 7px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.15s;
+}
+.erp-tab.active, .erp-tab:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Excel export btn ── */
+.btn-excel {
+  background: rgba(16,185,129,0.12);
+  color: #10b981;
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.btn-excel:hover { background: rgba(16,185,129,0.22); }
+
+@media (max-width: 768px) {
+  .erp-kpi-grid { grid-template-columns: repeat(2,1fr); }
+  .notif-panel  { width: calc(100vw - 20px); left: 10px; }
+}
+
 /* ═══ LOGIN SCREEN ═══ */
 #login-screen {
   position: fixed; inset: 0; background: var(--bg);
@@ -216,6 +380,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .search-box input::placeholder { color:var(--muted); }
 table { width:100%; border-collapse:collapse; }
 thead tr { border-bottom:1px solid var(--border); }
+/* منع امتداد خلايا الجدول وتغطية أزرار الإجراءات */
+.invoices-table-wrap table td { max-width:160px; overflow:hidden; text-overflow:ellipsis; }
+.invoices-table-wrap table td:last-child { overflow:visible; width:110px; min-width:110px; }
+.actions { display:flex; gap:4px; flex-wrap:nowrap; position:relative; z-index:5; }
 th { padding:12px 20px; font-size:11px; font-weight:600; color:var(--muted); text-align:right; text-transform:uppercase; letter-spacing:0.5px; }
 td { padding:14px 20px; font-size:13px; border-bottom:1px solid rgba(30,45,71,0.5); }
 tbody tr:last-child td { border-bottom:none; }
@@ -889,6 +1057,12 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
     <button class="nav-item" onclick="showSection('reconcile')">
       <span>🔍</span> مطابقة الفواتير
     </button>
+    <button class="nav-item" onclick="showSection('profit-report')">
+      <span>💹</span> تقرير الربحية
+    </button>
+    <button class="nav-item" onclick="showSection('audit-log')">
+      <span>📋</span> سجل العمليات
+    </button>
     <button class="nav-item" onclick="showSection('invoice-template')">
       <span>🧾</span> قالب الفاتورة
     </button>
@@ -930,7 +1104,19 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
         <div class="user-avatar" id="user-avatar-dash">م</div>
         <span id="user-name-dash">—</span>
       </div>
+      <div class="notif-btn" id="notif-btn-wrap" onclick="toggleNotifPanel()" style="cursor:pointer">
+        <button class="btn btn-ghost" style="position:relative;padding:8px 12px">🔔</button>
+        <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+      </div>
       <button class="btn btn-primary" onclick="showSection('invoices'); openNewInvoice()">➕ إنشاء فاتورة</button>
+      <!-- Notif Panel -->
+      <div class="notif-panel" id="notif-panel">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:700;font-size:14px">🔔 التنبيهات</div>
+          <button onclick="clearNotifications();event.stopPropagation()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">مسح الكل</button>
+        </div>
+        <div id="notif-list"><div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">لا توجد تنبيهات</div></div>
+      </div>
     </div>
   </div>
   <div class="content">
@@ -955,6 +1141,12 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
       <div class="stat-card" style="--card-color:var(--red-p);cursor:pointer" onclick="goToReport('unpaid')" title="اضغط لعرض تقرير الغير مدفوعة"><div class="stat-icon">🔴</div><div class="stat-label">غير مدفوعة <span style="font-size:9px;color:var(--accent)">↗ تقرير</span></div><div class="stat-value" id="dash-unpaid-count" style="color:var(--red-p)">0</div><div class="stat-detail" id="dash-unpaid-amount">0 ر.س</div></div>
       <div class="stat-card" style="--card-color:var(--gold);cursor:pointer" onclick="goToReport('partial')" title="اضغط لعرض تقرير الجزئية"><div class="stat-icon">🟡</div><div class="stat-label">مدفوعة جزئياً <span style="font-size:9px;color:var(--accent)">↗ تقرير</span></div><div class="stat-value" id="dash-partial-count" style="color:var(--gold)">0</div><div class="stat-detail" id="dash-partial-amount">0 ر.س</div></div>
       <div class="stat-card" style="--card-color:var(--red-p);border-color:rgba(239,68,68,0.3);cursor:pointer" onclick="goToReport('unpaid_all')" title="اضغط لعرض تقرير الغير محصّل"><div class="stat-icon">💳</div><div class="stat-label">إجمالي غير المحصّل <span style="font-size:9px;color:var(--accent)">↗ تقرير</span></div><div class="stat-value" id="dash-remaining" style="color:var(--red-p)">0</div><div class="stat-detail">غير مدفوعة + جزئية</div></div>
+    </div>
+    <!-- Stat cards row 3: Profit -->
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px" id="dash-profit-row">
+      <div class="stat-card profit" style="cursor:pointer" onclick="showSection('profit-report')"><div class="stat-icon">💹</div><div class="stat-label">إجمالي الربح <span style="font-size:9px;color:var(--accent)">↗ تفاصيل</span></div><div class="stat-value profit-positive" id="dash-profit-total">—</div><div class="stat-detail" id="dash-profit-sub">من الفواتير بتكلفة DHL</div></div>
+      <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-label">متوسط هامش الربح</div><div class="stat-value" id="dash-margin-avg">—</div><div class="stat-detail">على الفواتير المحسوبة</div></div>
+      <div class="stat-card loss"><div class="stat-icon">⚠️</div><div class="stat-label">فواتير خاسرة</div><div class="stat-value profit-negative" id="dash-losing-count">0</div><div class="stat-detail">تكلفة أعلى من السعر</div></div>
     </div>
 
     <!-- Charts row -->
@@ -1699,8 +1891,10 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
           <div>
             <label style="font-size:12px;color:#64748b;display:block;margin-bottom:5px">الصلاحية</label>
             <select id="nu-role" style="width:100%;background:#111827;border:1px solid #1e2d47;border-radius:8px;padding:9px 12px;color:#e2e8f0;font-size:13px;font-family:inherit">
-              <option value="employee">موظف</option>
-              <option value="admin">مدير</option>
+              <option value="employee">👤 موظف</option>
+              <option value="accountant">💼 محاسب</option>
+              <option value="viewer">👁️ مشاهد فقط</option>
+              <option value="admin">⭐ مدير</option>
             </select>
           </div>
         </div>
@@ -1715,6 +1909,146 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
 
   </div>
 </div><!-- /sec-settings -->
+
+
+<!-- ══ PROFIT REPORT SECTION ══ -->
+<div id="sec-profit-report" class="section">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="hamburger" onclick="openSidebar()">☰</button>
+      <div>
+        <div class="page-title">💹 تقرير الربحية</div>
+        <div class="page-sub">تحليل الأرباح والهوامش لكل فاتورة وعميل وفترة زمنية</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-excel" onclick="exportProfitExcel()">⬇️ Excel</button>
+      <div class="user-badge" onclick="showUserMenu()">
+        <div class="user-avatar" id="user-avatar-profit">م</div>
+        <span id="user-name-profit">—</span>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- Period filters -->
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
+      <button class="erp-tab active" onclick="setProfitPeriod('month',this)">هذا الشهر</button>
+      <button class="erp-tab" onclick="setProfitPeriod('last_month',this)">الشهر الماضي</button>
+      <button class="erp-tab" onclick="setProfitPeriod('quarter',this)">آخر 3 أشهر</button>
+      <button class="erp-tab" onclick="setProfitPeriod('year',this)">هذه السنة</button>
+      <button class="erp-tab" onclick="setProfitPeriod('all',this)">الكل</button>
+      <div style="margin-right:auto;display:flex;gap:8px">
+        <input type="date" id="profit-from" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:var(--font)" onchange="renderProfitReport()">
+        <input type="date" id="profit-to" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:var(--font)" onchange="renderProfitReport()">
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="erp-kpi-grid" id="profit-kpi-grid">
+      <div class="erp-kpi-card"><div class="erp-kpi-icon">💰</div><div class="erp-kpi-label">إجمالي الإيرادات</div><div class="erp-kpi-value" id="pkpi-revenue">0</div><div class="erp-kpi-sub">ريال سعودي</div></div>
+      <div class="erp-kpi-card"><div class="erp-kpi-icon">🚚</div><div class="erp-kpi-label">إجمالي تكلفة DHL</div><div class="erp-kpi-value" id="pkpi-cost">0</div><div class="erp-kpi-sub">ريال سعودي</div></div>
+      <div class="erp-kpi-card"><div class="erp-kpi-icon">💹</div><div class="erp-kpi-label">إجمالي الربح الصافي</div><div class="erp-kpi-value profit-positive" id="pkpi-profit">0</div><div class="erp-kpi-sub" id="pkpi-profit-sub">من الفواتير المحسوبة</div></div>
+      <div class="erp-kpi-card"><div class="erp-kpi-icon">📊</div><div class="erp-kpi-label">متوسط هامش الربح</div><div class="erp-kpi-value" id="pkpi-margin">0%</div><div class="erp-kpi-sub" id="pkpi-margin-sub">على الفواتير بتكلفة DHL</div></div>
+    </div>
+
+    <!-- Summary row -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+      <div class="erp-kpi-card" style="border-color:rgba(16,185,129,0.3)">
+        <div class="erp-kpi-label">✅ فواتير بها تكلفة DHL</div>
+        <div class="erp-kpi-value" id="pkpi-counted">0</div>
+        <div class="erp-kpi-sub">محسوبة بدقة</div>
+      </div>
+      <div class="erp-kpi-card" style="border-color:rgba(245,158,11,0.3)">
+        <div class="erp-kpi-label">⚠️ فواتير بدون تكلفة DHL</div>
+        <div class="erp-kpi-value" id="pkpi-uncounted">0</div>
+        <div class="erp-kpi-sub">ربحها تقديري فقط</div>
+      </div>
+      <div class="erp-kpi-card" style="border-color:rgba(239,68,68,0.3)">
+        <div class="erp-kpi-label">🔴 فواتير خاسرة</div>
+        <div class="erp-kpi-value profit-negative" id="pkpi-losing">0</div>
+        <div class="erp-kpi-sub">تكلفة أعلى من السعر</div>
+      </div>
+    </div>
+
+    <!-- Tabs: by invoice / by client / by month -->
+    <div class="erp-tabs">
+      <button class="erp-tab active" onclick="setProfitTab('invoices',this)" id="ptab-invoices">📄 حسب الفاتورة</button>
+      <button class="erp-tab" onclick="setProfitTab('clients',this)" id="ptab-clients">👥 حسب العميل</button>
+      <button class="erp-tab" onclick="setProfitTab('monthly',this)" id="ptab-monthly">📅 حسب الشهر</button>
+    </div>
+
+    <!-- Tables -->
+    <div id="profit-tab-invoices" class="table-card profit-table-wrap">
+      <div class="table-header">
+        <div class="table-title">تفاصيل الربح لكل فاتورة</div>
+        <input type="text" id="profit-search" placeholder="🔍 بحث..." oninput="renderProfitReport()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text);font-size:13px;font-family:var(--font);width:200px">
+      </div>
+      <div id="profit-invoice-table"></div>
+    </div>
+
+    <div id="profit-tab-clients" class="table-card" style="display:none">
+      <div class="table-header"><div class="table-title">الربحية حسب العميل</div></div>
+      <div id="profit-client-table"></div>
+    </div>
+
+    <div id="profit-tab-monthly" class="table-card" style="display:none">
+      <div class="table-header"><div class="table-title">الربحية الشهرية</div></div>
+      <div id="profit-monthly-table"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ AUDIT LOG SECTION ══ -->
+<div id="sec-audit-log" class="section">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="hamburger" onclick="openSidebar()">☰</button>
+      <div>
+        <div class="page-title">📋 سجل العمليات</div>
+        <div class="page-sub">جميع الإجراءات التي تمت على المنصة مع توقيت ومنفذ كل عملية</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-excel" onclick="exportAuditExcel()">⬇️ Excel</button>
+      <div class="user-badge" onclick="showUserMenu()">
+        <div class="user-avatar" id="user-avatar-audit">م</div>
+        <span id="user-name-audit">—</span>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- Filters -->
+    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
+      <select id="audit-filter-type" onchange="renderAuditLog()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:13px;font-family:var(--font)">
+        <option value="">كل الأنواع</option>
+        <option value="create">إنشاء فاتورة</option>
+        <option value="edit">تعديل</option>
+        <option value="paid">تأكيد دفع</option>
+        <option value="delete">حذف</option>
+        <option value="login">تسجيل دخول</option>
+        <option value="import">استيراد</option>
+      </select>
+      <select id="audit-filter-user" onchange="renderAuditLog()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:13px;font-family:var(--font)">
+        <option value="">كل المستخدمين</option>
+      </select>
+      <input type="date" id="audit-from" onchange="renderAuditLog()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:var(--font)">
+      <input type="date" id="audit-to" onchange="renderAuditLog()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:var(--font)">
+      <button onclick="clearAuditFilters()" class="btn btn-ghost btn-sm">مسح الفلاتر</button>
+      <span id="audit-count" style="font-size:12px;color:var(--muted);margin-right:auto"></span>
+    </div>
+
+    <!-- Log list -->
+    <div class="table-card" style="padding:20px">
+      <div id="audit-log-list">
+        <div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">جارٍ تحميل السجل...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <!-- ══ WA TEMPLATES SECTION ══ -->
 <div id="sec-wa-templates" class="section">
@@ -1997,7 +2331,12 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
             <select id="f-carrier"><option value="">اختر شركة الشحن</option><option selected>DHL Express</option><option>Aramex</option><option>FedEx</option><option>SMSA</option><option>Naqel</option><option>J&T Express</option><option>أخرى</option></select>
           </div>
           <div class="form-group"><label>رقم الشحنة / AWB</label><input type="text" id="f-awb" placeholder="1234567890 (اختياري في المسودة)" oninput="generateCode()"></div>
-          <div class="form-group"><label>السعر النهائي (ريال)</label><input type="number" id="f-price" placeholder="0.00 (اختياري في المسودة)" min="0" step="0.01"></div>
+          <div class="form-group"><label>السعر النهائي (ريال)</label><input type="number" id="f-price" placeholder="0.00 (اختياري في المسودة)" min="0" step="0.01" oninput="calcProfitPreview()"></div>
+          <div class="form-group"><label style="display:flex;align-items:center;gap:6px"><span style="color:#D40511;font-weight:700">🚚 تكلفة DHL</span><span style="font-size:10px;color:var(--muted)">(لحساب الربح)</span></label><input type="number" id="f-dhl-cost" placeholder="اختياري" min="0" step="0.01" oninput="calcProfitPreview()">
+          <div id="profit-preview" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;font-size:12px;gap:16px;flex-wrap:wrap">
+            <span>💹 الربح: <b id="pp-profit" style="color:#10b981">—</b></span> &nbsp;
+            <span>📊 الهامش: <b id="pp-margin" style="color:#10b981">—</b></span>
+          </div></div>
           <div class="form-group"><label>الوزن (كجم)</label><input type="number" id="f-weight" placeholder="اختياري" min="0" step="0.1"></div>
           <div class="form-group"><label>تاريخ الفاتورة</label><input type="date" id="f-date"></div>
           <div class="form-group"><label>حالة الدفع</label>
@@ -2405,7 +2744,8 @@ function updateUserBadges() {
 function showUserMenu() {
   const user = getCurrentUser();
   if (!user) return;
-  const roleLabel = user.role === 'admin' ? 'مدير ⭐' : 'موظف';
+  const roleLabels = {admin:'مدير ⭐', accountant:'محاسب 💼', viewer:'مشاهد 👁️', employee:'موظف 👤'};
+  const roleLabel = roleLabels[user.role] || 'موظف';
   if (confirm(`👤 ${user.name}\n📌 ${roleLabel}\n\nهل تريد تسجيل الخروج؟`)) {
     doLogout();
   }
@@ -2458,7 +2798,7 @@ function renderUsersList() {
         <div class="user-row-name">${esc(u.name)} ${u.username === cur?.username ? '<span style="font-size:11px;color:var(--muted)">(أنت)</span>' : ''}</div>
         <div class="user-row-role" style="direction:ltr;text-align:right">@${esc(u.username)}</div>
       </div>
-      <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-employee'}">${u.role === 'admin' ? '⭐ مدير' : '👤 موظف'}</span>
+      <span class="role-badge ${u.role==='admin'?'role-admin':u.role==='accountant'?'role-accountant':u.role==='viewer'?'role-viewer':'role-employee'}">${{admin:'⭐ مدير',accountant:'💼 محاسب',viewer:'👁️ مشاهد',employee:'👤 موظف'}[u.role]||'👤 موظف'}</span>
       ${isAdmin && u.username !== (cur?.username) ? `<button onclick="deleteUser('${u.username}')" style="background:rgba(239,68,68,0.1);color:var(--red-p);border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">حذف</button>` : ''}
     </div>
   `).join('');
@@ -2537,6 +2877,18 @@ function closeSidebar() {
 
 function showSection(id, pushState = true) {
   try {
+    // ── Role-based access control ──
+    const _cur = getCurrentUser();
+    const _role = _cur?.role || 'employee';
+    const _restricted = {
+      viewer:     ['calculator','reconcile','settings','audit-log','profit-report'],
+      accountant: ['settings'],
+      employee:   ['audit-log']
+    };
+    if ((_restricted[_role]||[]).includes(id)) {
+      showToast('🚫 ليس لديك صلاحية الوصول لهذا القسم');
+      return;
+    }
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     const sec = document.getElementById('sec-' + id);
     if (!sec) { console.error('Section not found: sec-' + id); return; }
@@ -2611,7 +2963,9 @@ document.addEventListener('DOMContentLoaded', () => {
   try { wireDataHandlers(); } catch(e){ console.error('wireDataHandlers:', e); }
   // hash routing — آمن لـ iOS Safari
   try {
-    const validSections = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','wa-templates','settings'];
+    const validSections = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','wa-templates','settings','profit-report','audit-log'];
+    initERP();
+    addExcelButtonToInvoices();
     const hashSection = (location.hash||'').replace('#','');
     if (hashSection && validSections.includes(hashSection)) {
       setTimeout(() => showSection(hashSection, false), 100);
@@ -3087,7 +3441,7 @@ function renderTable() {
       <td style="color:var(--muted);font-size:12px">${inv.carrier}</td>
       <td style="color:var(--muted);font-size:12px">${inv.weight ? `<span style="background:rgba(14,165,233,0.1);color:var(--accent);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">${inv.weight} كجم</span>` : '<span style="color:var(--border)">—</span>'}</td>
       <td style="font-weight:700;color:var(--gold)">${inv.price ? Number(inv.price).toFixed(2) + ' ر.س' : '<span style="color:var(--border);font-weight:400;font-size:11px">—</span>'}</td>
-      <td>${inv.isDraft ? `<span class="badge badge-draft"><span class="badge-dot" style="background:var(--gold)"></span>مسودة</span>` : inv.status==='partial' ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><span class="badge-dot" style="background:var(--gold)"></span>جزئية — متبقي: ${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)} ر.س</span>` : statusBadge(inv.status)}</td>
+      <td style="white-space:nowrap">${inv.isDraft ? `<span class="badge badge-draft"><span class="badge-dot" style="background:var(--gold)"></span>مسودة</span>` : inv.status==='partial' ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold);flex-direction:column;align-items:flex-start;gap:1px"><span style="display:flex;align-items:center;gap:4px"><span class="badge-dot" style="background:var(--gold)"></span>جزئية</span><span style="font-size:10px;padding-right:12px;opacity:0.9">متبقي: ${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)} ر.س</span></span>` : statusBadge(inv.status)}</td>
       <td style="color:var(--muted);font-size:12px">${inv.payment||'—'}</td>
       <td>${inv.created_by ? `<span class="creator-badge">👤 ${inv.created_by}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}</td>
       <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
@@ -3155,6 +3509,8 @@ function openNewInvoice(prefill) {
   document.getElementById('f-carrier').value = 'DHL Express';
   document.getElementById('f-awb').value = '';
   document.getElementById('f-price').value = prefill ? prefill.price : '';
+  const dhlEl = document.getElementById('f-dhl-cost'); if(dhlEl) dhlEl.value = prefill ? (prefill.dhlCost||'') : '';
+  const ppEl2 = document.getElementById('profit-preview'); if(ppEl2) ppEl2.style.display='none';
   document.getElementById('f-weight').value = prefill ? (prefill.weight || '') : '';
   document.getElementById('f-date').valueAsDate = new Date();
   document.getElementById('f-status').value = 'unpaid';
@@ -3559,6 +3915,7 @@ function saveInvoice() {
   const payment = document.getElementById('f-payment').value;
   const details = document.getElementById('f-details').value.trim();
   const partialPaid = status === 'partial' ? (parseFloat(document.getElementById('f-partial-paid')?.value)||0) : 0;
+  const dhlCost = parseFloat(document.getElementById('f-dhl-cost')?.value)||0;
   const codeType = document.getElementById('f-code-type').value;
   const shipper = readShipper();
   const receiver = readReceiver();
@@ -3568,7 +3925,7 @@ function saveInvoice() {
     const idx = invoices.findIndex(i => String(i.id)===String(editingId));
     const prev = invoices[idx];
     const wasDraft = prev.isDraft;
-    invoices[idx] = {...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,isDraft:false};
+    invoices[idx] = {...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,isDraft:false};
     // Timeline — skipSave=true لتجنب حفظات متعددة (saveData يُستدعى مرة واحدة أدناه)
     addTimelineEvent(invoices[idx], 'edit', { note: wasDraft ? `إكمال المسودة — ${carrier}` : `تعديل البيانات — ${carrier}` }, true);
     if (wasDraft) addTimelineEvent(invoices[idx], 'invoice', { note: `${Number(price).toFixed(2)} ر.س` }, true);
@@ -3579,11 +3936,12 @@ function saveInvoice() {
       addTimelineEvent(invoices[idx], 'awb', { awb, note: 'تم تعديل AWB يدوياً' }, true);
     }
     showToast(wasDraft ? '✅ تم إكمال المسودة وحفظها' : '✅ تم تعديل الفاتورة بنجاح');
+    auditEntry('edit', { invId: editingId, client, note: wasDraft ? 'إكمال مسودة' : 'تعديل بيانات' });
   } else {
     const newId = String(invoices.length ? Math.max(...invoices.map(i=>Number(i.id)||0))+1 : 1001);
     const curUser = getCurrentUser();
     const actor = curUser?.name || curUser?.username || '—';
-    invoices.push({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,
+    invoices.push({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,
       isDraft: false,
       created_by: actor,
       timeline: [
@@ -3594,6 +3952,7 @@ function saveInvoice() {
       ]
     });
     showToast('✅ تم إنشاء الفاتورة بنجاح');
+    auditEntry('create', { invId: newId, client, note: `${carrier} — ${Number(price).toFixed(2)} ر.س` });
   }
   saveData();
   const saved = editingId ? invoices.find(i=>String(i.id)===String(editingId)) : invoices[invoices.length-1];
@@ -3619,6 +3978,8 @@ function editInvoice(id) {
   document.getElementById('f-status').value = inv.status||'unpaid';
   document.getElementById('f-payment').value = inv.payment||'';
   document.getElementById('f-details').value = inv.details||'';
+  const dhlCostEl = document.getElementById('f-dhl-cost'); if(dhlCostEl) dhlCostEl.value = inv.dhlCost||'';
+  calcProfitPreview();
   document.getElementById('f-code-type').value = inv.codeType||'barcode';
   // تعبئة حقل المدفوع جزئياً
   const ppEl = document.getElementById('f-partial-paid'); if(ppEl) ppEl.value = inv.partialPaid||'';
@@ -3640,9 +4001,10 @@ function editInvoice(id) {
 }
 function deleteInvoice(id) {
   if (!confirm('هل تريد حذف هذه الفاتورة؟')) return;
-  invoices = invoices.filter(i=>i.id!==id);
+  invoices = invoices.filter(i=>String(i.id)!==String(id));
   saveData();
   deleteInvoiceFromDB(String(id));
+  auditEntry('delete', { invId: id, note: 'حذف فاتورة' });
   renderTable(); updateStats(); showToast('🗑 تم حذف الفاتورة');
 }
 
@@ -6041,7 +6403,7 @@ function openCollections() {
     if (!p) return;
     if (!unpaidByPhone[p]) unpaidByPhone[p] = { client: inv.client, phone: p, invoices: [], total: 0 };
     unpaidByPhone[p].invoices.push(inv);
-    unpaidByPhone[p].total += Number(inv.price || 0);
+    unpaidByPhone[p].total += inv.status==='partial' ? Math.max(0, Number(inv.price||0) - Number(inv.partialPaid||0)) : Number(inv.price||0);
   });
   const clients = Object.values(unpaidByPhone).filter(c => c.invoices.length > 0);
   clients.sort((a, b) => b.total - a.total);
@@ -6188,14 +6550,16 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
     const no     = dInv.no || dId;
 
     if (byDaftraId.has(dId)) {
-      // ── موجودة: حدّث الحالة والسعر فقط ──
+      // ── موجودة: حدّث الحالة والسعر وpartialPaid ──
       const idx = byDaftraId.get(dId);
       const existing = invoices[idx];
-      const statusChanged = existing.status !== newStatus;
-      const priceChanged  = Math.abs(Number(existing.price||0) - price) > 0.01;
-      if (statusChanged || priceChanged) {
-        const updatedPartialPaid = newStatus==='partial' ? (daftraPaid>0 ? daftraPaid : (existing.partialPaid||0)) : (newStatus==='paid' ? price : 0);
-        invoices[idx] = { ...existing, status: newStatus, price, partialPaid: updatedPartialPaid };
+      const statusChanged   = existing.status !== newStatus;
+      const priceChanged    = Math.abs(Number(existing.price||0) - price) > 0.01;
+      // دائماً نحدّث partialPaid للجزئية إذا دفترة أرسل قيمة جديدة
+      const newPartialPaidVal = newStatus==='partial' ? (daftraPaid>0 ? daftraPaid : (existing.partialPaid||0)) : (newStatus==='paid' ? price : 0);
+      const partialPaidChanged = newStatus==='partial' && Math.abs((existing.partialPaid||0) - newPartialPaidVal) > 0.01;
+      if (statusChanged || priceChanged || partialPaidChanged) {
+        invoices[idx] = { ...existing, status: newStatus, price, partialPaid: newPartialPaidVal };
         toSave.push(invoices[idx]);
         updated++;
       }
@@ -7444,6 +7808,50 @@ window.testBackendConnection = testBackendConnection;
 // Aliases for calls inside daftra integration
 window.renderTable = renderTable;
 window.saveData = saveData;
+window.viewInvoice = viewInvoice;
+window.addUser = typeof addUser !== 'undefined' ? addUser : function(){};
+window.backToClients = typeof backToClients !== 'undefined' ? backToClients : function(){};
+window.clearAdvSearch = typeof clearAdvSearch !== 'undefined' ? clearAdvSearch : function(){};
+window.clearDateRange = typeof clearDateRange !== 'undefined' ? clearDateRange : function(){};
+window.closeModal = typeof closeModal !== 'undefined' ? closeModal : function(){};
+window.closeSidebar = typeof closeSidebar !== 'undefined' ? closeSidebar : function(){};
+window.dashSetPeriod = typeof dashSetPeriod !== 'undefined' ? dashSetPeriod : function(){};
+window.deleteNoPhone = typeof deleteNoPhone !== 'undefined' ? deleteNoPhone : function(){};
+window.deleteUser = typeof deleteUser !== 'undefined' ? deleteUser : function(){};
+window.doLogin = typeof doLogin !== 'undefined' ? doLogin : function(){};
+window.openCollections = typeof openCollections !== 'undefined' ? openCollections : function(){};
+window.openNewInvoice = typeof openNewInvoice !== 'undefined' ? openNewInvoice : function(){};
+window.openSidebar = typeof openSidebar !== 'undefined' ? openSidebar : function(){};
+window.recCloseModal = typeof recCloseModal !== 'undefined' ? recCloseModal : function(){};
+window.recExportExcel = typeof recExportExcel !== 'undefined' ? recExportExcel : function(){};
+window.recRemoveFile = typeof recRemoveFile !== 'undefined' ? recRemoveFile : function(){};
+window.recReset = typeof recReset !== 'undefined' ? recReset : function(){};
+window.recShowDetail = typeof recShowDetail !== 'undefined' ? recShowDetail : function(){};
+window.selectService = typeof selectService !== 'undefined' ? selectService : function(){};
+window.sendToInvoice = typeof sendToInvoice !== 'undefined' ? sendToInvoice : function(){};
+window.setChartView = typeof setChartView !== 'undefined' ? setChartView : function(){};
+window.setQuickDate = typeof setQuickDate !== 'undefined' ? setQuickDate : function(){};
+window.setQuickStatus = typeof setQuickStatus !== 'undefined' ? setQuickStatus : function(){};
+window.showClientDetail = typeof showClientDetail !== 'undefined' ? showClientDetail : function(){};
+window.showSection = typeof showSection !== 'undefined' ? showSection : function(){};
+window.showUserMenu = typeof showUserMenu !== 'undefined' ? showUserMenu : function(){};
+window.toggleAdvSearch = typeof toggleAdvSearch !== 'undefined' ? toggleAdvSearch : function(){};
+window.toggleDateSort = typeof toggleDateSort !== 'undefined' ? toggleDateSort : function(){};
+window.togglePriceSort = typeof togglePriceSort !== 'undefined' ? togglePriceSort : function(){};
+window.wCalculate = typeof wCalculate !== 'undefined' ? wCalculate : function(){};
+window.wChooseMode = typeof wChooseMode !== 'undefined' ? wChooseMode : function(){};
+window.wGoBack = typeof wGoBack !== 'undefined' ? wGoBack : function(){};
+window.wGoStep2 = typeof wGoStep2 !== 'undefined' ? wGoStep2 : function(){};
+window.wSelectService = typeof wSelectService !== 'undefined' ? wSelectService : function(){};
+window.editInvoice = editInvoice;
+window.deleteInvoice = deleteInvoice;
+window.goToClient = goToClient;
+window.openAddItemModal = openAddItemModal;
+window.openPartialPayModal = openPartialPayModal;
+window.savePartialPay = savePartialPay;
+window.togglePartialField = togglePartialField;
+window.saveInvoice = saveInvoice;
+window.saveAsDraft = saveAsDraft;
 // WhatsApp workflow
 window.sendWAUnpaid = sendWAUnpaid;
 window.sendWAPaid = sendWAPaid;
@@ -7789,6 +8197,666 @@ function bindAddItemInputs() {
   if (aiPrice) aiPrice.oninput = () => { const inv = invoices.find(i=>String(i.id)===String(addItemTargetId)); if(inv) updateAiPreview(inv); };
   if (aiDetails) aiDetails.oninput = () => { const inv = invoices.find(i=>String(i.id)===String(addItemTargetId)); if(inv) updateAiPreview(inv); };
 }
+
+// ═══════════════════════════════════════════════════════════════
+// ERP MODULE 1: AUDIT LOG — سجل العمليات
+// ═══════════════════════════════════════════════════════════════
+
+let _auditLog = [];
+
+function auditEntry(type, details = {}) {
+  const cur = getCurrentUser();
+  const entry = {
+    id: Date.now() + Math.random(),
+    type,
+    actor: cur?.name || cur?.username || 'النظام',
+    role: cur?.role || 'system',
+    at: new Date().toISOString(),
+    ...details
+  };
+  _auditLog.unshift(entry);
+  // Keep last 1000 entries
+  if (_auditLog.length > 1000) _auditLog = _auditLog.slice(0, 1000);
+  try { localStorage.setItem('erp_audit_log', JSON.stringify(_auditLog.slice(0,500))); } catch(e){}
+  updateNotifications();
+}
+
+function loadAuditLog() {
+  try {
+    const raw = localStorage.getItem('erp_audit_log');
+    if (raw) _auditLog = JSON.parse(raw);
+  } catch(e) { _auditLog = []; }
+}
+
+function clearAuditFilters() {
+  document.getElementById('audit-filter-type').value = '';
+  document.getElementById('audit-filter-user').value = '';
+  document.getElementById('audit-from').value = '';
+  document.getElementById('audit-to').value = '';
+  renderAuditLog();
+}
+
+function renderAuditLog() {
+  const typeEl = document.getElementById('audit-filter-type');
+  const userEl = document.getElementById('audit-filter-user');
+  const fromEl = document.getElementById('audit-from');
+  const toEl   = document.getElementById('audit-to');
+  const type   = typeEl?.value || '';
+  const user   = userEl?.value || '';
+  const from   = fromEl?.value;
+  const to     = toEl?.value;
+
+  // Populate user filter
+  if (userEl && userEl.options.length <= 1) {
+    const actors = [...new Set(_auditLog.map(e=>e.actor))].filter(Boolean);
+    actors.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a; opt.textContent = a;
+      userEl.appendChild(opt);
+    });
+  }
+
+  let filtered = _auditLog.filter(e => {
+    if (type && e.type !== type) return false;
+    if (user && e.actor !== user) return false;
+    if (from && e.at < from) return false;
+    if (to   && e.at > to + 'T23:59:59') return false;
+    return true;
+  });
+
+  const countEl = document.getElementById('audit-count');
+  if (countEl) countEl.textContent = filtered.length + ' عملية';
+
+  const icons = {
+    create:'📄', edit:'✏️', paid:'✅', unpaid:'🔴', delete:'🗑️',
+    login:'🔐', logout:'🚪', import:'📥', export:'📤', partial:'💛',
+    awb:'📦', wa_send:'📲', print:'🖨️', payment_link:'💳', note:'📝',
+    sync:'🔄', setting:'⚙️'
+  };
+  const typeLabels = {
+    create:'إنشاء فاتورة', edit:'تعديل', paid:'تأكيد دفع', unpaid:'إلغاء دفع',
+    delete:'حذف', login:'تسجيل دخول', logout:'خروج', import:'استيراد',
+    export:'تصدير', partial:'دفعة جزئية', awb:'AWB', wa_send:'إرسال واتساب',
+    print:'طباعة', payment_link:'رابط دفع', note:'ملاحظة', sync:'مزامنة', setting:'إعداد'
+  };
+
+  const el = document.getElementById('audit-log-list');
+  if (!el) return;
+
+  if (!filtered.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">لا توجد عمليات في هذه الفترة</div>';
+    return;
+  }
+
+  el.innerHTML = filtered.slice(0,200).map(e => {
+    const icon = icons[e.type] || '🔹';
+    const label = typeLabels[e.type] || e.type;
+    const dt = new Date(e.at);
+    const timeStr = dt.toLocaleDateString('ar-SA') + ' ' + dt.toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+    const roleColors = {admin:'var(--gold)',accountant:'var(--accent)',viewer:'#10b981',employee:'var(--muted)'};
+    const actorColor = roleColors[e.role] || 'var(--muted)';
+    return `<div class="audit-row">
+      <div class="audit-icon">${icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-weight:600;font-size:13px">${label}</span>
+          ${e.invId ? `<span style="font-size:11px;background:rgba(14,165,233,0.1);color:var(--accent);padding:1px 6px;border-radius:4px">#${e.invId}</span>` : ''}
+          ${e.client ? `<span style="font-size:11px;color:var(--muted)">${e.client}</span>` : ''}
+        </div>
+        ${e.note ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">${e.note}</div>` : ''}
+        <div style="display:flex;gap:12px;margin-top:3px">
+          <span class="audit-actor" style="color:${actorColor}">${e.actor}</span>
+          <span class="audit-time">${timeStr}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function exportAuditExcel() {
+  const rows = [['النوع','المنفذ','الصلاحية','الفاتورة','العميل','الملاحظة','الوقت']];
+  const typeLabels = {create:'إنشاء',edit:'تعديل',paid:'دفع',delete:'حذف',login:'دخول',import:'استيراد'};
+  _auditLog.forEach(e => {
+    rows.push([
+      typeLabels[e.type]||e.type,
+      e.actor||'',
+      e.role||'',
+      e.invId||'',
+      e.client||'',
+      e.note||'',
+      e.at ? new Date(e.at).toLocaleString('ar-SA') : ''
+    ]);
+  });
+  exportToExcel(rows, 'سجل_العمليات');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ERP MODULE 2: NOTIFICATIONS — نظام التنبيهات
+// ═══════════════════════════════════════════════════════════════
+
+let _notifications = [];
+
+function addNotification(title, body, type = 'info', action = null) {
+  const n = {
+    id: Date.now(),
+    title, body, type, action,
+    at: new Date().toISOString(),
+    read: false
+  };
+  _notifications.unshift(n);
+  if (_notifications.length > 50) _notifications.pop();
+  updateNotifications();
+}
+
+function updateNotifications() {
+  const unread = _notifications.filter(n => !n.read).length;
+  const badge = document.getElementById('notif-badge');
+  if (badge) {
+    badge.textContent = unread;
+    badge.style.display = unread > 0 ? 'flex' : 'none';
+  }
+  renderNotifList();
+}
+
+function renderNotifList() {
+  const el = document.getElementById('notif-list');
+  if (!el) return;
+  if (!_notifications.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">لا توجد تنبيهات</div>';
+    return;
+  }
+  const typeIcons = {info:'ℹ️', warning:'⚠️', success:'✅', error:'🔴', money:'💰'};
+  el.innerHTML = _notifications.slice(0,20).map(n => {
+    const dt = new Date(n.at);
+    const timeStr = dt.toLocaleDateString('ar-SA') + ' ' + dt.toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="notif-item${n.read?'':' unread'}" onclick="markNotifRead(${n.id})${n.action?';'+n.action:''}">
+      <div class="notif-item-title">${typeIcons[n.type]||'🔔'} ${n.title}</div>
+      <div class="notif-item-body">${n.body}</div>
+      <div class="notif-item-time">${timeStr}</div>
+    </div>`;
+  }).join('');
+}
+
+function markNotifRead(id) {
+  const n = _notifications.find(n=>n.id===id);
+  if (n) n.read = true;
+  updateNotifications();
+}
+
+function clearNotifications() {
+  _notifications = [];
+  updateNotifications();
+}
+
+function toggleNotifPanel(e) {
+  const panel = document.getElementById('notif-panel');
+  if (!panel) return;
+  panel.classList.toggle('show');
+  if (panel.classList.contains('show')) {
+    _notifications.forEach(n=>n.read=true);
+    updateNotifications();
+    renderNotifList();
+  }
+}
+
+// Close panel when clicking outside
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('notif-panel');
+  const btn = document.getElementById('notif-btn-wrap');
+  if (panel && panel.classList.contains('show') && !panel.contains(e.target) && !btn?.contains(e.target)) {
+    panel.classList.remove('show');
+  }
+});
+
+// ── Smart notifications on load ──
+function generateSmartNotifications() {
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now - 30*24*60*60*1000);
+
+  // 1. فواتير غير مدفوعة قديمة (أكثر من 30 يوم)
+  const oldUnpaid = invoices.filter(i =>
+    i.status === 'unpaid' && i.date && new Date(i.date) < thirtyDaysAgo && !i.isDraft
+  );
+  if (oldUnpaid.length > 0) {
+    addNotification(
+      `⏰ ${oldUnpaid.length} فاتورة غير مدفوعة (أكثر من 30 يوم)`,
+      'فواتير قديمة تحتاج متابعة فورية',
+      'warning',
+      "showSection('reports');goToReport('unpaid')"
+    );
+  }
+
+  // 2. فواتير بدون AWB
+  const noAWB = invoices.filter(i => !i.awb && !i.isDraft && i.status !== 'paid');
+  if (noAWB.length > 0) {
+    addNotification(
+      `📦 ${noAWB.length} فاتورة بدون رقم AWB`,
+      'يُنصح بإدخال أرقام الشحن لتتبع الشحنات',
+      'info'
+    );
+  }
+
+  // 3. فواتير جزئية تحتاج متابعة
+  const partials = invoices.filter(i => i.status === 'partial');
+  if (partials.length > 0) {
+    const remaining = partials.reduce((s,i) => s + Math.max(0, Number(i.price||0) - Number(i.partialPaid||0)), 0);
+    addNotification(
+      `💛 ${partials.length} فاتورة مدفوعة جزئياً`,
+      `متبقي ${remaining.toFixed(2)} ر.س للتحصيل`,
+      'money',
+      "goToReport('partial')"
+    );
+  }
+
+  // 4. فواتير بدون تكلفة DHL (تأثر على تقرير الربحية)
+  const noCost = invoices.filter(i => !i.dhlCost && !i.isDraft);
+  if (noCost.length > 5) {
+    addNotification(
+      `📊 ${noCost.length} فاتورة بدون تكلفة DHL`,
+      'أضف تكلفة DHL لكل فاتورة لتفعيل تقرير الربحية',
+      'info',
+      "showSection('profit-report')"
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ERP MODULE 3: PROFIT REPORT — تقرير الربحية
+// ═══════════════════════════════════════════════════════════════
+
+let _profitPeriod = 'month';
+let _profitTab = 'invoices';
+
+function setProfitPeriod(period, btn) {
+  _profitPeriod = period;
+  document.querySelectorAll('#sec-profit-report .erp-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  // Set date range
+  const now = new Date();
+  const fromEl = document.getElementById('profit-from');
+  const toEl   = document.getElementById('profit-to');
+  if (!fromEl || !toEl) return;
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  toEl.value = fmt(now);
+  if (period === 'month') {
+    fromEl.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
+  } else if (period === 'last_month') {
+    const lm = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    const lme = new Date(now.getFullYear(), now.getMonth(), 0);
+    fromEl.value = fmt(lm); toEl.value = fmt(lme);
+  } else if (period === 'quarter') {
+    fromEl.value = fmt(new Date(now - 90*24*60*60*1000));
+  } else if (period === 'year') {
+    fromEl.value = `${now.getFullYear()}-01-01`;
+  } else {
+    fromEl.value = '2020-01-01';
+    toEl.value = '2099-12-31';
+  }
+  renderProfitReport();
+}
+
+function setProfitTab(tab, btn) {
+  _profitTab = tab;
+  ['invoices','clients','monthly'].forEach(t => {
+    const el = document.getElementById('profit-tab-' + t);
+    if (el) el.style.display = t === tab ? '' : 'none';
+  });
+  document.querySelectorAll('[id^="ptab-"]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderProfitReport();
+}
+
+function getProfitFiltered() {
+  const fromVal = document.getElementById('profit-from')?.value || '2020-01-01';
+  const toVal   = document.getElementById('profit-to')?.value   || '2099-12-31';
+  const q       = (document.getElementById('profit-search')?.value||'').toLowerCase();
+  return invoices.filter(i => {
+    if (i.isDraft) return false;
+    if (i.date && i.date < fromVal) return false;
+    if (i.date && i.date > toVal)   return false;
+    if (q && !((i.client||'').toLowerCase().includes(q) || (i.id+'').includes(q) || (i.awb||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+}
+
+function calcInvProfit(inv) {
+  const price   = Number(inv.price||0);
+  const cost    = Number(inv.dhlCost||0);
+  const profit  = cost > 0 ? price - cost : null;
+  const margin  = (cost > 0 && price > 0) ? ((profit / price) * 100) : null;
+  return { price, cost, profit, margin, hasCost: cost > 0 };
+}
+
+function renderProfitReport() {
+  const filtered = getProfitFiltered();
+  const hasCost  = filtered.filter(i => Number(i.dhlCost||0) > 0);
+  const noCost   = filtered.filter(i => !(Number(i.dhlCost||0) > 0));
+  const losing   = hasCost.filter(i => Number(i.price||0) < Number(i.dhlCost||0));
+
+  const totalRevenue = filtered.reduce((s,i) => s + Number(i.price||0), 0);
+  const totalCost    = hasCost.reduce((s,i) => s + Number(i.dhlCost||0), 0);
+  const totalProfit  = hasCost.reduce((s,i) => s + (Number(i.price||0) - Number(i.dhlCost||0)), 0);
+  const avgMargin    = hasCost.length ? (hasCost.reduce((s,i) => {
+    const p = calcInvProfit(i);
+    return s + (p.margin||0);
+  }, 0) / hasCost.length) : 0;
+
+  // KPI Cards
+  const setEl = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  setEl('pkpi-revenue', totalRevenue.toFixed(2) + ' ر.س');
+  setEl('pkpi-cost',    totalCost.toFixed(2) + ' ر.س');
+
+  const profitEl = document.getElementById('pkpi-profit');
+  if (profitEl) {
+    profitEl.textContent = totalProfit.toFixed(2) + ' ر.س';
+    profitEl.className = 'erp-kpi-value ' + (totalProfit >= 0 ? 'profit-positive' : 'profit-negative');
+  }
+  setEl('pkpi-margin',    avgMargin.toFixed(1) + '%');
+  setEl('pkpi-counted',   hasCost.length);
+  setEl('pkpi-uncounted', noCost.length);
+  setEl('pkpi-losing',    losing.length);
+  setEl('pkpi-profit-sub', `من ${hasCost.length} فاتورة`);
+  setEl('pkpi-margin-sub', `${hasCost.length} فاتورة محسوبة`);
+
+  // Update dashboard profit cards
+  setEl('dash-profit-total', hasCost.length ? totalProfit.toFixed(2) + ' ر.س' : '—');
+  setEl('dash-margin-avg',   hasCost.length ? avgMargin.toFixed(1) + '%' : '—');
+  setEl('dash-losing-count', losing.length);
+
+  if (_profitTab === 'invoices') renderProfitInvoiceTable(filtered);
+  if (_profitTab === 'clients')  renderProfitClientTable(filtered);
+  if (_profitTab === 'monthly')  renderProfitMonthlyTable(filtered);
+}
+
+function renderProfitInvoiceTable(filtered) {
+  const el = document.getElementById('profit-invoice-table');
+  if (!el) return;
+  if (!filtered.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">لا توجد فواتير في هذه الفترة</div>';
+    return;
+  }
+  const sorted = [...filtered].sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
+  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:10px 12px;text-align:right;color:var(--muted);font-weight:600">رقم</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted);font-weight:600">العميل</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted);font-weight:600">AWB</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted);font-weight:600">السعر</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted);font-weight:600">تكلفة DHL</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted);font-weight:600">الربح</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted);font-weight:600">الهامش%</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted);font-weight:600">التاريخ</th>
+    </tr></thead>
+    <tbody>${sorted.map(inv => {
+      const p = calcInvProfit(inv);
+      const profitStr = p.hasCost ? `<span class="${p.profit>=0?'profit-positive':'profit-negative'}">${p.profit.toFixed(2)}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>';
+      const marginStr = p.hasCost ? `<span class="${p.margin>=0?'profit-positive':'profit-negative'}">${p.margin.toFixed(1)}%</span>` : '<span style="color:var(--muted);font-size:11px">—</span>';
+      const rowBg = p.hasCost && p.profit < 0 ? 'rgba(239,68,68,0.04)' : '';
+      return `<tr style="border-bottom:1px solid var(--border);background:${rowBg}">
+        <td style="padding:9px 12px;font-family:var(--mono);color:var(--muted)">#${inv.id}</td>
+        <td style="padding:9px 12px;font-weight:600">${inv.client||'—'}</td>
+        <td style="padding:9px 12px;font-family:var(--mono);font-size:11px;color:var(--muted)">${inv.awb||'—'}</td>
+        <td style="padding:9px 12px;font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)}</td>
+        <td style="padding:9px 12px;color:var(--red-p)">${p.hasCost ? Number(inv.dhlCost).toFixed(2) : '<span style="color:var(--muted);font-size:11px">—</span>'}</td>
+        <td style="padding:9px 12px" class="profit-cell">${profitStr}</td>
+        <td style="padding:9px 12px">${marginStr}</td>
+        <td style="padding:9px 12px;color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function renderProfitClientTable(filtered) {
+  const el = document.getElementById('profit-client-table');
+  if (!el) return;
+  const map = {};
+  filtered.forEach(inv => {
+    const client = inv.client || 'غير محدد';
+    if (!map[client]) map[client] = { client, count:0, revenue:0, cost:0, profit:0, hasCostCount:0 };
+    map[client].count++;
+    map[client].revenue += Number(inv.price||0);
+    if (Number(inv.dhlCost||0) > 0) {
+      map[client].cost += Number(inv.dhlCost||0);
+      map[client].profit += Number(inv.price||0) - Number(inv.dhlCost||0);
+      map[client].hasCostCount++;
+    }
+  });
+  const rows = Object.values(map).sort((a,b) => b.revenue - a.revenue);
+  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">العميل</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">الشحنات</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">الإيرادات</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">تكلفة DHL</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">الربح</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">الهامش</th>
+    </tr></thead>
+    <tbody>${rows.map(r => {
+      const margin = (r.hasCostCount && r.revenue > 0) ? ((r.profit/r.revenue)*100).toFixed(1) : null;
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:9px 12px;font-weight:600">${r.client}</td>
+        <td style="padding:9px 12px;text-align:center">${r.count}</td>
+        <td style="padding:9px 12px;font-weight:700;color:var(--gold)">${r.revenue.toFixed(2)} ر.س</td>
+        <td style="padding:9px 12px;color:var(--red-p)">${r.hasCostCount ? r.cost.toFixed(2)+' ر.س' : '—'}</td>
+        <td style="padding:9px 12px"><span class="${r.profit>=0?'profit-positive':'profit-negative'}">${r.hasCostCount ? r.profit.toFixed(2)+' ر.س' : '—'}</span></td>
+        <td style="padding:9px 12px">${margin ? `<span class="${parseFloat(margin)>=0?'profit-positive':'profit-negative'}">${margin}%</span>` : '—'}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function renderProfitMonthlyTable(filtered) {
+  const el = document.getElementById('profit-monthly-table');
+  if (!el) return;
+  const map = {};
+  filtered.forEach(inv => {
+    const d = inv.date ? inv.date.substring(0,7) : 'بدون تاريخ';
+    if (!map[d]) map[d] = { month:d, count:0, revenue:0, cost:0, profit:0, hasCostCount:0 };
+    map[d].count++;
+    map[d].revenue += Number(inv.price||0);
+    if (Number(inv.dhlCost||0) > 0) {
+      map[d].cost += Number(inv.dhlCost||0);
+      map[d].profit += Number(inv.price||0) - Number(inv.dhlCost||0);
+      map[d].hasCostCount++;
+    }
+  });
+  const rows = Object.values(map).sort((a,b) => b.month.localeCompare(a.month));
+  const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">الشهر</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">الشحنات</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">الإيرادات</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">تكلفة DHL</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">الربح</th>
+      <th style="padding:10px 12px;text-align:right;color:var(--muted)">الهامش</th>
+    </tr></thead>
+    <tbody>${rows.map(r => {
+      const [yr, mo] = r.month.split('-');
+      const monthName = months[parseInt(mo)-1] || r.month;
+      const label = `${monthName} ${yr}`;
+      const margin = (r.hasCostCount && r.revenue > 0) ? ((r.profit/r.revenue)*100).toFixed(1) : null;
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:9px 12px;font-weight:600">${label}</td>
+        <td style="padding:9px 12px;text-align:center">${r.count}</td>
+        <td style="padding:9px 12px;font-weight:700;color:var(--gold)">${r.revenue.toFixed(2)} ر.س</td>
+        <td style="padding:9px 12px;color:var(--red-p)">${r.hasCostCount ? r.cost.toFixed(2)+' ر.س' : '—'}</td>
+        <td style="padding:9px 12px"><span class="${r.profit>=0?'profit-positive':'profit-negative'}">${r.hasCostCount ? r.profit.toFixed(2)+' ر.س' : '—'}</span></td>
+        <td style="padding:9px 12px">${margin ? `<span class="${parseFloat(margin)>=0?'profit-positive':'profit-negative'}">${margin}%</span>` : '—'}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function exportProfitExcel() {
+  const filtered = getProfitFiltered();
+  const rows = [['رقم الفاتورة','العميل','AWB','الشركة','السعر','تكلفة DHL','الربح','الهامش%','الحالة','التاريخ']];
+  filtered.forEach(inv => {
+    const p = calcInvProfit(inv);
+    rows.push([
+      inv.id, inv.client||'', inv.awb||'', inv.carrier||'',
+      Number(inv.price||0).toFixed(2),
+      p.hasCost ? Number(inv.dhlCost).toFixed(2) : '',
+      p.hasCost ? p.profit.toFixed(2) : '',
+      p.hasCost ? p.margin.toFixed(1)+'%' : '',
+      inv.status==='paid'?'مدفوعة':inv.status==='partial'?'جزئية':'غير مدفوعة',
+      inv.date||''
+    ]);
+  });
+  exportToExcel(rows, 'تقرير_الربحية');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ERP MODULE 4: EXCEL EXPORT — تصدير Excel
+// ═══════════════════════════════════════════════════════════════
+
+function exportToExcel(rows, filename = 'تصدير') {
+  // Build CSV with BOM for Arabic support
+  const bom = '\uFEFF';
+  const csv = bom + rows.map(r =>
+    r.map(cell => {
+      const s = String(cell ?? '').replace(/"/g, '""');
+      return /[,\n"]/.test(s) ? `"${s}"` : s;
+    }).join(',')
+  ).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = filename + '_' + new Date().toISOString().split('T')[0] + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✅ تم تصدير الملف');
+  auditEntry('export', { note: filename });
+}
+
+function exportInvoicesExcel() {
+  const rows = [['رقم الفاتورة','العميل','الجوال','AWB','الشركة','البند','السعر','تكلفة DHL','الربح','الحالة','طريقة الدفع','التاريخ','موظف']];
+  invoices.filter(i=>!i.isDraft).forEach(inv => {
+    const p = calcInvProfit(inv);
+    rows.push([
+      inv.id, inv.client||'', inv.phone||'', inv.awb||'', inv.carrier||'',
+      inv.itemType||'', Number(inv.price||0).toFixed(2),
+      p.hasCost ? Number(inv.dhlCost).toFixed(2) : '',
+      p.hasCost ? p.profit.toFixed(2) : '',
+      inv.status==='paid'?'مدفوعة':inv.status==='partial'?'جزئية':'غير مدفوعة',
+      inv.payment||'', inv.date||'', inv.created_by||''
+    ]);
+  });
+  exportToExcel(rows, 'الفواتير_الكاملة');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ERP MODULE 5: PROFIT PREVIEW — معاينة الربح في النموذج
+// ═══════════════════════════════════════════════════════════════
+
+function calcProfitPreview() {
+  const price = parseFloat(document.getElementById('f-price')?.value) || 0;
+  const cost  = parseFloat(document.getElementById('f-dhl-cost')?.value) || 0;
+  const preview = document.getElementById('profit-preview');
+  if (!preview) return;
+  if (!cost || !price) { preview.style.display = 'none'; return; }
+  const profit = price - cost;
+  const margin = (profit / price * 100).toFixed(1);
+  const color  = profit >= 0 ? '#10b981' : '#ef4444';
+  preview.style.display = 'flex';
+  const pEl = document.getElementById('pp-profit');
+  const mEl = document.getElementById('pp-margin');
+  if (pEl) { pEl.textContent = profit.toFixed(2) + ' ر.س'; pEl.style.color = color; }
+  if (mEl) { mEl.textContent = margin + '%';              mEl.style.color = color; }
+  // Update border color based on profit
+  preview.style.borderColor = profit >= 0 ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)';
+  preview.style.background  = profit >= 0 ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.06)';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ERP MODULE 6: AUDIT ENTRIES — ربط بالعمليات الموجودة
+// ═══════════════════════════════════════════════════════════════
+
+// Hook into showSection to init profit/audit
+const _origShowSection = showSection;
+window.showSection = function(id, pushState) {
+  _origShowSection(id, pushState);
+  if (id === 'profit-report') {
+    updateUserBadge('user-avatar-profit', 'user-name-profit');
+    if (_profitPeriod === 'month') {
+      const btn = document.querySelector('#sec-profit-report .erp-tab');
+      setProfitPeriod('month', btn);
+    } else renderProfitReport();
+  }
+  if (id === 'audit-log') {
+    updateUserBadge('user-avatar-audit', 'user-name-audit');
+    renderAuditLog();
+  }
+};
+
+function updateUserBadge(avatarId, nameId) {
+  const cur = getCurrentUser();
+  if (!cur) return;
+  const avatarEl = document.getElementById(avatarId);
+  const nameEl   = document.getElementById(nameId);
+  if (avatarEl) avatarEl.textContent = (cur.name||cur.username||'م')[0].toUpperCase();
+  if (nameEl)   nameEl.textContent   = cur.name || cur.username || '—';
+}
+
+// ── Hook into login for audit ──
+const _origDoLogin = doLogin;
+window.doLogin = function() {
+  const un = document.getElementById('login-username')?.value?.trim();
+  _origDoLogin();
+  // Log after short delay to ensure user is set
+  setTimeout(() => {
+    const cur = getCurrentUser();
+    if (cur && cur.username === un) {
+      auditEntry('login', { note: `تسجيل دخول من ${navigator.userAgent.substring(0,40)}` });
+    }
+  }, 500);
+};
+
+// ═══════════════════════════════════════════════════════════════
+// ERP MODULE 7: INIT ERP
+// ═══════════════════════════════════════════════════════════════
+
+function initERP() {
+  loadAuditLog();
+  // Generate smart notifications after data loads
+  setTimeout(() => {
+    generateSmartNotifications();
+    renderProfitReport();
+  }, 1500);
+}
+
+// Hook: add Excel export button to invoices section
+function addExcelButtonToInvoices() {
+  const header = document.querySelector('#sec-invoices .section-header');
+  if (header && !document.getElementById('inv-excel-btn')) {
+    const btn = document.createElement('button');
+    btn.id = 'inv-excel-btn';
+    btn.className = 'btn-excel';
+    btn.innerHTML = '⬇️ Excel';
+    btn.onclick = exportInvoicesExcel;
+    header.appendChild(btn);
+  }
+}
+
+// ── window exports ──
+window.setProfitPeriod   = setProfitPeriod;
+window.setProfitTab      = setProfitTab;
+window.renderProfitReport= renderProfitReport;
+window.exportProfitExcel = exportProfitExcel;
+window.exportAuditExcel  = exportAuditExcel;
+window.exportInvoicesExcel = exportInvoicesExcel;
+window.renderAuditLog    = renderAuditLog;
+window.clearAuditFilters = clearAuditFilters;
+window.toggleNotifPanel  = toggleNotifPanel;
+window.clearNotifications= clearNotifications;
+window.markNotifRead     = markNotifRead;
+window.calcProfitPreview = calcProfitPreview;
+window.auditEntry        = auditEntry;
+
 </script>
 </body>
 </html>
