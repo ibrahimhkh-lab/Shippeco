@@ -1791,38 +1791,18 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
       <div id="store-wa-status" style="display:none;margin-bottom:14px;padding:10px 14px;border-radius:10px;font-size:13px"></div>
     </div>
     <div style="background:#111827;border:1px solid #1e2d47;border-radius:16px;padding:24px;max-width:640px;margin-bottom:24px">
-      <!-- Paymob Header -->
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
-        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#6c2fff,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:22px">💳</div>
-        <div>
-          <div style="font-size:16px;font-weight:700;color:#e2e8f0">ربط بوابة الدفع — Paymob</div>
-          <div style="font-size:12px;color:#64748b;margin-top:3px">اربط المنصة بـ Paymob لإرسال روابط دفع للعملاء مباشرةً</div>
-        </div>
-        <div id="paymob-status-badge" style="margin-right:auto;display:none;background:rgba(16,185,129,0.15);color:#10b981;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600">✓ متصل</div>
+        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:22px">💳</div>
+        <div><div style="font-size:16px;font-weight:700;color:#e2e8f0">ربط بوابة الدفع — PayTabs</div><div style="font-size:12px;color:#64748b;margin-top:3px">اربط المنصة بـ PayTabs لإرسال روابط دفع للعملاء</div></div>
       </div>
-
-      <!-- API Key -->
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">🔑 API Key</label>
-        <input id="pm-api-key" type="password" placeholder="AAE4DD05C3..." style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;direction:ltr;font-family:monospace" oninput="settingsDirty()">
-        <div style="font-size:11px;color:#475569;margin-top:4px">من لوحة Paymob: Settings → Account Info → API Key</div>
+        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رابط الـ Backend API</label>
+        <input id="pt-api-url" type="url" placeholder="https://yoursite.com/api.php" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:14px;direction:ltr" oninput="settingsDirty()">
       </div>
-
-      <!-- Secret Key -->
       <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">🔐 Secret Key</label>
-        <input id="pm-secret-key" type="password" placeholder="sk_..." style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;direction:ltr;font-family:monospace" oninput="settingsDirty()">
-        <div style="font-size:11px;color:#475569;margin-top:4px">من لوحة Paymob: Settings → Account Info → المفتاح السري</div>
+        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">مفتاح API السري</label>
+        <input id="pt-api-key" type="password" placeholder="your-secret-key" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:14px;direction:ltr" oninput="settingsDirty()">
       </div>
-
-      <!-- Public Key -->
-      <div style="margin-bottom:14px">
-        <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">🌐 Public Key</label>
-        <input id="pm-public-key" type="text" placeholder="pk_..." style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:13px;direction:ltr;font-family:monospace" oninput="settingsDirty()">
-        <div style="font-size:11px;color:#475569;margin-top:4px">من لوحة Paymob: Settings → Account Info → المفتاح العام</div>
-      </div>
-
-      <!-- Currency -->
       <div style="margin-bottom:14px">
         <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">العملة</label>
         <select id="pt-currency" style="background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:14px;width:100%" onchange="settingsDirty()">
@@ -1831,17 +1811,13 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
           <option value="AED">AED — درهم إماراتي</option>
         </select>
       </div>
-
-      <!-- Invoice Note -->
       <div style="margin-bottom:20px">
         <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">ملاحظة ثابتة في الفاتورة</label>
         <textarea id="invoice-note" rows="3" placeholder="مثال: شكراً لتعاملكم معنا..." style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:14px;resize:vertical;font-family:inherit" oninput="settingsDirty()"></textarea>
       </div>
-
-      <!-- Buttons -->
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button onclick="saveSettings()" style="background:linear-gradient(135deg,#6c2fff,#4f46e5);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ الإعدادات</button>
-        <button onclick="testPaymobConnection()" style="background:transparent;color:#6c2fff;border:1px solid #6c2fff;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🔌 اختبار الاتصال</button>
+        <button onclick="saveSettings()" style="background:#0ea5e9;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">💾 حفظ الإعدادات</button>
+        <button onclick="testBackendConnection()" style="background:transparent;color:#64748b;border:1px solid #1e2d47;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-family:inherit">🔌 اختبار الاتصال</button>
         <span id="settings-status" style="font-size:13px"></span>
       </div>
       <div id="conn-test-result" style="display:none;margin-top:12px;padding:10px 14px;border-radius:10px;font-size:13px"></div>
@@ -2143,7 +2119,7 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
           <span style="width:32px;height:32px;border-radius:8px;background:rgba(14,165,233,0.1);display:flex;align-items:center;justify-content:center;font-size:16px">💳</span>
           <div>
-            <div style="font-size:14px;font-weight:700;color:var(--text)">رابط دفع Paymob</div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">رابط دفع PayTabs</div>
             <div style="font-size:11px;color:var(--muted)">إرسال رابط الدفع الإلكتروني</div>
           </div>
         </div>
@@ -2724,53 +2700,33 @@ async function syncUsersFromDB() {
   }
 }
 
-var _sessMem = null; // in-memory session — works on ALL browsers including iOS Private
-
 function getCurrentUser() {
-  // 1. memory (fastest, always works)
-  if (_sessMem) return _sessMem;
-  // 2. sessionStorage
-  try { var a = sessionStorage.getItem(SESSION_KEY); if (a) { _sessMem = JSON.parse(a); return _sessMem; } } catch(e) {}
-  // 3. localStorage fallback (iOS Safari Private Mode)
-  try { var b = localStorage.getItem(SESSION_KEY + '_fb'); if (b) { _sessMem = JSON.parse(b); return _sessMem; } } catch(e) {}
-  return null;
+  try {
+    const s = sessionStorage.getItem(SESSION_KEY);
+    return s ? JSON.parse(s) : null;
+  } catch(e) { return null; }
 }
 
 function setCurrentUser(user) {
-  _sessMem = user;
   try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e) {}
-  try { localStorage.setItem(SESSION_KEY + '_fb', JSON.stringify(user)); } catch(e) {}
 }
 
 function doLogin() {
-  try { if (document.activeElement) document.activeElement.blur(); } catch(e) {}
-  var username = (document.getElementById('login-username').value || '').trim();
-  var password = (document.getElementById('login-password').value || '');
-  var errEl = document.getElementById('login-error');
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
   errEl.textContent = '';
   if (!username || !password) { errEl.textContent = 'أدخل اسم المستخدم وكلمة المرور'; return; }
-  var users = getUsers();
-  // ضمان وجود admin دائماً حتى لو فشل التحميل من الشبكة
-  var hasAdmin = users.some(function(u) { return u.username === 'admin'; });
-  if (!hasAdmin) users = users.concat(DEFAULT_USERS);
-  var user = null;
-  for (var i = 0; i < users.length; i++) {
-    if (users[i].username === username && users[i].password === password) { user = users[i]; break; }
-  }
+  const users = getUsers();
+  const user = users.find(u => u.username === username && u.password === password);
   if (!user) { errEl.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة ❌'; return; }
   setCurrentUser({ username: user.username, name: user.name, role: user.role });
   document.getElementById('login-screen').classList.add('hidden');
-  try { updateUserBadges(); } catch(e) {}
-  // ERP audit log
-  setTimeout(function() {
-    try { auditEntry('login', { note: 'login ' + (navigator.userAgent || '').substring(0, 40) }); } catch(e) {}
-  }, 600);
+  updateUserBadges();
 }
 
 function doLogout() {
-  _sessMem = null;
   try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
-  try { localStorage.removeItem(SESSION_KEY + '_fb'); } catch(e) {}
   document.getElementById('login-username').value = '';
   document.getElementById('login-password').value = '';
   document.getElementById('login-error').textContent = '';
@@ -2880,7 +2836,7 @@ async function loadFromDB() {
       // Merge DB invoices with local — DB wins for shared IDs
       const dbIds = new Set(data.map(i => String(i.id)));
       const localOnly = invoices.filter(i => !dbIds.has(String(i.id)));
-      invoices = [...data.map(i => normalizeInvoice({...i, codeType: i.code_type || 'barcode', partialPaid: parseFloat(i.partialPaid || i.partial_paid || 0)})), ...localOnly];
+      invoices = [...data.map(i => ({...i, codeType: i.code_type || 'barcode'})), ...localOnly];
 
       // ── إزالة المكررات بعد الدمج ──
       // بالـ id أولاً
@@ -2901,8 +2857,6 @@ async function loadFromDB() {
         return true;
       });
 
-      // ── تطبيع كل الفواتير بعد التحميل (يصلح partialPaid القديم) ──
-      runNormalizeAll();
       try { localStorage.setItem('shipco_invoices', JSON.stringify(invoices)); } catch(e) {}
       renderTable && renderTable();
       updateStats && updateStats();
@@ -3019,10 +2973,7 @@ document.addEventListener('DOMContentLoaded', () => {
       history.replaceState({ section: 'dashboard' }, '', location.pathname);
     }
   } catch(e) {}
-  setTimeout(() => { try {
-    runNormalizeAll(); // إصلاح فوري للبيانات من localStorage قبل عرضها
-    loadFromDB();
-  } catch(e){ console.warn('loadFromDB:', e); } }, 500);
+  setTimeout(() => { try { loadFromDB(); } catch(e){ console.warn('loadFromDB:', e); } }, 500);
   setTimeout(() => { try { syncUsersFromDB(); } catch(e){ console.warn('syncUsers:', e); } }, 800);
   setTimeout(() => { try { syncDaftraBackground(); } catch(e){ console.warn('syncDaftra:', e); } }, 2000);
 });
@@ -3077,9 +3028,8 @@ function saveData() {
   try {
     // حذف labelBase64 قبل الحفظ — يوفر مساحة localStorage (base64 ضخم)
     const slim = invoices.map(inv => {
-      const normInv = normalizeInvoice(inv);
-      if (!normInv.labelBase64) return normInv;
-      const { labelBase64, ...rest } = normInv;
+      if (!inv.labelBase64) return inv;
+      const { labelBase64, ...rest } = inv;
       return rest;
     });
     localStorage.setItem('shipco_invoices', JSON.stringify(slim));
@@ -3147,98 +3097,6 @@ function dashFilterInvoices(list, period) {
 
 // Chart instances
 const _charts = {};
-
-
-// ════════════════════════════════════════════════════════════════
-// FINANCIAL CORE — Single Source of Truth للفواتير
-// القاعدة: invoice_total - paid_amount = remaining_amount
-// ════════════════════════════════════════════════════════════════
-
-/**
- * normalizeInvoice — يضمن أن كل فاتورة لها الحقول المالية الصحيحة
- * يُطبَّق عند: التحميل من DB، الاستيراد من دفترة، الحفظ، العرض
- */
-function normalizeInvoice(inv) {
-  if (!inv) return inv;
-  const total   = Math.max(0, parseFloat(inv.price || 0));
-  const paid    = Math.max(0, parseFloat(inv.partialPaid || 0));
-  const status  = inv.status || 'unpaid';
-
-  let normalizedPaid   = paid;
-  let normalizedStatus = status;
-
-  // تطبيع الحالة بناءً على المبالغ الفعلية
-  if (status === 'paid')    normalizedPaid = total;   // مدفوعة كاملاً
-  if (status === 'unpaid')  normalizedPaid = 0;       // غير مدفوعة
-
-  // حماية من القيم المنطقية الخاطئة
-  if (normalizedPaid >= total && total > 0) normalizedStatus = 'paid';
-  if (normalizedPaid <= 0 && status === 'partial') {
-    // partial بدون partialPaid → نُعيد لـ unpaid (بيانات تالفة)
-    normalizedStatus = 'unpaid';
-    normalizedPaid = 0;
-  }
-
-  return {
-    ...inv,
-    price:        total,
-    partialPaid:  normalizedPaid,
-    status:       normalizedStatus,
-  };
-}
-
-/**
- * dueAmt — المبلغ المستحق الفعلي
- * partial: remaining فقط | paid: 0 | unpaid: الكامل
- */
-function dueAmt(inv) {
-  const total  = Math.max(0, parseFloat(inv.price || 0));
-  const paid   = Math.max(0, parseFloat(inv.partialPaid || 0));
-  const status = inv.status || 'unpaid';
-  if (status === 'paid')    return 0;
-  if (status === 'partial') return Math.max(0, total - paid);
-  return total; // unpaid
-}
-
-/**
- * saleAmt — إجمالي الفاتورة الأصلي (للمبيعات والإيرادات)
- */
-function saleAmt(inv) { return Math.max(0, parseFloat(inv.price || 0)); }
-
-/**
- * paidAmt — المبلغ المدفوع فعلياً
- */
-function paidAmt(inv) {
-  if (inv.status === 'paid')    return Math.max(0, parseFloat(inv.price || 0));
-  if (inv.status === 'partial') return Math.max(0, parseFloat(inv.partialPaid || 0));
-  return 0;
-}
-
-window.normalizeInvoice = normalizeInvoice;
-// ════════════════════════════════════════════════════════════════
-// NORMALIZE ALL — تطبيع كل الفواتير المحملة في الذاكرة
-// يُصحح البيانات القديمة التي تحمل partialPaid = 0 مع status = partial
-// يُستدعى مرة واحدة عند بدء التطبيق وبعد كل تحميل من DB
-// ════════════════════════════════════════════════════════════════
-function runNormalizeAll() {
-  let fixed = 0;
-  invoices = invoices.map(inv => {
-    const normalized = normalizeInvoice(inv);
-    // فحص إذا تغير شيء مهم
-    if (normalized.partialPaid !== inv.partialPaid || normalized.status !== inv.status) fixed++;
-    return normalized;
-  });
-  if (fixed > 0) {
-    saveData();
-    console.log('[ShipBeak] normalizeAll: fixed', fixed, 'invoices');
-  }
-  return fixed;
-}
-window.runNormalizeAll = runNormalizeAll;
-
-window.dueAmt           = dueAmt;
-window.saleAmt          = saleAmt;
-window.paidAmt          = paidAmt;
 
 function updateStats() {
   const filtered = dashFilterInvoices(invoices, dashPeriod);
@@ -4003,13 +3861,13 @@ function saveAsDraft() {
     // تحديث مسودة موجودة
     const idx = invoices.findIndex(i => String(i.id)===String(editingId));
     if (idx !== -1) {
-      invoices[idx] = normalizeInvoice({ ...invoices[idx], client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver, isDraft: true });
+      invoices[idx] = { ...invoices[idx], client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver, isDraft: true };
       addTimelineEvent(invoices[idx], 'edit', { note: 'تحديث المسودة' }, true); // skipSave — saveData below
       showToast('📋 تم تحديث المسودة');
     }
   } else {
     const newId = String(invoices.length ? Math.max(...invoices.map(i=>Number(i.id)||0))+1 : 1001);
-    invoices.push(normalizeInvoice({ id:newId, client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver,
+    invoices.push({ id:newId, client, phone, itemType, carrier, awb, price, weight, date, status, payment, details, codeType, shipper, receiver,
       isDraft: true, created_by: actor,
       timeline: [{ type:'create', at:new Date().toISOString(), actor, note:`مسودة — ${carrier||'غير محدد'} — ${client||'غير محدد'}` }]
     });
@@ -4067,7 +3925,7 @@ function saveInvoice() {
     const idx = invoices.findIndex(i => String(i.id)===String(editingId));
     const prev = invoices[idx];
     const wasDraft = prev.isDraft;
-    invoices[idx] = normalizeInvoice({...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,isDraft:false});
+    invoices[idx] = {...invoices[idx],client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,isDraft:false};
     // Timeline — skipSave=true لتجنب حفظات متعددة (saveData يُستدعى مرة واحدة أدناه)
     addTimelineEvent(invoices[idx], 'edit', { note: wasDraft ? `إكمال المسودة — ${carrier}` : `تعديل البيانات — ${carrier}` }, true);
     if (wasDraft) addTimelineEvent(invoices[idx], 'invoice', { note: `${Number(price).toFixed(2)} ر.س` }, true);
@@ -4083,7 +3941,7 @@ function saveInvoice() {
     const newId = String(invoices.length ? Math.max(...invoices.map(i=>Number(i.id)||0))+1 : 1001);
     const curUser = getCurrentUser();
     const actor = curUser?.name || curUser?.username || '—';
-    invoices.push(normalizeInvoice({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,
+    invoices.push({id:newId,client,phone,itemType,carrier,awb,price,weight,date,status,payment,details,codeType,shipper,receiver,partialPaid,dhlCost,
       isDraft: false,
       created_by: actor,
       timeline: [
@@ -5880,34 +5738,25 @@ function recFmt(n) {
 }
 
 // ═══════════════════════════════════════════
-// SETTINGS & PAYMOB INTEGRATION
+// SETTINGS & PAYTABS INTEGRATION (via Backend)
 // ═══════════════════════════════════════════
-
-// Paymob KSA — Intention API
-// المفاتيح: api_key + secret_key + public_key
-// الـ API Endpoint: https://ksa.paymob.com
-const PAYMOB_BASE = 'https://ksa.paymob.com';
 
 let ptSettings = (() => { try { return JSON.parse(localStorage.getItem('shippec_settings') || '{}'); } catch(e) { return {}; } })();
 
 function loadSettings() {
   const el = id => document.getElementById(id);
-  if (!el('pm-api-key')) return;
-  // ── Paymob Keys ──
-  el('pm-api-key').value    = ptSettings.pmApiKey    || '';
-  el('pm-secret-key').value = ptSettings.pmSecretKey || '';
-  el('pm-public-key').value = ptSettings.pmPublicKey || '';
-  el('pt-currency').value   = ptSettings.currency    || 'SAR';
-  el('invoice-note').value  = ptSettings.invoiceNote || '';
+  if (!el('pt-api-url')) return;
+  el('pt-api-url').value = ptSettings.apiUrl || '';
+  el('pt-api-key').value = ptSettings.apiKey || '';
+  el('pt-currency').value = ptSettings.currency || 'SAR';
+  el('invoice-note').value = ptSettings.invoiceNote || '';
+  // Store WA number
   if (el('store-wa-number')) el('store-wa-number').value = ptSettings.storeWA || '';
-  // Badge
-  const hasKeys = ptSettings.pmSecretKey && ptSettings.pmPublicKey;
-  const badge = el('paymob-status-badge');
-  if (badge) badge.style.display = hasKeys ? 'block' : 'none';
-  el('settings-status').textContent = hasKeys ? '✅ Paymob متصل' : '';
+  el('settings-status').textContent = ptSettings.apiUrl ? '✅ الإعدادات محفوظة' : '';
   el('settings-status').style.color = '#10b981';
   const ds = el('daftra-status');
   if (ds) { ds.textContent = '✅ متصل تلقائياً'; ds.style.color = '#10b981'; }
+  // Load WA templates
   try { loadWaTemplatesUI(); } catch(e) { console.warn('loadWaTemplatesUI:', e); }
 }
 
@@ -6008,91 +5857,65 @@ window.tmplLogoChange = tmplLogoChange;
 window.tmplLogoRemove = tmplLogoRemove;
 
 function saveSettings() {
-  const pmApiKey    = (document.getElementById('pm-api-key')?.value    || '').trim();
-  const pmSecretKey = (document.getElementById('pm-secret-key')?.value || '').trim();
-  const pmPublicKey = (document.getElementById('pm-public-key')?.value || '').trim();
+  const apiUrl = document.getElementById('pt-api-url').value.trim();
+  const apiKey = document.getElementById('pt-api-key').value.trim();
   const invoiceNote = document.getElementById('invoice-note').value.trim();
-  const storeWA     = (document.getElementById('store-wa-number')?.value || '').replace(/[^0-9]/g, '').trim();
+  const storeWA = (document.getElementById('store-wa-number')?.value || '').replace(/[^0-9]/g, '').trim();
   ptSettings = {
-    pmApiKey, pmSecretKey, pmPublicKey,
+    apiUrl, apiKey,
     currency: document.getElementById('pt-currency').value,
     invoiceNote,
     storeWA
   };
   try { localStorage.setItem('shippec_settings', JSON.stringify(ptSettings)); } catch(e) {}
-  const hasKeys = pmSecretKey && pmPublicKey;
-  const badge = document.getElementById('paymob-status-badge');
-  if (badge) badge.style.display = hasKeys ? 'block' : 'none';
-  document.getElementById('settings-status').textContent = hasKeys ? '✅ Paymob تم الحفظ' : '⚠️ أدخل المفاتيح';
-  document.getElementById('settings-status').style.color = hasKeys ? 'var(--green)' : '#f59e0b';
-  if (hasKeys) showToast('✅ تم حفظ إعدادات Paymob');
-  else showToast('⚠️ أدخل المفاتيح الثلاثة لتفعيل الدفع');
+  document.getElementById('settings-status').textContent = '✅ تم الحفظ';
+  document.getElementById('settings-status').style.color = 'var(--green)';
+  showToast('✅ تم حفظ الإعدادات');
 }
 
-// ─── TEST PAYMOB CONNECTION ───
-async function testPaymobConnection() {
-  const secretKey = (document.getElementById('pm-secret-key')?.value || '').trim();
-  const publicKey = (document.getElementById('pm-public-key')?.value || '').trim();
-  const resultEl  = document.getElementById('conn-test-result');
+// ─── TEST BACKEND CONNECTION ───
+async function testBackendConnection() {
+  const apiUrl = document.getElementById('pt-api-url').value.trim();
+  const apiKey = document.getElementById('pt-api-key').value.trim();
+  const resultEl = document.getElementById('conn-test-result');
   resultEl.style.display = 'block';
   resultEl.style.background = 'rgba(245,158,11,0.1)';
   resultEl.style.color = '#f59e0b';
-  resultEl.textContent = '⏳ جارٍ اختبار الاتصال بـ Paymob...';
-
-  if (!secretKey || !publicKey) {
+  resultEl.textContent = '⏳ جارٍ الاختبار...';
+  if (!apiUrl || !apiKey) {
     resultEl.style.background = 'rgba(239,68,68,0.1)';
-    resultEl.style.color = '#ef4444';
-    resultEl.textContent = '❌ أدخل الـ Secret Key والـ Public Key أولاً';
+    resultEl.style.color = 'var(--red-p)';
+    resultEl.textContent = '❌ يرجى إدخال الرابط والمفتاح أولاً';
     return;
   }
-
   try {
-    // اختبار بسيط: نطلب intention بمبلغ 1 هللة
-    const res = await fetch(`${PAYMOB_BASE}/v1/intention/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Token ${secretKey}`
-      },
-      body: JSON.stringify({
-        amount: 1, currency: 'SAR',
-        payment_methods: ['card'],
-        billing_data: { first_name:'Test', last_name:'User', phone_number:'NA', email:'test@test.com', apartment:'NA', floor:'NA', street:'NA', building:'NA', city:'Riyadh', country:'SAU', state:'Riyadh' },
-        items: [{ name: 'Test', amount: 1, description: 'Test', quantity: 1 }]
-      })
+    const res = await fetch(apiUrl + '?action=invoices', {
+      headers: { 'X-API-Key': apiKey }
     });
-    if (res.status === 201 || res.status === 200) {
+    if (res.ok) {
       resultEl.style.background = 'rgba(16,185,129,0.1)';
-      resultEl.style.color = '#10b981';
-      resultEl.textContent = '✅ الاتصال بـ Paymob ناجح! المفاتيح صحيحة';
-      document.getElementById('paymob-status-badge').style.display = 'block';
-    } else if (res.status === 401) {
-      resultEl.style.background = 'rgba(239,68,68,0.1)';
-      resultEl.style.color = '#ef4444';
-      resultEl.textContent = '❌ خطأ 401: المفاتيح غير صحيحة';
+      resultEl.style.color = 'var(--green)';
+      resultEl.textContent = '✅ تم الاتصال بنجاح! الـ Backend يعمل بشكل صحيح';
     } else {
       const txt = await res.text();
-      resultEl.style.background = 'rgba(245,158,11,0.1)';
-      resultEl.style.color = '#f59e0b';
-      resultEl.textContent = `⚠️ استجابة غير متوقعة (${res.status}): ${txt.slice(0,100)}`;
+      resultEl.style.background = 'rgba(239,68,68,0.1)';
+      resultEl.style.color = 'var(--red-p)';
+      resultEl.textContent = '❌ خطأ ' + res.status + ': ' + txt.slice(0,120);
     }
   } catch(e) {
     resultEl.style.background = 'rgba(239,68,68,0.1)';
-    resultEl.style.color = '#ef4444';
+    resultEl.style.color = 'var(--red-p)';
     resultEl.textContent = '❌ تعذّر الاتصال: ' + e.message;
   }
 }
-window.testPaymobConnection = testPaymobConnection;
 
-// ─── PAYMOB: CREATE PAYMENT LINK (Intention API) ───
-// docs: https://developers.paymob.com/ksa/payment-links/payment-link-api
+// ─── CREATE PAYMENT LINK VIA BACKEND ───
 async function sendPaymentLink() {
   if (!currentViewInvoice) return;
   const inv = currentViewInvoice;
 
-  const { pmSecretKey, pmPublicKey, currency } = ptSettings;
-  if (!pmSecretKey || !pmPublicKey) {
-    showToast('⚠️ يرجى إدخال مفاتيح Paymob في الإعدادات أولاً');
+  if (!ptSettings.apiUrl || !ptSettings.apiKey) {
+    showToast('⚠️ يرجى إعداد رابط الـ Backend أولاً في الإعدادات');
     showSection('settings');
     closeModal('invoice-modal');
     return;
@@ -6103,91 +5926,53 @@ async function sendPaymentLink() {
   btn.textContent = '⏳ جارٍ الإنشاء...';
 
   try {
-    // ── خطوة 1: إنشاء Intention (رابط الدفع) ──
-    // Paymob KSA: المبالغ بالـ Halalas (أجزاء الريال) × 100
-    const amountInHalalas = Math.round(dueAmt(inv) * 100);
+    await syncInvoiceToBackend(inv);
 
-    const intentionBody = {
-      amount: amountInHalalas,
-      currency: currency || 'SAR',
-      payment_methods: ['card'], // Paymob يدعم: card, applepay, stcpay
-      items: [{
-        name: `شحنة ${inv.awb || inv.id}`,
-        amount: amountInHalalas,
-        description: `فاتورة رقم ${inv.id} — العميل: ${inv.client}`,
-        quantity: 1
-      }],
-      billing_data: {
-        first_name: inv.client?.split(' ')[0] || inv.client || 'عميل',
-        last_name:  inv.client?.split(' ').slice(1).join(' ') || 'شيب بيك',
-        phone_number: (inv.phone || '').replace(/[^0-9+]/g, '') || 'NA',
-        email: 'no-reply@shipbeak.sa',
-        apartment: 'NA', floor: 'NA', street: 'NA',
-        building: 'NA', city: 'الرياض', country: 'SAU',
-        state: 'الرياض'
-      },
-      customer: {
-        first_name: inv.client?.split(' ')[0] || inv.client || 'عميل',
-        last_name:  inv.client?.split(' ').slice(1).join(' ') || 'شيب بيك',
-        email: 'no-reply@shipbeak.sa'
-      },
-      extras: {
-        invoice_id: String(inv.id),
-        awb: inv.awb || '',
-        shipbeak_ref: String(inv.id)
-      },
-      special_reference: `shipbeak-${inv.id}-${Date.now()}`
-    };
-
-    const intentRes = await fetch(`${PAYMOB_BASE}/v1/intention/`, {
+    const res = await fetch(ptSettings.apiUrl + '?action=create-payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Token ${pmSecretKey}`
+        'X-API-Key': ptSettings.apiKey
       },
-      body: JSON.stringify(intentionBody)
+      body: JSON.stringify({ invoice_id: String(inv.id) })
     });
 
-    if (!intentRes.ok) {
-      const err = await intentRes.text();
-      throw new Error(`Paymob intention error ${intentRes.status}: ${err}`);
+    const data = await res.json();
+
+    if (data.payment_url) {
+      const idx = invoices.findIndex(i => String(i.id)===String(inv.id));
+      if (idx !== -1) {
+        invoices[idx].paymentUrl = data.payment_url;
+        invoices[idx].paymentRef = data.invoice?.paytabs_token || 'pending';
+        addTimelineEvent(invoices[idx], 'payment_link', { note: 'رابط دفع PayTabs — تم إرساله عبر واتساب' }, true); // skipSave
+        saveData();
+        currentViewInvoice = invoices[idx];
+      }
+      document.getElementById('check-pay-btn').style.display = 'inline-flex';
+      sendPaymentLinkWhatsApp(data.payment_url);
+      startPaymentPolling();
+      showToast('✅ تم إنشاء رابط الدفع وإرساله عبر واتساب');
+    } else {
+      showToast('❌ خطأ: ' + (data.error || data.message || JSON.stringify(data)));
     }
-
-    const intentData = await intentRes.json();
-    const clientSecret = intentData.client_secret;
-    if (!clientSecret) throw new Error('لم يتم استلام client_secret من Paymob');
-
-    // ── خطوة 2: بناء رابط الدفع ──
-    const paymentUrl = `${PAYMOB_BASE}/unifiedcheckout/?publicKey=${pmPublicKey}&clientSecret=${clientSecret}`;
-
-    // ── حفظ البيانات ──
-    const idx = invoices.findIndex(i => String(i.id) === String(inv.id));
-    if (idx !== -1) {
-      invoices[idx].paymentUrl     = paymentUrl;
-      invoices[idx].paymentRef     = clientSecret;
-      invoices[idx].paymobIntentId = intentData.id || '';
-      addTimelineEvent(invoices[idx], 'payment_link', { note: `رابط دفع Paymob — ${amountInHalalas/100} ${currency||'SAR'}` }, true);
-      saveData();
-      currentViewInvoice = invoices[idx];
-    }
-
-    document.getElementById('check-pay-btn').style.display = 'inline-flex';
-    sendPaymentLinkWhatsApp(paymentUrl);
-    startPaymentPolling();
-    showToast('✅ تم إنشاء رابط Paymob وإرساله عبر واتساب');
-
   } catch (e) {
-    console.error('Paymob payment link error:', e);
-    showToast('❌ خطأ في Paymob: ' + e.message);
+    showToast('❌ تعذّر الاتصال بالـ Backend: ' + e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = '💳 رابط الدفع';
   }
 }
 
-// ─── SYNC INVOICE TO BACKEND (legacy - kept for compatibility) ───
+// ─── SYNC INVOICE TO BACKEND ───
 async function syncInvoiceToBackend(inv) {
-  // Paymob لا يحتاج backend منفصل — الـ Intention API مباشرة
+  if (!ptSettings.apiUrl || !ptSettings.apiKey) return;
+  try {
+    await fetch(ptSettings.apiUrl + '?action=invoices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': ptSettings.apiKey },
+      body: JSON.stringify(inv)
+    });
+  } catch(e) { console.warn('Backend sync:', e); }
 }
 
 // ─── SEND PAYMENT LINK VIA WHATSAPP ───
@@ -6200,14 +5985,13 @@ function sendPaymentLinkWhatsApp(payUrl) {
   window.open('https://wa.me/' + intlPhone + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-// ─── CHECK PAYMENT STATUS (Paymob Transaction Inquiry) ───
+// ─── CHECK PAYMENT STATUS VIA BACKEND ───
 async function checkPaymentStatus() {
   if (!currentViewInvoice) return;
   const inv = currentViewInvoice;
-  const { pmSecretKey } = ptSettings;
 
-  if (!pmSecretKey) {
-    showToast('⚠️ يرجى إعداد مفاتيح Paymob أولاً');
+  if (!ptSettings.apiUrl || !ptSettings.apiKey) {
+    showToast('⚠️ يرجى إعداد رابط الـ Backend أولاً');
     return;
   }
 
@@ -6216,31 +6000,19 @@ async function checkPaymentStatus() {
   btn.textContent = '⏳ جارٍ التحقق...';
 
   try {
-    // استعلام عن الـ Intention عبر client_secret المخزون
-    const clientSecret = inv.paymentRef;
-    if (!clientSecret) throw new Error('لا يوجد client_secret محفوظ');
+    const res = await fetch(ptSettings.apiUrl + '?action=invoices', {
+      headers: { 'X-API-Key': ptSettings.apiKey }
+    });
+    const allInvoices = await res.json();
+    const backendInv = allInvoices.find(i => String(i.id) === String(inv.id));
 
-    const { pmPublicKey } = ptSettings;
-    const inquiryRes = await fetch(
-      `${PAYMOB_BASE}/v1/intention/element/${pmPublicKey}/${clientSecret}/`,
-      { headers: { 'Authorization': `Token ${pmSecretKey}` } }
-    );
-
-    if (!inquiryRes.ok) throw new Error(`HTTP ${inquiryRes.status}`);
-    const data = await inquiryRes.json();
-
-    // Paymob: status = 'successful' للمدفوعة
-    const isPaid = data.status === 'successful' ||
-      (data.transactions || []).some(t => t.success === true);
-
-    if (isPaid) {
-      const idx = invoices.findIndex(i => String(i.id) === String(inv.id));
+    if (backendInv && backendInv.status === 'مدفوعة بالكامل' || backendInv.status === 'paid') {
+      const idx = invoices.findIndex(i => String(i.id)===String(inv.id));
       if (idx !== -1) {
-        invoices[idx].status     = 'paid';
-        invoices[idx].payment    = 'Paymob';
+        invoices[idx].status = 'paid';
+        invoices[idx].payment = invoices[idx].payment || 'PayTabs';
         invoices[idx].paymentUrl = null;
-        invoices[idx].partialPaid = invoices[idx].price; // دفع كامل
-        addTimelineEvent(invoices[idx], 'paid', { note: 'تأكيد دفع تلقائي — Paymob' }, true);
+        addTimelineEvent(invoices[idx], 'paid', { note: 'تأكيد دفع تلقائي — PayTabs' }, true); // skipSave
         saveData();
         currentViewInvoice = invoices[idx];
         viewInvoice(inv.id);
@@ -6249,8 +6021,7 @@ async function checkPaymentStatus() {
         showToast('✅ تم تأكيد الدفع! تحوّلت الفاتورة إلى مدفوعة');
       }
     } else {
-      const st = data.status || 'pending';
-      showToast(`⏳ لم يتم الدفع بعد — الحالة: ${st}`);
+      showToast('⏳ لم يتم الدفع بعد — الحالة: ' + (backendInv ? backendInv.status : 'غير موجودة في Backend'));
     }
   } catch (e) {
     showToast('❌ تعذّر التحقق: ' + e.message);
@@ -6260,35 +6031,26 @@ async function checkPaymentStatus() {
   }
 }
 
-// ─── AUTO-POLL PAYMENT — Paymob (every 30s) ───
+// ─── AUTO-POLL PAYMENT (every 30s) ───
 let paymentPollInterval = null;
 
 function startPaymentPolling() {
   stopPaymentPolling();
-  const { pmSecretKey, pmPublicKey } = ptSettings;
-  if (!pmSecretKey || !pmPublicKey) return;
+  if (!ptSettings.apiUrl || !ptSettings.apiKey) return;
   paymentPollInterval = setInterval(async () => {
     if (!currentViewInvoice || currentViewInvoice.status === 'paid') { stopPaymentPolling(); return; }
-    const clientSecret = currentViewInvoice.paymentRef;
-    if (!clientSecret) { stopPaymentPolling(); return; }
     try {
-      const res = await fetch(
-        `${PAYMOB_BASE}/v1/intention/element/${pmPublicKey}/${clientSecret}/`,
-        { headers: { 'Authorization': `Token ${pmSecretKey}` } }
-      );
-      if (!res.ok) return;
-      const data = await res.json();
-      const isPaid = data.status === 'successful' ||
-        (data.transactions || []).some(t => t.success === true);
-      if (isPaid) {
+      const res = await fetch(ptSettings.apiUrl + '?action=invoices', { headers: { 'X-API-Key': ptSettings.apiKey } });
+      const all = await res.json();
+      const b = all.find(i => String(i.id) === String(currentViewInvoice.id));
+      if (b && b.status === 'مدفوعة بالكامل' || b.status === 'paid') {
         stopPaymentPolling();
-        const idx = invoices.findIndex(i => String(i.id) === String(currentViewInvoice.id));
+        const idx = invoices.findIndex(i => String(i.id)===String(currentViewInvoice.id));
         if (idx !== -1) {
-          invoices[idx].status      = 'paid';
-          invoices[idx].payment     = 'Paymob';
-          invoices[idx].paymentUrl  = null;
-          invoices[idx].partialPaid = invoices[idx].price;
-          addTimelineEvent(invoices[idx], 'paid', { note: 'دفع تلقائي — Paymob polling' }, true);
+          invoices[idx].status = 'paid';
+          invoices[idx].payment = invoices[idx].payment || 'PayTabs';
+          invoices[idx].paymentUrl = null;
+          addTimelineEvent(invoices[idx], 'paid', { note: 'دفع تلقائي — PayTabs polling' }, true); // skipSave
           saveData();
           currentViewInvoice = invoices[idx];
           viewInvoice(currentViewInvoice.id);
@@ -6555,25 +6317,6 @@ async function syncDaftraBackground() {
     saveDaftraCache({ invoices: allInvs, clients, lastSync: new Date().toISOString() });
 
     const { added, updated } = mergeFromDaftra(allInvs, clients);
-
-    // ── تحديث partialPaid تلقائياً لكل الفواتير الجزئية عند كل مزامنة ──
-    const daftraById = {};
-    allInvs.forEach(d => { const dId = String(d.id || d.invoice_id || ''); if (dId) daftraById[dId] = d; });
-    let partialFixed = 0;
-    invoices.forEach((inv, idx) => {
-      if (inv.status !== 'partial' || !inv.daftra_id) return;
-      const d = daftraById[String(inv.daftra_id)];
-      if (!d) return;
-      const dPaid = parseFloat(d.summary_paid || d.paid_amount || d.amount_paid || 0);
-      if (dPaid > 0 && Math.abs((inv.partialPaid || 0) - dPaid) > 0.01) {
-        invoices[idx] = normalizeInvoice({ ...inv, partialPaid: dPaid });
-        partialFixed++;
-      }
-    });
-    if (partialFixed > 0) { saveData(); renderTable(); updateStats(); }
-    // ── تطبيع شامل بعد كل مزامنة ──
-    runNormalizeAll();
-
     const t = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
     const total = invoices.filter(i => i.daftra_id).length;
     setSyncStatus(`📒 دفترة: ${t} · ${total} فاتورة (+${added} جديدة، ~${updated} محدّثة)`, 'var(--green)');
@@ -6813,15 +6556,10 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
       const statusChanged   = existing.status !== newStatus;
       const priceChanged    = Math.abs(Number(existing.price||0) - price) > 0.01;
       // دائماً نحدّث partialPaid للجزئية إذا دفترة أرسل قيمة جديدة
-      const newPartialPaidVal = newStatus==='partial'
-        ? (daftraPaid > 0 ? daftraPaid : (existing.partialPaid || 0))
-        : (newStatus==='paid' ? price : 0);
-      // نحدّث إذا: تغيرت الحالة، تغير السعر، أو كانت partial وpartialPaid مختلف (حتى لو صفر → قيمة)
+      const newPartialPaidVal = newStatus==='partial' ? (daftraPaid>0 ? daftraPaid : (existing.partialPaid||0)) : (newStatus==='paid' ? price : 0);
       const partialPaidChanged = newStatus==='partial' && Math.abs((existing.partialPaid||0) - newPartialPaidVal) > 0.01;
-      // أيضاً: إذا كانت partial وعند دفترة summary_paid > 0 لكن عندنا 0 → حدّث حتماً
-      const forcePartialUpdate = newStatus==='partial' && daftraPaid > 0 && !(existing.partialPaid > 0);
-      if (statusChanged || priceChanged || partialPaidChanged || forcePartialUpdate) {
-        invoices[idx] = normalizeInvoice({ ...existing, status: newStatus, price, partialPaid: newPartialPaidVal });
+      if (statusChanged || priceChanged || partialPaidChanged) {
+        invoices[idx] = { ...existing, status: newStatus, price, partialPaid: newPartialPaidVal };
         toSave.push(invoices[idx]);
         updated++;
       }
@@ -6848,7 +6586,7 @@ function mergeFromDaftra(daftraInvs, daftraClients) {
         details: `#${no} — مستورد من دفترة`,
         weight: parseFloat(dInv.weight || 0) || 0,
       };
-      invoices.push(normalizeInvoice(newInv));
+      invoices.push(newInv);
       byDaftraId.set(dId, invoices.length - 1);
       existingIds.add(newId);
       toSave.push(newInv);
@@ -7046,7 +6784,6 @@ function runDiagnostics() {
       <button onclick="syncAllStatusFromDaftra()" style="background:rgba(14,165,233,0.1);color:var(--accent);border:1px solid rgba(14,165,233,0.25);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
         🔄 تحديث حالات الدفع من دفترة
       </button>
-      <button id="fix-partial-btn" onclick="fixPartialInvoices()" style="background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;width:100%">🔧 إصلاح الفواتير الجزئية (تحديث partialPaid من دفترة)</button>
       <button onclick="document.getElementById('diag-panel').style.display='none'" style="background:none;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit">إغلاق</button>
     </div>
   `;
@@ -7123,14 +6860,8 @@ async function syncAllStatusFromDaftra() {
       if (!d) return;
       const pst = String(d.payment_status ?? d.status ?? '0');
       const newStatus = statusMap[pst] || 'unpaid';
-      const daftraPaidSync = parseFloat(d.summary_paid || d.paid_amount || d.amount_paid || 0);
-      const newPartialSync = newStatus==='partial'
-        ? (daftraPaidSync > 0 ? daftraPaidSync : (inv.partialPaid || 0))
-        : (newStatus==='paid' ? Number(inv.price||0) : 0);
-      const statusChanged2   = inv.status !== newStatus;
-      const partialChanged2  = newStatus==='partial' && Math.abs((inv.partialPaid||0) - newPartialSync) > 0.01;
-      if (statusChanged2 || partialChanged2) {
-        invoices[idx] = normalizeInvoice({ ...inv, status: newStatus, partialPaid: newPartialSync });
+      if (inv.status !== newStatus) {
+        invoices[idx] = { ...inv, status: newStatus };
         updated++;
       }
     });
@@ -7744,7 +7475,7 @@ function buildRepGroups(from, to, groupBy) {
 function renderReport() {
   const range = getRepRange();
   if (!range) return;
-  cons  const dueAmount = inv => dueAmt(inv); // ← centralised
+  const dueAmount = inv => inv.status === 'partial' ? Math.max(0, Number(inv.price||0) - Number(inv.partialPaid||0)) : Number(inv.price||0);
 
   // تحديث label التنقل
   const navLabel = document.getElementById('rep-nav-label');
@@ -8087,7 +7818,7 @@ window.closeSidebar = typeof closeSidebar !== 'undefined' ? closeSidebar : funct
 window.dashSetPeriod = typeof dashSetPeriod !== 'undefined' ? dashSetPeriod : function(){};
 window.deleteNoPhone = typeof deleteNoPhone !== 'undefined' ? deleteNoPhone : function(){};
 window.deleteUser = typeof deleteUser !== 'undefined' ? deleteUser : function(){};
-// doLogin: defined above, wrapper at end of file
+window.doLogin = typeof doLogin !== 'undefined' ? doLogin : function(){};
 window.openCollections = typeof openCollections !== 'undefined' ? openCollections : function(){};
 window.openNewInvoice = typeof openNewInvoice !== 'undefined' ? openNewInvoice : function(){};
 window.openSidebar = typeof openSidebar !== 'undefined' ? openSidebar : function(){};
@@ -9071,7 +8802,19 @@ function updateUserBadge(avatarId, nameId) {
   if (nameEl)   nameEl.textContent   = cur.name || cur.username || '—';
 }
 
-// audit login: مدمج مباشرة في doLogin أعلاه
+// ── Hook into login for audit ──
+const _origDoLogin = doLogin;
+window.doLogin = function() {
+  const un = document.getElementById('login-username')?.value?.trim();
+  _origDoLogin();
+  // Log after short delay to ensure user is set
+  setTimeout(() => {
+    const cur = getCurrentUser();
+    if (cur && cur.username === un) {
+      auditEntry('login', { note: `تسجيل دخول من ${navigator.userAgent.substring(0,40)}` });
+    }
+  }, 500);
+};
 
 // ═══════════════════════════════════════════════════════════════
 // ERP MODULE 7: INIT ERP
@@ -9100,88 +8843,6 @@ function addExcelButtonToInvoices() {
 }
 
 // ── window exports ──
-
-// ═══════════════════════════════════════════════════════════════
-// FIX PARTIAL INVOICES — إصلاح الفواتير الجزئية بدون partialPaid
-// ═══════════════════════════════════════════════════════════════
-
-async function fixPartialInvoices() {
-  const btn = document.getElementById('fix-partial-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإصلاح...'; }
-
-  try {
-    // 1. جلب كل الفواتير الجزئية من دفترة
-    showToast('⏳ جاري جلب الفواتير الجزئية من دفترة...');
-    const partialInvs = await _fetchAllPages('invoices', { payment_status: 1 });
-
-    if (!partialInvs.length) {
-      showToast('✅ لا توجد فواتير جزئية في دفترة');
-      if (btn) { btn.disabled = false; btn.textContent = '🔧 إصلاح الجزئية'; }
-      return;
-    }
-
-    // 2. بناء map: daftra_id → summary_paid
-    const daftraPartialMap = {};
-    partialInvs.forEach(d => {
-      const dId = String(d.id || d.invoice_id || '');
-      const paid = parseFloat(d.summary_paid || d.paid_amount || d.amount_paid || 0);
-      if (dId && paid > 0) daftraPartialMap[dId] = { paid, price: parseFloat(d.summary_total || d.total || 0) };
-    });
-
-    // 3. تحديث الفواتير المحلية
-    let fixed = 0;
-    invoices.forEach((inv, idx) => {
-      if (!inv.daftra_id) return;
-      const dId = String(inv.daftra_id);
-      const dData = daftraPartialMap[dId];
-      if (!dData) return;
-
-      // إذا كانت partial وpartialPaid مختلف عما في دفترة
-      const currentPartial = Number(inv.partialPaid || 0);
-      if (inv.status === 'partial' && Math.abs(currentPartial - dData.paid) > 0.01) {
-        invoices[idx] = { ...inv, partialPaid: dData.paid };
-        fixed++;
-      }
-      // إذا كانت partial وعندنا partialPaid = 0 بينما دفترة عنده paid > 0
-      if (inv.status === 'partial' && currentPartial === 0 && dData.paid > 0) {
-        invoices[idx] = { ...inv, partialPaid: dData.paid };
-        fixed++;
-      }
-      // إذا لم تكن محدّثة بشكل صحيح
-      if (inv.status !== 'partial' && dData) {
-        // تحقق إذا يجب أن تكون partial
-        const pst = partialInvs.find(d => String(d.id || d.invoice_id) === dId);
-        if (pst && String(pst.payment_status) === '1') {
-          invoices[idx] = { ...inv, status: 'partial', partialPaid: dData.paid };
-          fixed++;
-        }
-      }
-    });
-
-    if (fixed > 0) {
-      // Remove duplicates in fixed count
-      const uniqueFixed = [...new Set(invoices.filter((inv,idx) => {
-        return invoices.findIndex(i2 => String(i2.id) === String(inv.id)) === idx;
-      }))];
-      saveData();
-      await bulkSaveToDB(invoices.filter(i => i.daftra_id && partialInvs.some(d => String(d.id||d.invoice_id) === String(i.daftra_id))));
-      renderTable();
-      updateStats();
-      showToast(`✅ تم إصلاح ${fixed} فاتورة جزئية`);
-      auditEntry('sync', { note: `إصلاح ${fixed} فاتورة جزئية من دفترة` });
-    } else {
-      showToast('✅ كل الفواتير الجزئية محدّثة بالفعل');
-    }
-  } catch(e) {
-    showToast('❌ فشل الإصلاح: ' + e.message);
-    console.error('fixPartialInvoices:', e);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '🔧 إصلاح الجزئية'; }
-  }
-}
-
-window.fixPartialInvoices = fixPartialInvoices;
-
 window.setProfitPeriod   = setProfitPeriod;
 window.setProfitTab      = setProfitTab;
 window.renderProfitReport= renderProfitReport;
