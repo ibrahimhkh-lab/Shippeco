@@ -1074,6 +1074,11 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
       <span>📲</span> قوالب واتساب
     </button>
     <div class="nav-divider"></div>
+    <div class="nav-label">بوابة الدفع</div>
+    <button class="nav-item" onclick="showSection('paymob-links')">
+      <span>💳</span> روابط Paymob
+    </button>
+    <div class="nav-divider"></div>
     <button class="nav-item" onclick="showSection('settings')">
       <span>⚙️</span> الإعدادات
     </button>
@@ -1766,6 +1771,72 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
 
   </div>
 </div><!-- /sec-invoice-template -->
+
+
+<!-- ── PAYMOB PAYMENT LINKS ── -->
+<div id="sec-paymob-links" class="section">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="page-title">💳 روابط دفع Paymob</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="user-badge" onclick="doLogout()">
+        <div class="user-avatar" id="user-avatar-paymob">م</div>
+        <span id="user-name-paymob">—</span>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- بطاقة إنشاء رابط منفرد -->
+    <div style="background:#111827;border:1px solid #1e2d47;border-radius:16px;padding:28px;max-width:560px;margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#10b981,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:22px">💳</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:#e2e8f0">إنشاء رابط دفع منفرد</div>
+          <div style="font-size:12px;color:#64748b;margin-top:3px">أرسل رابط دفع Paymob لأي عميل مباشرةً بدون فاتورة</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div>
+          <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">اسم العميل *</label>
+          <input id="pm-client-name" type="text" placeholder="محمد أحمد" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:14px;font-family:inherit;direction:rtl">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رقم الجوال *</label>
+          <input id="pm-client-phone" type="text" placeholder="05XXXXXXXX" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:14px;font-family:inherit;direction:ltr">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+        <div>
+          <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">المبلغ (ريال) *</label>
+          <input id="pm-amount" type="number" min="1" step="0.01" placeholder="0.00" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:14px;font-family:inherit;direction:ltr">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">الوصف</label>
+          <input id="pm-description" type="text" placeholder="خدمة شحن" style="width:100%;background:#0a0e1a;border:1px solid #1e2d47;border-radius:10px;padding:10px 14px;color:#e2e8f0;font-size:14px;font-family:inherit;direction:rtl">
+        </div>
+      </div>
+
+      <button onclick="createDirectPaymobLink()" id="pm-create-btn" style="width:100%;background:linear-gradient(135deg,#10b981,#0ea5e9);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity 0.2s" onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=1">
+        💳 إنشاء رابط الدفع وإرساله عبر واتساب
+      </button>
+
+      <div id="pm-result" style="display:none;margin-top:16px;padding:14px;border-radius:10px;font-size:13px;line-height:1.7"></div>
+    </div>
+
+    <!-- آخر الروابط المنشأة -->
+    <div style="background:#111827;border:1px solid #1e2d47;border-radius:16px;padding:24px;max-width:560px">
+      <div style="font-size:15px;font-weight:700;color:#e2e8f0;margin-bottom:16px">📋 آخر الروابط المنشأة</div>
+      <div id="pm-history-list">
+        <div style="text-align:center;padding:30px;color:#64748b;font-size:13px">لم يتم إنشاء أي روابط بعد</div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /sec-paymob-links -->
 
 <!-- ── SETTINGS ── -->
 <div id="sec-settings" class="section">
@@ -2663,6 +2734,66 @@ var ptSettings = (() => { try { return JSON.parse(localStorage.getItem('shippec_
 var invoiceTemplate = (() => { try { return JSON.parse(localStorage.getItem('shippec_template') || '{}'); } catch(e) { return {}; } })();
 var WORKER_URL = 'https://silent-paper-fd08.ibrahim-h-kh.workers.dev';
 // ─── AUTH SYSTEM ───
+
+var WA_TEMPLATES_KEY = 'shippec_wa_templates';
+var WA_DEFAULT_TEMPLATES = {
+  paid: `مرحباً {اسم_العميل} 👋
+
+✅ *تم إصدار بوليصة شحنتك بنجاح!*
+
+📦 *رقم AWB:* \`{رقم_الشحنة}\`
+🚚 *الناقل:* {الناقل}
+
+🔗 *تتبع الشحنة:*
+{رابط_التتبع}
+{رابط_البوليصة}
+
+📌 في حال اختلاف الوزن عند DHL يُطبَّق الفرق وفق الشروط.
+
+شيب بيك تتمنى لك شحناً موفقاً 🌟`,
+
+  unpaid: `مرحباً {اسم_العميل} 👋
+
+نشكرك على تواصلك مع شيب بيك 🚀
+
+🧾 *الفاتورة رقم:* #{رقم_الفاتورة}
+💰 *المبلغ:* {المبلغ} ر.س
+⏳ *الحالة:* بانتظار الدفع
+{رابط_الدفع}
+
+⚠️ سيتم إرسال بوليصة الشحن بعد إتمام الدفع.
+
+شكراً لثقتك 🌟`,
+
+  collection: `مرحباً {اسم_العميل} 👋
+
+نود تذكيرك بفاتورة مستحقة لدى شيب بيك 🧾
+
+🔖 *رقم الفاتورة:* #{رقم_الفاتورة}
+📦 *رقم الشحنة:* {رقم_الشحنة}
+💰 *المبلغ المستحق:* *{المبلغ} ر.س*
+📅 *التاريخ:* {التاريخ}
+⏳ *الحالة:* بانتظار الدفع
+{رابط_الدفع}
+
+نأمل منكم سرعة التسوية. شكراً لثقتكم 🌟
+شيب بيك`,
+
+  payment_link: `مرحباً {اسم_العميل} 👋
+
+يسعدنا خدمتك! إليك رابط دفع فاتورتك:
+
+🧾 رقم الفاتورة: #{رقم_الفاتورة}
+📦 رقم الشحنة: {رقم_الشحنة}
+💰 المبلغ: {المبلغ} ريال
+
+💳 رابط الدفع الآمن:
+{رابط_الدفع}
+
+يمكنك الدفع بالبطاقة الائتمانية أو مدى 🔒
+شكراً لتعاملكم مع شيب بيك 🚀`
+};
+
 var USERS_KEY = 'shippec_users';
 var SESSION_KEY = 'shippec_session';
 
@@ -2978,7 +3109,7 @@ document.addEventListener('DOMContentLoaded', () => {
   try { wireDataHandlers(); } catch(e){ console.error('wireDataHandlers:', e); }
   // hash routing — آمن لـ iOS Safari
   try {
-    var validSections = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','wa-templates','settings','profit-report','audit-log'];
+    var validSections = ['dashboard','invoices','reports','clients','calculator','reconcile','invoice-template','wa-templates','settings','profit-report','audit-log','paymob-links'];
     initERP();
     addExcelButtonToInvoices();
     var hashSection = (location.hash||'').replace('#','');
@@ -7910,76 +8041,75 @@ window.saveAsDraft = saveAsDraft;
 // WHATSAPP MESSAGE TEMPLATES — قوالب رسائل واتساب مخصصة
 // ═══════════════════════════════════════════════════════════
 
-var WA_TEMPLATES_KEY = 'shippec_wa_templates';
+// WA_TEMPLATES_KEY moved to top
 
-var WA_DEFAULT_TEMPLATES = {
-  paid: `مرحباً {اسم_العميل} 👋
 
-✅ *تم إصدار بوليصة شحنتك بنجاح!*
 
-📦 *رقم AWB:* \`{رقم_الشحنة}\`
-🚚 *الناقل:* {الناقل}
 
-🔗 *تتبع الشحنة:*
-{رابط_التتبع}
-{رابط_البوليصة}
 
-📌 في حال اختلاف الوزن عند DHL يُطبَّق الفرق وفق الشروط.
 
-شيب بيك تتمنى لك شحناً موفقاً 🌟`,
 
-  unpaid: `مرحباً {اسم_العميل} 👋
 
-نشكرك على تواصلك مع شيب بيك 🚀
 
-🧾 *الفاتورة رقم:* #{رقم_الفاتورة}
-💰 *المبلغ:* {المبلغ} ر.س
-⏳ *الحالة:* بانتظار الدفع
-{رابط_الدفع}
 
-⚠️ سيتم إرسال بوليصة الشحن بعد إتمام الدفع.
 
-شكراً لثقتك 🌟`,
 
-  collection: `مرحباً {اسم_العميل} 👋
 
-نود تذكيرك بفاتورة مستحقة لدى شيب بيك 🧾
 
-🔖 *رقم الفاتورة:* #{رقم_الفاتورة}
-📦 *رقم الشحنة:* {رقم_الشحنة}
-💰 *المبلغ المستحق:* *{المبلغ} ر.س*
-📅 *التاريخ:* {التاريخ}
-⏳ *الحالة:* بانتظار الدفع
-{رابط_الدفع}
 
-نأمل منكم سرعة التسوية. شكراً لثقتكم 🌟
-شيب بيك`,
 
-  payment_link: `مرحباً {اسم_العميل} 👋
 
-يسعدنا خدمتك! إليك رابط دفع فاتورتك:
 
-🧾 رقم الفاتورة: #{رقم_الفاتورة}
-📦 رقم الشحنة: {رقم_الشحنة}
-💰 المبلغ: {المبلغ} ريال
 
-💳 رابط الدفع الآمن:
-{رابط_الدفع}
 
-يمكنك الدفع بالبطاقة الائتمانية أو مدى 🔒
-شكراً لتعاملكم مع شيب بيك 🚀`
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function getWaTemplates() {
   try {
     var stored = localStorage.getItem(WA_TEMPLATES_KEY);
     if (stored) {
       var parsed = JSON.parse(stored);
-      // Merge with defaults so new template types are always available
-      return { ...WA_DEFAULT_TEMPLATES, ...parsed };
+      return Object.assign({}, WA_DEFAULT_TEMPLATES, parsed);
     }
   } catch(e) {}
-  return { ...WA_DEFAULT_TEMPLATES };
+  return Object.assign({}, WA_DEFAULT_TEMPLATES);
 }
 
 function loadWaTemplatesUI() {
@@ -8037,10 +8167,10 @@ function applyWaTemplate(templateKey, inv, extraVars) {
     'الناقل':       inv.carrier || 'DHL',
     'رابط_التتبع':  trackUrl,
     'رابط_الدفع':   inv.paymentUrl || '',
-    'رابط_البوليصة': inv.labelUrl ? `\n🖨️ *بوليصة الشحن (PDF):*\n${inv.labelUrl}` : '',
-    'التاريخ':      formatDate(inv.date),
-    ...(extraVars || {})
+    'رابط_البوليصة': inv.labelUrl ? ('\n🖨️ *بوليصة الشحن (PDF):*\n' + inv.labelUrl) : '',
+    'التاريخ':      formatDate(inv.date)
   };
+  if (extraVars) { Object.keys(extraVars).forEach(function(k){ vars[k] = extraVars[k]; }); }
   Object.entries(vars).forEach(([k, v]) => {
     msg = msg.replace(new RegExp(`\\{${k}\\}`, 'g'), v || '');
   });
@@ -8048,6 +8178,196 @@ function applyWaTemplate(templateKey, inv, extraVars) {
   msg = msg.replace(/\n{3,}/g, '\n\n').trim();
   return msg;
 }
+
+
+// ═══════════════════════════════════════════════════════════════
+// PAYMOB DIRECT LINKS — قسم روابط الدفع المنفردة
+// ═══════════════════════════════════════════════════════════════
+
+var pmLinkHistory = (function() {
+  try { return JSON.parse(localStorage.getItem('shippec_pm_history') || '[]'); } catch(e) { return []; }
+})();
+
+function savePmHistory() {
+  try { localStorage.setItem('shippec_pm_history', JSON.stringify(pmLinkHistory.slice(0, 20))); } catch(e) {}
+}
+
+function renderPmHistory() {
+  var el = document.getElementById('pm-history-list');
+  if (!el) return;
+  if (!pmLinkHistory.length) {
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:#64748b;font-size:13px">لم يتم إنشاء أي روابط بعد</div>';
+    return;
+  }
+  el.innerHTML = pmLinkHistory.map(function(item, i) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #1e2d47;gap:10px">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13px;font-weight:600;color:#e2e8f0">' + (item.name || 'عميل') + '</div>' +
+        '<div style="font-size:11px;color:#64748b;margin-top:2px">' + (item.amount || 0) + ' ر.س · ' + (item.date || '') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px;flex-shrink:0">' +
+        '<button onclick="copyPmLink(' + i + ')" style="background:rgba(14,165,233,0.12);color:#0ea5e9;border:1px solid rgba(14,165,233,0.3);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">📋 نسخ</button>' +
+        '<button onclick="sendPmLinkWA(' + i + ')" style="background:rgba(37,211,102,0.12);color:#25d366;border:1px solid rgba(37,211,102,0.3);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">📲 واتساب</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function copyPmLink(idx) {
+  var item = pmLinkHistory[idx];
+  if (!item || !item.url) return;
+  navigator.clipboard.writeText(item.url).then(function() {
+    showToast('📋 تم نسخ الرابط');
+  }).catch(function() {
+    showToast('الرابط: ' + item.url);
+  });
+}
+
+function sendPmLinkWA(idx) {
+  var item = pmLinkHistory[idx];
+  if (!item) return;
+  var phone = (item.phone || '').replace(/\D/g, '');
+  var intl = phone.startsWith('966') ? phone : phone.startsWith('0') ? '966' + phone.slice(1) : '966' + phone;
+  var msg = 'مرحباً ' + (item.name || 'عزيزي العميل') + ' 👋\n\n' +
+    'إليك رابط الدفع الآمن عبر Paymob:\n\n' +
+    '💰 المبلغ: ' + item.amount + ' ريال\n' +
+    (item.description ? '📦 ' + item.description + '\n' : '') +
+    '\n💳 رابط الدفع:\n' + item.url + '\n\n' +
+    'يمكنك الدفع بالبطاقة أو مدى أو Apple Pay 🔒\nشيب بيك 🚀';
+  window.open('https://wa.me/' + intl + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+async function createDirectPaymobLink() {
+  var nameEl   = document.getElementById('pm-client-name');
+  var phoneEl  = document.getElementById('pm-client-phone');
+  var amountEl = document.getElementById('pm-amount');
+  var descEl   = document.getElementById('pm-description');
+  var resultEl = document.getElementById('pm-result');
+  var btn      = document.getElementById('pm-create-btn');
+
+  var name   = (nameEl   ? nameEl.value.trim()   : '');
+  var phone  = (phoneEl  ? phoneEl.value.trim()  : '');
+  var amount = parseFloat(amountEl ? amountEl.value : 0);
+  var desc   = (descEl   ? descEl.value.trim()   : '') || 'خدمة شحن';
+
+  // Validation
+  if (!name)        { showToast('⚠️ أدخل اسم العميل');    if (nameEl)   nameEl.focus();   return; }
+  if (!phone)       { showToast('⚠️ أدخل رقم الجوال');    if (phoneEl)  phoneEl.focus();  return; }
+  if (!amount || amount <= 0) { showToast('⚠️ أدخل مبلغاً صحيحاً'); if (amountEl) amountEl.focus(); return; }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ جارٍ الإنشاء...';
+  resultEl.style.display = 'none';
+
+  try {
+    var res = await fetch(WORKER_URL + '?action=create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        invoice_id: 'DIRECT_' + Date.now(),
+        amount: amount,
+        client_name: name,
+        client_phone: phone,
+        description: desc,
+        integration_type: 'PL'
+      })
+    });
+    var data = await res.json();
+
+    if (data.payment_url) {
+      // Save to history
+      var histItem = {
+        name: name,
+        phone: phone,
+        amount: amount.toFixed(2),
+        description: desc,
+        url: data.payment_url,
+        order_id: data.order_id,
+        date: new Date().toLocaleDateString('ar-SA')
+      };
+      pmLinkHistory.unshift(histItem);
+      savePmHistory();
+      renderPmHistory();
+
+      // Show result
+      resultEl.style.display = 'block';
+      resultEl.style.background = 'rgba(16,185,129,0.1)';
+      resultEl.style.border = '1px solid rgba(16,185,129,0.3)';
+      resultEl.style.color = '#10b981';
+      var safeUrl = data.payment_url.replace(/'/g, '%27');
+      resultEl.innerHTML =
+        '<div style="font-weight:700;font-size:14px;margin-bottom:8px">&#x2705; تم إنشاء رابط الدفع!</div>' +
+        '<div style="word-break:break-all;font-size:12px;color:#94a3b8;margin-bottom:12px">' + data.payment_url + '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+          '<button onclick="copyPmLink(this)" data-url="' + safeUrl + '" style="background:rgba(14,165,233,0.15);color:#0ea5e9;border:1px solid rgba(14,165,233,0.3);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:inherit">&#x1F4CB; نسخ الرابط</button>' +
+          '<button onclick="sendDirectLinkWA(this.getAttribute(\'data-url\'),this.getAttribute(\'data-name\'),this.getAttribute(\'data-phone\'),this.getAttribute(\'data-amount\'),this.getAttribute(\'data-desc\'))" data-url="' + safeUrl + '" data-name="' + name + '" data-phone="' + phone + '" data-amount="' + amount + '" data-desc="' + desc + '" style="background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.3);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:inherit">&#x1F4F2; إرسال عبر واتساب</button>' +
+        '</div>';
+
+      // Auto send WA
+      sendDirectLinkWA(data.payment_url, name, phone, amount, desc);
+      showToast('✅ تم إنشاء الرابط — يفتح واتساب الآن');
+
+      // Clear form
+      if (nameEl)   nameEl.value   = '';
+      if (phoneEl)  phoneEl.value  = '';
+      if (amountEl) amountEl.value = '';
+      if (descEl)   descEl.value   = '';
+
+    } else {
+      resultEl.style.display = 'block';
+      resultEl.style.background = 'rgba(239,68,68,0.1)';
+      resultEl.style.border = '1px solid rgba(239,68,68,0.3)';
+      resultEl.style.color = '#ef4444';
+      resultEl.textContent = '❌ ' + (data.error || JSON.stringify(data).slice(0,120));
+    }
+  } catch(e) {
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'rgba(239,68,68,0.1)';
+    resultEl.style.border = '1px solid rgba(239,68,68,0.3)';
+    resultEl.style.color = '#ef4444';
+    resultEl.textContent = '❌ خطأ: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💳 إنشاء رابط الدفع وإرساله عبر واتساب';
+  }
+}
+
+function sendDirectLinkWA(url, name, phone, amount, desc) {
+  var raw = (phone || '').replace(/\D/g, '');
+  var intl = raw.startsWith('966') ? raw : raw.startsWith('0') ? '966' + raw.slice(1) : '966' + raw;
+  var msg = 'مرحباً ' + (name || 'عزيزي العميل') + ' 👋\n\n' +
+    'إليك رابط الدفع الآمن عبر Paymob:\n\n' +
+    '💰 المبلغ: ' + Number(amount).toFixed(2) + ' ريال\n' +
+    (desc && desc !== 'خدمة شحن' ? '📦 ' + desc + '\n' : '') +
+    '\n💳 رابط الدفع الآمن:\n' + url + '\n\n' +
+    'يمكنك الدفع بـ 💳 بطاقة ائتمانية أو مدى أو 🍎 Apple Pay\nشيب بيك 🚀';
+  window.open('https://wa.me/' + intl + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// Hook showSection to init paymob-links section
+var _origShowSectionPaymob = window.showSection;
+window.showSection = function(id, pushState) {
+  _origShowSectionPaymob(id, pushState);
+  if (id === 'paymob-links') {
+    renderPmHistory();
+    var cur = getCurrentUser();
+    if (cur) {
+      var av = document.getElementById('user-avatar-paymob');
+      var nm = document.getElementById('user-name-paymob');
+      if (av) av.textContent = (cur.name || cur.username || 'م')[0].toUpperCase();
+      if (nm) nm.textContent = cur.name || cur.username || '—';
+    }
+  }
+};
+
+window.createDirectPaymobLink = createDirectPaymobLink;
+window.sendDirectLinkWA       = sendDirectLinkWA;
+window.copyPmLink             = copyPmLink;
+window.sendPmLinkWA           = sendPmLinkWA;
+window.renderPmHistory        = renderPmHistory;
+
+// ── Register section in showSection valid list ──
+// (paymob-links section maps to sec-paymob-links)
 
 // WA templates now loads via showSection('wa-templates') → loadWaTemplatesUI()
 
