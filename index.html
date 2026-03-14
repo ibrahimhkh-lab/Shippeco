@@ -3262,7 +3262,15 @@ function renderDashTable(filtered) {
       <td class="mono">#${inv.id}</td>
       <td style="font-weight:600">${inv.client}</td>
       <td class="mono">${inv.awb}</td>
-      <td style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)} ر.س</td>
+      <td style="font-weight:700;color:var(--gold)">${
+  inv.status === 'partial' ? `<div style="line-height:1.5">
+    <div>${Number(inv.price||0).toFixed(2)} ر.س</div>
+    <div style="font-size:10px;font-weight:400;display:flex;gap:6px;margin-top:2px">
+      <span style="color:#10b981">✓ ${Number(inv.partialPaid||0).toFixed(2)}</span>
+      <span style="color:#f59e0b">↩ ${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)}</span>
+    </div>
+  </div>` : Number(inv.price||0).toFixed(2) + ' ر.س'
+}</td>
       <td>${statusBadge(inv.status)}</td>
       <td style="color:var(--muted);font-size:12px">${inv.payment||'—'}</td>
       <td style="color:var(--muted)">${formatDate(inv.date)}</td>
@@ -3442,17 +3450,25 @@ function renderTable() {
       <td><span style="background:rgba(139,92,246,0.12);color:#a78bfa;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${inv.items && inv.items.length > 1 ? inv.items.map(i=>i.type).join(' + ') : (inv.itemType||'شحن دولي')}</span></td>
       <td style="color:var(--muted);font-size:12px">${inv.carrier}</td>
       <td style="color:var(--muted);font-size:12px">${inv.weight ? `<span style="background:rgba(14,165,233,0.1);color:var(--accent);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">${inv.weight} كجم</span>` : '<span style="color:var(--border)">—</span>'}</td>
-      <td style="font-weight:700;color:var(--gold)">${inv.price ? Number(inv.price).toFixed(2) + ' ر.س' : '<span style="color:var(--border);font-weight:400;font-size:11px">—</span>'}</td>
+      <td style="font-weight:700;color:var(--gold)">${inv.price ? (
+  inv.status === 'partial' ? `<div style="line-height:1.5">
+    <div>${Number(inv.price).toFixed(2)} ر.س</div>
+    <div style="font-size:10px;font-weight:400;display:flex;gap:6px;margin-top:2px">
+      <span style="color:#10b981">✓ ${Number(inv.partialPaid||0).toFixed(2)}</span>
+      <span style="color:#f59e0b">↩ ${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)}</span>
+    </div>
+  </div>` : Number(inv.price).toFixed(2) + ' ر.س'
+) : '<span style="color:var(--border);font-weight:400;font-size:11px">—</span>'}</td>
       <td style="white-space:nowrap">${inv.isDraft ? `<span class="badge badge-draft"><span class="badge-dot" style="background:var(--gold)"></span>مسودة</span>` : inv.status==='partial' ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold);flex-direction:column;align-items:flex-start;gap:1px"><span style="display:flex;align-items:center;gap:4px"><span class="badge-dot" style="background:var(--gold)"></span>جزئية</span><span style="font-size:10px;padding-right:12px;opacity:0.9">متبقي: ${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)} ر.س</span></span>` : statusBadge(inv.status)}</td>
       <td style="color:var(--muted);font-size:12px">${inv.payment||'—'}</td>
       <td>${inv.created_by ? `<span class="creator-badge">👤 ${inv.created_by}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}</td>
       <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
       <td><div class="actions">
-        <button class="btn btn-ghost btn-sm" onclick="viewInvoice(${inv.id})">👁</button>
-        <button class="btn btn-ghost btn-sm" title="إضافة بند" onclick="openAddItemModal(${inv.id})" style="color:#a78bfa">＋</button>
-        <button class="btn btn-ghost btn-sm" onclick="editInvoice(${inv.id})" ${inv.isDraft ? 'style="color:var(--gold)"' : ''} title="${inv.isDraft ? 'إكمال المسودة' : 'تعديل'}">✏️${inv.isDraft ? ' إكمال' : ''}</button>
-        ${!inv.isDraft && inv.status !== 'paid' && inv.phone ? `<button class="btn btn-ghost btn-sm" title="مطالبة بالدفع" onclick="sendSingleCollectionWA(${inv.id})" style="color:#ef4444">💰</button>` : ''}
-        <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${inv.id})">🗑</button>
+        <button class="btn btn-ghost btn-sm" onclick="viewInvoice('${inv.id}')">👁</button>
+        <button class="btn btn-ghost btn-sm" title="إضافة بند" onclick="openAddItemModal('${inv.id}')" style="color:#a78bfa">＋</button>
+        <button class="btn btn-ghost btn-sm" onclick="editInvoice('${inv.id}')" ${inv.isDraft ? 'style="color:var(--gold)"' : ''} title="${inv.isDraft ? 'إكمال المسودة' : 'تعديل'}">✏️${inv.isDraft ? ' إكمال' : ''}</button>
+        ${!inv.isDraft && inv.status !== 'paid' && inv.phone ? `<button class="btn btn-ghost btn-sm" title="مطالبة بالدفع" onclick="sendSingleCollectionWA('${inv.id}')" style="color:#ef4444">💰</button>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="deleteInvoice('${inv.id}')">🗑</button>
       </div></td>
     </tr>`).join('') + `</tbody></table>`;
   // ── Pagination controls ──
@@ -4053,7 +4069,14 @@ function viewInvoice(id) {
     ${inv.details?`<div class="inv-details-box"><div class="inv-box-label">تفاصيل الشحنة</div><div class="inv-details-text">${inv.details}</div></div>`:''}
     <div class="inv-price-section">
       <div><div class="inv-price-label">إجمالي الفاتورة</div><div style="font-size:11px;opacity:0.7;margin-top:2px">شامل جميع الرسوم</div></div>
-      <div><span class="inv-price-currency">ر.س</span><span class="inv-price-value">${Number(inv.price).toFixed(2)}</span></div>
+      <div>
+  <span class="inv-price-currency">ر.س</span>
+  <span class="inv-price-value">${Number(inv.price).toFixed(2)}</span>
+  ${inv.status==='partial' ? `<div style="font-size:13px;font-weight:400;margin-top:6px;display:flex;gap:12px">
+    <span style="color:#10b981">✓ مدفوع: ${Number(inv.partialPaid||0).toFixed(2)}</span>
+    <span style="color:#f59e0b">↩ متبقي: ${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)}</span>
+  </div>` : ''}
+</div>
     </div>
     <div class="inv-footer">
       ${ptSettings.invoiceNote ? `<div style="width:100%;text-align:center;font-size:12px;color:#475569;padding-bottom:12px;border-bottom:1px solid #e2e8f0;margin-bottom:12px">${ptSettings.invoiceNote}</div>` : ''}
@@ -4806,14 +4829,22 @@ function showClientDetail(phone, name, idsStr) {
       <td class="mono">#${inv.id}</td>
       <td class="mono">${inv.awb||'—'}</td>
       <td style="color:var(--muted);font-size:12px">${inv.carrier||'—'}</td>
-      <td style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)} ر.س</td>
+      <td style="font-weight:700;color:var(--gold)">${
+  inv.status === 'partial' ? `<div style="line-height:1.5">
+    <div>${Number(inv.price||0).toFixed(2)} ر.س</div>
+    <div style="font-size:10px;font-weight:400;display:flex;gap:6px;margin-top:2px">
+      <span style="color:#10b981">✓ ${Number(inv.partialPaid||0).toFixed(2)}</span>
+      <span style="color:#f59e0b">↩ ${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)}</span>
+    </div>
+  </div>` : Number(inv.price||0).toFixed(2) + ' ر.س'
+}</td>
       <td>${statusBadge(inv.status)}</td>
       <td style="font-size:11px;color:var(--muted)">${inv.daftra_id ? '📒' : '✏️'}</td>
       <td style="color:var(--muted);font-size:12px">${formatDate(inv.date)}</td>
       <td><div class="actions">
-        <button class="btn btn-ghost btn-sm" onclick="viewInvoice(${inv.id})">👁</button>
-        <button class="btn btn-ghost btn-sm" onclick="editInvoice(${inv.id})">✏️</button>
-        ${inv.status !== 'paid' && !inv.isDraft ? `<button class="btn btn-ghost btn-sm" title="مطالبة بالدفع" onclick="sendSingleCollectionWA(${inv.id})" style="color:#ef4444">💰</button>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="viewInvoice('${inv.id}')">👁</button>
+        <button class="btn btn-ghost btn-sm" onclick="editInvoice('${inv.id}')">✏️</button>
+        ${inv.status !== 'paid' && !inv.isDraft ? `<button class="btn btn-ghost btn-sm" title="مطالبة بالدفع" onclick="sendSingleCollectionWA('${inv.id}')" style="color:#ef4444">💰</button>` : ''}
       </div></td>
     </tr>`).join('') + `</tbody></table>`;
 
@@ -7655,7 +7686,7 @@ function renderReport() {
       </div>
       <div style="padding:12px;display:flex;flex-direction:column;gap:10px">` +
       sorted.map(inv => `
-        <div onclick="viewInvoice(${inv.id})" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer">
+        <div onclick="viewInvoice('${inv.id}')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <span style="font-size:12px;color:var(--accent);font-weight:700">#${inv.no||inv.id}</span>
             ${statusBadge(inv.status)}
@@ -7663,7 +7694,13 @@ function renderReport() {
           <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">${inv.client||'—'}</div>
           <div style="display:flex;justify-content:space-between;align-items:center">
             <span style="font-size:12px;color:var(--muted)">${inv.awb||inv.carrier||'—'} · ${formatDate(inv.date)}</span>
-            <span style="font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)} ر.س</span>
+            <span style="font-weight:700;color:var(--gold)">
+  ${Number(inv.price||0).toFixed(2)} ر.س
+  ${inv.status==='partial' ? `<span style="font-size:10px;font-weight:400;display:block;margin-top:2px">
+    <span style="color:#10b981">✓${Number(inv.partialPaid||0).toFixed(2)}</span>
+    <span style="color:#f59e0b;margin-right:6px">↩${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)}</span>
+  </span>` : ''}
+</span>
           </div>
         </div>`).join('') +
       `</div>`;
@@ -7685,7 +7722,7 @@ function renderReport() {
           ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><span class="badge-dot" style="background:var(--gold)"></span>جزئية</span>`
           : statusBadge(inv.status);
         return `<tr>
-        <td class="mono" style="cursor:pointer;color:var(--accent)" onclick="viewInvoice(${inv.id})">#${inv.no||inv.id}</td>
+        <td class="mono" style="cursor:pointer;color:var(--accent)" onclick="viewInvoice('${inv.id}')">#${inv.no||inv.id}</td>
         <td>${inv.client||'—'}</td>
         <td style="font-size:12px;color:var(--muted)">${inv.carrier||'—'}</td>
         <td class="mono" style="font-size:12px">${inv.awb||'—'}</td>
@@ -8623,7 +8660,13 @@ function renderProfitInvoiceTable(filtered) {
         <td style="padding:9px 12px;font-family:var(--mono);color:var(--muted)">#${inv.id}</td>
         <td style="padding:9px 12px;font-weight:600">${inv.client||'—'}</td>
         <td style="padding:9px 12px;font-family:var(--mono);font-size:11px;color:var(--muted)">${inv.awb||'—'}</td>
-        <td style="padding:9px 12px;font-weight:700;color:var(--gold)">${Number(inv.price||0).toFixed(2)}</td>
+        <td style="padding:9px 12px;font-weight:700;color:var(--gold)">
+  ${Number(inv.price||0).toFixed(2)}
+  ${inv.status==='partial' ? `<div style="font-size:10px;font-weight:400;margin-top:2px">
+    <span style="color:#10b981">✓${Number(inv.partialPaid||0).toFixed(2)}</span>
+    <span style="color:#f59e0b;margin-right:4px">↩${Math.max(0,Number(inv.price||0)-Number(inv.partialPaid||0)).toFixed(2)}</span>
+  </div>` : ''}
+</td>
         <td style="padding:9px 12px;color:var(--red-p)">${p.hasCost ? Number(inv.dhlCost).toFixed(2) : '<span style="color:var(--muted);font-size:11px">—</span>'}</td>
         <td style="padding:9px 12px" class="profit-cell">${profitStr}</td>
         <td style="padding:9px 12px">${marginStr}</td>
