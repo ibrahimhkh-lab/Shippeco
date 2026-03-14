@@ -1793,7 +1793,7 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
     <div style="background:#111827;border:1px solid #1e2d47;border-radius:16px;padding:24px;max-width:640px;margin-bottom:24px">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
         <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:22px">💳</div>
-        <div><div style="font-size:16px;font-weight:700;color:#e2e8f0">ربط بوابة الدفع — Paymob</div><div style="font-size:12px;color:#64748b;margin-top:3px">بوابة Paymob متصلة — روابط الدفع تعمل تلقائياً</div></div>
+        <div><div style="font-size:16px;font-weight:700;color:#e2e8f0">ربط بوابة الدفع — PayTabs</div><div style="font-size:12px;color:#64748b;margin-top:3px">اربط المنصة بـ PayTabs لإرسال روابط دفع للعملاء</div></div>
       </div>
       <div style="margin-bottom:14px">
         <label style="font-size:12px;color:#64748b;display:block;margin-bottom:6px">رابط الـ Backend API</label>
@@ -2119,7 +2119,7 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
           <span style="width:32px;height:32px;border-radius:8px;background:rgba(14,165,233,0.1);display:flex;align-items:center;justify-content:center;font-size:16px">💳</span>
           <div>
-            <div style="font-size:14px;font-weight:700;color:var(--text)">رابط دفع Paymob</div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">رابط دفع PayTabs</div>
             <div style="font-size:11px;color:var(--muted)">إرسال رابط الدفع الإلكتروني</div>
           </div>
         </div>
@@ -5783,13 +5783,13 @@ let ptSettings = (() => { try { return JSON.parse(localStorage.getItem('shippec_
 function loadSettings() {
   const el = id => document.getElementById(id);
   if (!el('pt-api-url')) return;
-  // Paymob Worker — لا حاجة لـ apiUrl
+  el('pt-api-url').value = ptSettings.apiUrl || '';
   el('pt-api-key').value = ptSettings.apiKey || '';
   el('pt-currency').value = ptSettings.currency || 'SAR';
   el('invoice-note').value = ptSettings.invoiceNote || '';
   // Store WA number
   if (el('store-wa-number')) el('store-wa-number').value = ptSettings.storeWA || '';
-  el('settings-status').textContent = '✅ Paymob متصل';
+  el('settings-status').textContent = ptSettings.apiUrl ? '✅ الإعدادات محفوظة' : '';
   el('settings-status').style.color = '#10b981';
   const ds = el('daftra-status');
   if (ds) { ds.textContent = '✅ متصل تلقائياً'; ds.style.color = '#10b981'; }
@@ -5949,35 +5949,39 @@ async function testBackendConnection() {
 // ─── CREATE PAYMENT LINK VIA BACKEND ───
 async function sendPaymentLink() {
   if (!currentViewInvoice) return;
-  var inv = currentViewInvoice;
+  const inv = currentViewInvoice;
 
-  var btn = document.getElementById('pay-link-btn');
+  if (!ptSettings.apiUrl || !ptSettings.apiKey) {
+    showToast('⚠️ يرجى إعداد رابط الـ Backend أولاً في الإعدادات');
+    showSection('settings');
+    closeModal('invoice-modal');
+    return;
+  }
+
+  const btn = document.getElementById('pay-link-btn');
   btn.disabled = true;
   btn.textContent = '⏳ جارٍ الإنشاء...';
 
   try {
-    showToast('⏳ جارٍ إنشاء رابط الدفع...');
-    var phone = (inv.phone || '').replace(/\D/g, '');
-    var res = await fetch(PAYMOB_WORKER + '?action=create-payment', {
+    await syncInvoiceToBackend(inv);
+
+    const res = await fetch(ptSettings.apiUrl + '?action=create-payment', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        invoice_id: String(inv.id),
-        amount: Number(inv.price || 0),
-        client_name: inv.client || 'عميل',
-        client_phone: phone,
-        description: inv.itemType || (inv.carrier ? 'شحن ' + inv.carrier : 'خدمة شحن')
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': ptSettings.apiKey
+      },
+      body: JSON.stringify({ invoice_id: String(inv.id) })
     });
-    var data = await res.json();
+
+    const data = await res.json();
 
     if (data.payment_url) {
-      var idx = invoices.findIndex(function(i) { return String(i.id) === String(inv.id); });
+      const idx = invoices.findIndex(i => String(i.id)===String(inv.id));
       if (idx !== -1) {
         invoices[idx].paymentUrl = data.payment_url;
-        invoices[idx].paymentRef = String(data.order_id || 'pending');
-        invoices[idx].paymobOrderId = data.order_id;
-        addTimelineEvent(invoices[idx], 'payment_link', { note: 'رابط دفع Paymob — تم إرساله عبر واتساب' }, true);
+        invoices[idx].paymentRef = data.invoice?.paytabs_token || 'pending';
+        addTimelineEvent(invoices[idx], 'payment_link', { note: 'رابط دفع PayTabs — تم إرساله عبر واتساب' }, true); // skipSave
         saveData();
         currentViewInvoice = invoices[idx];
       }
@@ -5986,17 +5990,27 @@ async function sendPaymentLink() {
       startPaymentPolling();
       showToast('✅ تم إنشاء رابط الدفع وإرساله عبر واتساب');
     } else {
-      showToast('❌ خطأ Paymob: ' + (data.error || JSON.stringify(data).slice(0, 100)));
+      showToast('❌ خطأ: ' + (data.error || data.message || JSON.stringify(data)));
     }
   } catch (e) {
-    showToast('❌ خطأ: ' + e.message);
+    showToast('❌ تعذّر الاتصال بالـ Backend: ' + e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = '💳 رابط الدفع';
   }
 }
 
-async function syncInvoiceToBackend(inv) { /* Paymob direct */ }
+// ─── SYNC INVOICE TO BACKEND ───
+async function syncInvoiceToBackend(inv) {
+  if (!ptSettings.apiUrl || !ptSettings.apiKey) return;
+  try {
+    await fetch(ptSettings.apiUrl + '?action=invoices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': ptSettings.apiKey },
+      body: JSON.stringify(inv)
+    });
+  } catch(e) { console.warn('Backend sync:', e); }
+}
 
 // ─── SEND PAYMENT LINK VIA WHATSAPP ───
 function sendPaymentLinkWhatsApp(payUrl) {
@@ -6008,37 +6022,50 @@ function sendPaymentLinkWhatsApp(payUrl) {
   window.open('https://wa.me/' + intlPhone + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-// ─── CHECK PAYMENT STATUS VIA PAYMOB WORKER ───
+// ─── CHECK PAYMENT STATUS VIA BACKEND ───
 async function checkPaymentStatus() {
   if (!currentViewInvoice) return;
-  var inv = currentViewInvoice;
-  var btn = document.getElementById('check-pay-btn');
+  const inv = currentViewInvoice;
+
+  if (!ptSettings.apiUrl || !ptSettings.apiKey) {
+    showToast('⚠️ يرجى إعداد رابط الـ Backend أولاً');
+    return;
+  }
+
+  const btn = document.getElementById('check-pay-btn');
   btn.disabled = true;
   btn.textContent = '⏳ جارٍ التحقق...';
+
   try {
-    var oid = inv.paymobOrderId || inv.paymentRef;
-    if (!oid || oid === 'pending') { showToast('⏳ الرابط لم يُفعَّل بعد'); return; }
-    var res = await fetch(PAYMOB_WORKER + '?action=check-payment&order_id=' + oid);
-    var data = await res.json();
-    if (data.paid) {
-      var idx = invoices.findIndex(function(i){ return String(i.id) === String(inv.id); });
+    const res = await fetch(ptSettings.apiUrl + '?action=invoices', {
+      headers: { 'X-API-Key': ptSettings.apiKey }
+    });
+    const allInvoices = await res.json();
+    const backendInv = allInvoices.find(i => String(i.id) === String(inv.id));
+
+    if (backendInv && backendInv.status === 'مدفوعة بالكامل' || backendInv.status === 'paid') {
+      const idx = invoices.findIndex(i => String(i.id)===String(inv.id));
       if (idx !== -1) {
         invoices[idx].status = 'paid';
-        invoices[idx].payment = 'Paymob';
+        invoices[idx].payment = invoices[idx].payment || 'PayTabs';
         invoices[idx].paymentUrl = null;
-        addTimelineEvent(invoices[idx], 'paid', { note: 'تأكيد دفع — Paymob' }, true);
+        addTimelineEvent(invoices[idx], 'paid', { note: 'تأكيد دفع تلقائي — PayTabs' }, true); // skipSave
         saveData();
         currentViewInvoice = invoices[idx];
         viewInvoice(inv.id);
         renderTable(); updateStats();
         stopPaymentPolling();
-        showToast('✅ تم تأكيد الدفع!');
+        showToast('✅ تم تأكيد الدفع! تحوّلت الفاتورة إلى مدفوعة');
       }
     } else {
-      showToast('⏳ لم يتم الدفع — مدفوع: ' + (data.paid_amount||0).toFixed(2) + ' / ' + (data.total_amount||0).toFixed(2) + ' ر.س');
+      showToast('⏳ لم يتم الدفع بعد — الحالة: ' + (backendInv ? backendInv.status : 'غير موجودة في Backend'));
     }
-  } catch(e) { showToast('❌ ' + e.message); }
-  finally { btn.disabled = false; btn.textContent = '🔄 تحقق من الدفع'; }
+  } catch (e) {
+    showToast('❌ تعذّر التحقق: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔄 تحقق من الدفع';
+  }
 }
 
 // ─── AUTO-POLL PAYMENT (every 30s) ───
@@ -6046,26 +6073,26 @@ let paymentPollInterval = null;
 
 function startPaymentPolling() {
   stopPaymentPolling();
-  paymentPollInterval = setInterval(async function() {
+  if (!ptSettings.apiUrl || !ptSettings.apiKey) return;
+  paymentPollInterval = setInterval(async () => {
     if (!currentViewInvoice || currentViewInvoice.status === 'paid') { stopPaymentPolling(); return; }
     try {
-      var oid = currentViewInvoice.paymobOrderId || currentViewInvoice.paymentRef;
-      if (!oid || oid === 'pending') return;
-      var res = await fetch(PAYMOB_WORKER + '?action=check-payment&order_id=' + oid);
-      var data = await res.json();
-      if (data.paid) {
+      const res = await fetch(ptSettings.apiUrl + '?action=invoices', { headers: { 'X-API-Key': ptSettings.apiKey } });
+      const all = await res.json();
+      const b = all.find(i => String(i.id) === String(currentViewInvoice.id));
+      if (b && b.status === 'مدفوعة بالكامل' || b.status === 'paid') {
         stopPaymentPolling();
-        var idx = invoices.findIndex(function(i){ return String(i.id) === String(currentViewInvoice.id); });
+        const idx = invoices.findIndex(i => String(i.id)===String(currentViewInvoice.id));
         if (idx !== -1) {
           invoices[idx].status = 'paid';
-          invoices[idx].payment = 'Paymob';
+          invoices[idx].payment = invoices[idx].payment || 'PayTabs';
           invoices[idx].paymentUrl = null;
-          addTimelineEvent(invoices[idx], 'paid', { note: 'دفع تلقائي — Paymob' }, true);
+          addTimelineEvent(invoices[idx], 'paid', { note: 'دفع تلقائي — PayTabs polling' }, true); // skipSave
           saveData();
           currentViewInvoice = invoices[idx];
           viewInvoice(currentViewInvoice.id);
           renderTable(); updateStats();
-          showToast('🎉 دفع جديد! الفاتورة أصبحت مدفوعة تلقائياً');
+          showToast('🎉 دفع جديد! تحوّلت الفاتورة إلى مدفوعة تلقائياً');
         }
       }
     } catch(e) {}
@@ -6084,7 +6111,7 @@ function refreshPaymentButtons() {
   if (!inv || !checkBtn || !payBtn) return;
   if (inv.paymentUrl || inv.paymentRef) {
     checkBtn.style.display = 'inline-flex';
-    startPaymentPolling();
+    if (ptSettings.apiUrl) startPaymentPolling();
   } else {
     checkBtn.style.display = 'none';
   }
@@ -6294,7 +6321,6 @@ function setSyncStatus(msg, color) {
 
 // Worker base URL — no API key needed
 const DAFTRA_WORKER_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
-const PAYMOB_WORKER = 'https://silent-paper-fd08.ibrahim-h-kh.workers.dev';
 const DB_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
 
 // Background sync — called on startup and manually
