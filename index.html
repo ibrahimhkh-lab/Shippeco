@@ -2824,7 +2824,9 @@ function esc(str) {
   return d.innerHTML;
 }
 
-let invoices = (() => { try { return JSON.parse(localStorage.getItem('shipco_invoices') || '[]'); } catch(e) { return []; } })();
+let invoices = []; // لا نحمّل من localStorage — D1 هو المصدر الوحيد
+// نمسح localStorage القديم لتجنب البيانات الخاطئة
+try { localStorage.removeItem('shipco_invoices'); } catch(e) {}
 
 // Load from D1 on startup
 async function loadFromDB() {
@@ -2857,7 +2859,7 @@ async function loadFromDB() {
         return true;
       });
 
-      try { localStorage.setItem('shipco_invoices', JSON.stringify(invoices)); } catch(e) {}
+      // localStorage removed — using D1
       renderTable && renderTable();
       updateStats && updateStats();
     }
@@ -2949,16 +2951,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const removed = beforeCount - invoices.length;
     if (removed > 0) {
       console.log(`Startup dedup: removed ${removed} duplicates (${beforeCount} → ${invoices.length})`);
-      try { localStorage.setItem('shipco_invoices', JSON.stringify(invoices)); } catch(e) {}
+      // localStorage removed — using D1
     }
   } catch(e) { console.warn('Startup dedup error:', e); }
 
   try { checkAuth(); } catch(e){ console.error('checkAuth:', e); }
   try { document.getElementById('f-date').valueAsDate = new Date(); } catch(e){}
   try { document.getElementById('today-date').textContent = new Date().toLocaleDateString('ar-EG', {weekday:'long',year:'numeric',month:'long',day:'numeric'}); } catch(e){}
-  try { renderTable(); } catch(e){ console.error('renderTable:', e); }
-  try { updateStats(); } catch(e){ console.error('updateStats:', e); }
   try { calcInit(); } catch(e){ console.error('calcInit:', e); }
+  // renderTable و updateStats يُستدعيان بعد loadFromDB — لا نعرض بيانات فارغة
   try { recInit(); } catch(e){ console.error('recInit:', e); }
   try { wireDataHandlers(); } catch(e){ console.error('wireDataHandlers:', e); }
   // hash routing — آمن لـ iOS Safari
@@ -2973,11 +2974,19 @@ document.addEventListener('DOMContentLoaded', () => {
       history.replaceState({ section: 'dashboard' }, '', location.pathname);
     }
   } catch(e) {}
-  setTimeout(() => { try { loadFromDB(); } catch(e){ console.warn('loadFromDB:', e); } }, 500);
+  // تسلسل التحميل: DB أولاً ثم دفترة مباشرة بعدها
+  // تسلسل التحميل الصحيح: D1 أولاً ← دفترة بعدها مباشرة
+  setTimeout(async () => {
+    try {
+      await loadFromDB();          // 1. حمّل من D1 (المصدر الرئيسي)
+    } catch(e){ console.warn('loadFromDB:', e); }
+    try {
+      await syncDaftraBackground(); // 2. صحّح من دفترة مباشرة بعدها
+    } catch(e){ console.warn('syncDaftra:', e); }
+  }, 500);
   setTimeout(() => { try { syncUsersFromDB(); } catch(e){ console.warn('syncUsers:', e); } }, 800);
-  setTimeout(() => { try { syncDaftraBackground(); } catch(e){ console.warn('syncDaftra:', e); } }, 2000);
-  // مزامنة تلقائية كل 10 دقائق
-  setInterval(() => { try { syncDaftraBackground(); } catch(e){ console.warn('autoSync:', e); } }, 2 * 60 * 1000); // كل دقيقتين
+  // مزامنة تلقائية كل دقيقتين
+  setInterval(() => { try { syncDaftraBackground(); } catch(e){ console.warn('autoSync:', e); } }, 2 * 60 * 1000);
 });
 
 // ─── EVENT WIRING (iOS Safari safe — no inline handlers) ───
@@ -3027,15 +3036,10 @@ document.addEventListener('change', function(e) {
 
 function saveData() {
   _contactsCache = null; // invalidate smart suggest cache
-  try {
-    // حذف labelBase64 قبل الحفظ — يوفر مساحة localStorage (base64 ضخم)
-    const slim = invoices.map(inv => {
-      if (!inv.labelBase64) return inv;
-      const { labelBase64, ...rest } = inv;
-      return rest;
-    });
-    localStorage.setItem('shipco_invoices', JSON.stringify(slim));
-  } catch(e) { console.warn('saveData error:', e); }
+  // لا نحفظ في localStorage — D1 هو المصدر الوحيد للبيانات
+  // renderTable و updateStats يشتغلان على invoices في الذاكرة مباشرة
+  try { renderTable && renderTable(); } catch(e) {}
+  try { updateStats && updateStats(); } catch(e) {}
 }
 
 async function saveInvoiceToDB(inv) {
@@ -6353,6 +6357,16 @@ async function syncDaftraBackground() {
     const t = new Date().toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
     const total = invoices.filter(i => i.daftra_id).length;
     setSyncStatus(`📒 دفترة: ${t} · ${total} فاتورة (+${added} جديدة، ~${updated} محدّثة)`, 'var(--green)');
+    // تحديث الشاشة بعد المزامنة
+    try { renderTable && renderTable(); } catch(e) {}
+    try { updateStats && updateStats(); } catch(e) {}
+    // ── حفظ الحالات الصحيحة في D1 بعد كل مزامنة ──
+    try {
+      const daftraInvs = invoices.filter(i => i.daftra_id);
+      if (daftraInvs.length > 0) {
+        bulkSaveToDB(daftraInvs).catch(e => console.warn('bulkSave after sync:', e));
+      }
+    } catch(e) { console.warn('D1 update after sync:', e); }
   } catch(e) {
     setSyncStatus('⚠️ دفترة: فشل المزامنة — اضغط للمحاولة', '#f59e0b');
     console.warn('Daftra sync error:', e);
@@ -7115,14 +7129,29 @@ function deleteNoPhone() {
 }
 
 async function clearAndReimport() {
-  if (!confirm('سيتم مسح جميع فواتير دفترة المستوردة وإعادة الاستيراد. هل أنت متأكد؟')) return;
-  // Remove only daftra-imported invoices (those with daftra_id)
-  invoices = invoices.filter(inv => !inv.daftra_id);
-  saveData();
-  updateStats();
-  renderTable && renderTable();
-  showToast('🗑️ تم مسح فواتير دفترة — جارٍ الاستيراد...');
-  await runFullDaftraImport();
+  if (!confirm('سيتم مسح كل قاعدة البيانات وإعادة الاستيراد من دفترة. هل أنت متأكد؟')) return;
+
+  const btn = document.querySelector('[onclick="clearAndReimport()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جارٍ المسح...'; }
+
+  try {
+    // 1. مسح D1 كاملاً
+    showToast('🗑️ جارٍ مسح قاعدة البيانات...');
+    await fetch(`${DB_URL}/db/invoices/clear`, { method: 'DELETE' });
+
+    // 2. مسح الذاكرة
+    invoices = invoices.filter(inv => !inv.daftra_id);
+    updateStats();
+    renderTable && renderTable();
+
+    // 3. إعادة الاستيراد من دفترة
+    showToast('📥 جارٍ الاستيراد من دفترة...');
+    await runFullDaftraImport();
+
+  } catch(e) {
+    showToast('❌ فشل المسح: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '🗑️ مسح وإعادة استيراد'; }
+  }
 }
 
 async function runFullDaftraImport() {
