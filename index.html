@@ -6376,18 +6376,18 @@ async function fetchAllDaftraPages(endpoint, params = {}) {
     return await _fetchAllPages(endpoint, params);
   }
 
-  // invoices: جلب الثلاث حالات منفصلة لضمان الحصول على الكل
-  // لأن الـ Worker قد يفرض فلتر payment_status داخلياً
-  const [unpaid, partial, paid] = await Promise.all([
+  // invoices: جلب الأربع حالات — 0=غير مدفوعة، 1=جزئية، 2=مدفوعة، 3=مرتجع
+  const [r0, r1, r2, r3] = await Promise.all([
     _fetchAllPages('invoices', { ...params, payment_status: 0 }),
     _fetchAllPages('invoices', { ...params, payment_status: 1 }),
     _fetchAllPages('invoices', { ...params, payment_status: 2 }),
+    _fetchAllPages('invoices', { ...params, payment_status: 3 }),
   ]);
 
   // دمج مع إزالة المكررات بـ id
   const seen = new Set();
   const all = [];
-  for (const inv of [...unpaid, ...partial, ...paid]) {
+  for (const inv of [...r0, ...r1, ...r2, ...r3]) {
     const id = String(inv.id || inv.invoice_id || '');
     if (!id || seen.has(id)) continue;
     seen.add(id);
