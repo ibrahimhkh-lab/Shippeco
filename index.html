@@ -2733,6 +2733,8 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
 var ptSettings = (() => { try { return JSON.parse(localStorage.getItem('shippec_settings') || '{}'); } catch(e) { return {}; } })();
 var invoiceTemplate = (() => { try { return JSON.parse(localStorage.getItem('shippec_template') || '{}'); } catch(e) { return {}; } })();
 var WORKER_URL = 'https://silent-paper-fd08.ibrahim-h-kh.workers.dev';
+var DB_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
+var DAFTRA_WORKER_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
 // ─── AUTH SYSTEM ───
 
 var WA_TEMPLATES_KEY = 'shippec_wa_templates';
@@ -6104,9 +6106,8 @@ async function sendPaymentLink() {
       var idx = invoices.findIndex(function(i) { return String(i.id) === String(inv.id); });
       if (idx !== -1) {
         invoices[idx].paymentUrl = data.payment_url;
-        invoices[idx].paymentRef    = String(data.order_id || data.client_secret || 'pending');
-        invoices[idx].paymobOrderId = String(data.order_id || '');
-        invoices[idx].paymobSecret  = String(data.client_secret || '');
+        invoices[idx].paymentRef = String(data.order_id);
+        invoices[idx].paymobOrderId = data.order_id;
         addTimelineEvent(invoices[idx], 'payment_link', { note: 'رابط دفع Paymob — تم إرساله عبر واتساب' }, true);
         saveData();
         currentViewInvoice = invoices[idx];
@@ -6436,8 +6437,8 @@ function setSyncStatus(msg, color) {
 }
 
 // Worker base URL — no API key needed
-var DAFTRA_WORKER_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
-var DB_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
+// DAFTRA_WORKER_URL moved to top
+// DB_URL moved to top
 
 // Background sync — called on startup and manually
 // ══════════════════════════════════════════════════════════════
