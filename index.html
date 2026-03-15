@@ -2733,6 +2733,8 @@ tr.draft-row { border-right: 3px solid rgba(245,158,11,0.5) !important; }
 var ptSettings = (() => { try { return JSON.parse(localStorage.getItem('shippec_settings') || '{}'); } catch(e) { return {}; } })();
 var invoiceTemplate = (() => { try { return JSON.parse(localStorage.getItem('shippec_template') || '{}'); } catch(e) { return {}; } })();
 var WORKER_URL = 'https://silent-paper-fd08.ibrahim-h-kh.workers.dev';
+var DB_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
+var DAFTRA_WORKER_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
 // ─── AUTH SYSTEM ───
 
 var WA_TEMPLATES_KEY = 'shippec_wa_templates';
@@ -6084,17 +6086,18 @@ async function sendPaymentLink() {
   btn.textContent = '⏳ جارٍ الإنشاء...';
 
   try {
-    showToast('⏳ جارٍ إنشاء رابط الدفع...');
+    showToast('⏳ جارٍ إنشاء رابط الدفع Paymob...');
     var phone = (inv.phone || '').replace(/\D/g,'');
     var res = await fetch(WORKER_URL + '?action=create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        invoice_id:   String(inv.id),
-        amount:       Number(inv.price || 0),
-        client_name:  inv.client || 'عميل',
+        invoice_id: String(inv.id),
+        amount: Number(inv.price || 0),
+        client_name: inv.client || 'عميل',
         client_phone: phone,
-        description:  inv.itemType || (inv.carrier ? 'شحن ' + inv.carrier : 'خدمة شحن')
+        description: inv.itemType || (inv.carrier ? 'شحن ' + inv.carrier : 'خدمة شحن'),
+        integration_type: 'PL'
       })
     });
     var data = await res.json();
@@ -6102,18 +6105,17 @@ async function sendPaymentLink() {
     if (data.payment_url) {
       var idx = invoices.findIndex(function(i) { return String(i.id) === String(inv.id); });
       if (idx !== -1) {
-        invoices[idx].paymentUrl     = data.payment_url;
-        invoices[idx].paymentRef     = String(data.order_id || data.client_secret || 'pending');
-        invoices[idx].paymobOrderId  = data.order_id || '';
-        invoices[idx].paymobSecret   = data.client_secret || '';
-        addTimelineEvent(invoices[idx], 'payment_link', { note: 'رابط دفع Paymob (Unified Checkout) — تم إرساله عبر واتساب' }, true);
+        invoices[idx].paymentUrl = data.payment_url;
+        invoices[idx].paymentRef = String(data.order_id);
+        invoices[idx].paymobOrderId = data.order_id;
+        addTimelineEvent(invoices[idx], 'payment_link', { note: 'رابط دفع Paymob — تم إرساله عبر واتساب' }, true);
         saveData();
         currentViewInvoice = invoices[idx];
       }
       document.getElementById('check-pay-btn').style.display = 'inline-flex';
       sendPaymentLinkWhatsApp(data.payment_url);
       startPaymentPolling();
-      showToast('✅ تم إنشاء رابط الدفع وإرساله عبر واتساب');
+      showToast('✅ تم إنشاء رابط الدفع Paymob وإرساله عبر واتساب');
     } else {
       showToast('❌ خطأ Paymob: ' + (data.error || JSON.stringify(data).slice(0,100)));
     }
@@ -6148,12 +6150,12 @@ async function checkPaymentStatus() {
   btn.textContent = '⏳ جارٍ التحقق...';
 
   try {
-    var orderId = inv.paymobOrderId || inv.paymobSecret || inv.paymentRef;
+    var orderId = inv.paymobOrderId || inv.paymentRef;
     if (!orderId || orderId === 'pending') {
       showToast('⏳ لم يتم الدفع بعد');
       return;
     }
-    var res = await fetch(WORKER_URL + '?action=check-payment&order_id=' + encodeURIComponent(orderId));
+    var res = await fetch(WORKER_URL + '?action=check-payment&order_id=' + orderId);
     var data = await res.json();
 
     if (data.paid) {
@@ -6162,7 +6164,7 @@ async function checkPaymentStatus() {
         invoices[idx].status = 'paid';
         invoices[idx].payment = 'Paymob';
         invoices[idx].paymentUrl = null;
-        addTimelineEvent(invoices[idx], 'paid', { note: 'تأكيد دفع — Paymob Unified Checkout' }, true);
+        addTimelineEvent(invoices[idx], 'paid', { note: 'تأكيد دفع — Paymob' }, true);
         saveData();
         currentViewInvoice = invoices[idx];
         viewInvoice(inv.id);
@@ -6171,8 +6173,7 @@ async function checkPaymentStatus() {
         showToast('✅ تم تأكيد الدفع! الفاتورة أصبحت مدفوعة');
       }
     } else {
-      var statusMsg = data.status ? ' (' + data.status + ')' : '';
-      showToast('⏳ لم يتم الدفع بعد' + statusMsg);
+      showToast('⏳ لم يتم الدفع بعد — المدفوع: ' + (data.paid_amount||0).toFixed(2) + ' / ' + (data.total_amount||0).toFixed(2) + ' ر.س');
     }
   } catch (e) {
     showToast('❌ تعذّر التحقق: ' + e.message);
@@ -6190,9 +6191,9 @@ function startPaymentPolling() {
   paymentPollInterval = setInterval(function() {
     if (!currentViewInvoice || currentViewInvoice.status === 'paid') { stopPaymentPolling(); return; }
     var inv = currentViewInvoice;
-    var orderId = inv.paymobOrderId || inv.paymobSecret || inv.paymentRef;
+    var orderId = inv.paymobOrderId || inv.paymentRef;
     if (!orderId || orderId === 'pending') return;
-    fetch(WORKER_URL + '?action=check-payment&order_id=' + encodeURIComponent(orderId))
+    fetch(WORKER_URL + '?action=check-payment&order_id=' + orderId)
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.paid) {
@@ -6436,8 +6437,8 @@ function setSyncStatus(msg, color) {
 }
 
 // Worker base URL — no API key needed
-var DAFTRA_WORKER_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
-var DB_URL = 'https://broad-glade-c30a.ibrahim-h-kh.workers.dev';
+// DAFTRA_WORKER_URL moved to top
+// DB_URL moved to top
 
 // Background sync — called on startup and manually
 // ══════════════════════════════════════════════════════════════
@@ -8278,15 +8279,13 @@ async function createDirectPaymobLink() {
     if (data.payment_url) {
       // Save to history
       var histItem = {
-        name:          name,
-        phone:         phone,
-        amount:        amount.toFixed(2),
-        description:   desc,
-        url:           data.payment_url,
-        order_id:      data.order_id || '',
-        client_secret: data.client_secret || '',
-        shortened:     data.shortened || false,
-        date:          new Date().toLocaleDateString('ar-SA')
+        name: name,
+        phone: phone,
+        amount: amount.toFixed(2),
+        description: desc,
+        url: data.payment_url,
+        order_id: data.order_id,
+        date: new Date().toLocaleDateString('ar-SA')
       };
       pmLinkHistory.unshift(histItem);
       savePmHistory();
